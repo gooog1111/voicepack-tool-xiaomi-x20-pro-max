@@ -173,8 +173,3 @@ XIAOMI_DID=YOUR_DEVICE_DID
   <a href="https://t.tb.ru/c2c-qr-choose-bank?requisiteNumber=+79996363556&bankCode=100000000004" target="_blank">
     <img src="https://img.shields.io/badge/СБП-blue?style=for-the-badge&logo=none" alt="Тбанк-Сбер">
   </a>
-  <a href="ton://transfer/UQA73kPkNHudFD5yV7DuP-GuXO1ExTpqH0gNioQX8sY4fU6L" target="_blank">
-    <img src="https://img.shields.io/badge/USDT%20TON-Telegram-purple?style=for-the-badge&logo=TON&logoColor=white" alt="USDT TON">
-  </a>
-</p>
-
