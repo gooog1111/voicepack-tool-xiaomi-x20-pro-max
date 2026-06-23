@@ -168,10 +168,10 @@ XIAOMI_DID=YOUR_DEVICE_DID
 
 <p align="center">
   <a href="https://yoomoney.ru/fundraise/1IJBVM8MJMG.260624" target="_blank">
-    <img src="https://img.shields.io/badge/ЮМопеу-Сбор средств-yellow?style=for-the-badge&logo=YooMoney&logoColor=white" alt="ЮМопеу">
+    <img src="https://img.shields.io/badge/ЮМоnеу-Сбор средств-yellow?style=for-the-badge&logo=YooMoney&logoColor=white" alt="ЮМоnеу">
   </a>
   <a href="https://t.tb.ru/c2c-qr-choose-bank?requisiteNumber=+79996363556&bankCode=100000000004" target="_blank">
-    <img src="https://img.shields.io/badge/СБП-Т-Банк-Sber-blue?style=for-the-badge&logo=none" alt="СБП">
+    <img src="https://img.shields.io/badge/СБП Т-Банк Sber-blue?style=for-the-badge&logo=none" alt="СБП">
   </a>
 </p>
 
