@@ -103,6 +103,12 @@ Git.
 Полный старый каталог содержит 97 голосовых событий. `sound.info` и
 `sound.ver` являются служебными файлами и не считаются голосами.
 
+## Скачать старые голосовые пакеты
+
+https://4pda.to/forum/index.php?showtopic=881982
+
+[https://www.google.com/search](https://www.google.com/webhp) -> xiaomi voice pack скачать
+
 ## Ручной кастомный пакет
 
 Номера событий находятся в `custom_voicepack/table_ru.csv` и
