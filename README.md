@@ -8,7 +8,7 @@
 [![Посещений](https://visitor-badge.laobi.icu/badge?page_id=gooog1111.voicepack-tool-xiaomi-x20-pro-max)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 
 
-[English version](README.md)
+[English version](README.en.md)
 
 Инструмент для Windows и Linux, предназначенный для работы с голосовыми
 пакетами роботов-пылесосов Xiaomi. Он конвертирует старые пакеты Roborock,
