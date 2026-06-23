@@ -134,6 +134,10 @@ Create `.env` from `.env.example` and set at least:
 XIAOMI_DID=YOUR_DEVICE_DID
 ```
 
+### Getting XIAOMI_DID
+
+Go to MiHome app -> Vacuum Cleaner -> ⋮ -> Cleaning History -> quickly tap with three fingers on -> total duration, total cleanings, total number of times
+
 Never publish `.env`, `state/*.json`, robot tokens, credentials, or signed
 download URLs.
 
