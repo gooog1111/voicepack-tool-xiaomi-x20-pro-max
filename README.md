@@ -171,11 +171,13 @@ XIAOMI_DID=YOUR_DEVICE_DID
     <img src="https://img.shields.io/badge/ЮМопеу-Сбор средств-yellow?style=for-the-badge&logo=YooMoney&logoColor=white" alt="ЮМопеу">
   </a>
   <a href="https://t.tb.ru/c2c-qr-choose-bank?requisiteNumber=+79996363556&bankCode=100000000004" target="_blank">
-    <img src="https://img.shields.io/badge/СБП-Т-Банк%2FSber-blue?style=for-the-badge&logo=none" alt="СБП">
+    <img src="https://img.shields.io/badge/СБП-Т-Банк-Sber-blue?style=for-the-badge&logo=none" alt="СБП">
   </a>
 </p>
 
 ### USDT (TON)
 
 Адрес для перевода:  
-`UQA73kPkNHudFD5yV7DuP-GuXO1ExTpqH0gNioQX8sY4fU6L`
+```bash
+UQA73kPkNHudFD5yV7DuP-GuXO1ExTpqH0gNioQX8sY4fU6L
+```
