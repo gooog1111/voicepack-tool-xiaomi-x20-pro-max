@@ -1,0 +1,102 @@
+﻿file,text
+01.mp3,Short music
+02.mp3,Long music
+10.mp3,Turning on
+20.mp3,Turning off
+30.mp3,Please remove the robot vacuum from the station before turning it off
+40.mp3,Starting to restore factory settings.
+50.mp3,System reset successfully.
+60.mp3,Waiting for the network setup
+61.mp3,Please download and connect to the Mi Home/Xiaomi Home app to explore more functions.
+70.mp3,"Couldn't connect to the network, please check and try again."
+80.mp3,"Couldn't connect to the server, please check and try again"
+90.mp3,Connecting to the network
+100.mp3,Network connected successfully.
+110.mp3,Starting a scheduled cleanup
+130.mp3,Start cleanup.
+140.mp3,Custom mode starts
+150.mp3,Custom cleanup starts.
+151.mp3,Start a cleanup task under the custom mode
+152.mp3,Custom cleanup starts.
+153.mp3,Return to the station to clean mop pads automatically before starting a cleanup task.
+154.mp3,"The station is performing a task, please try again later."
+160.mp3,Start to quickly create a map
+170.mp3,Paused
+180.mp3,Continue cleanup.
+190.mp3,Cleanup resumes
+200.mp3,Map creation is being resumed
+201.mp3,and clean up.
+202.mp3,Mapping ended.
+210.mp3,"Clean up completed, and return to the station to charge."
+220.mp3,Mapping completed and returned to the station to charge
+230.mp3,Start returning to the station to charge.
+240.mp3,"Low battery, the vacuum mop will return to the station to charge. Once it is fully charged, it will continue the task."
+250.mp3,"Low battery, returning to the station to charge."
+260.mp3,"Low battery, please wait until charging is completed"
+270.mp3,Move the robot vacuum back to the station.
+280.mp3,The robot vacuum is already on the station.
+290.mp3,"Low battery, the robot vacuum needs to be charged."
+300.mp3,"Low battery, the robot vacuum will be turned off."
+301.mp3,Please use after a full charge for optimal experience.
+310.mp3,Start charging.
+320.mp3,Stop returning to the station to charge
+350.mp3,Please install the dust compartment.
+370.mp3,"The mop pad tray has fallen off, please reinstall it before use."
+380.mp3,mop pad installed
+390.mp3,mop pad removed
+400.mp3,"Task completed, please remove and clean the mop pads in time."
+410.mp3,The dust compartment has been removed
+420.mp3,The dust compartment has been installed.
+430.mp3,"Updating, please do not turn off the robot vacuum or start a task."
+431.mp3,"Couldn't update, please move the robot vacuum to the station for charging and try again after the battery level is greater than 30%."
+440.mp3,Updated successfully
+450.mp3,"Couldn't update, please try again."
+460.mp3,"System updating, please try again later"
+470.mp3,The robot vacuum is repositioning. Please stay away.
+480.mp3,"A new area is detected, and the robot vacuum will start a new cleanup task."
+490.mp3,"Reposition successfully, resuming cleanup."
+491.mp3,"A new area is detected, and the robot vacuum will start a new mapping task."
+492.mp3,Position successfully. Continue to create the map.
+500.mp3,"Reposition successfully, the robot vacuum will return to the station to charge."
+510.mp3,"A new area is detected, and the robot vacuum will return to the station to charge."
+520.mp3,The robot vacuum is here.
+530.mp3,Start remote control.
+540.mp3,Exit remote control
+550.mp3,The child lock is enabled and all the buttons have been locked.
+560.mp3,The child lock is disabled and all the buttons have been unlocked.
+570.mp3,All the buttons have been locked. Please press and hold the dock and charge button to unlock.
+580.mp3,"Battery temperature error, please resume use after the battery temperature returns to normal."
+590.mp3,"Brush error, please check and clean"
+600.mp3,"Side brush error, please check and clean"
+610.mp3,"Drive wheel error, please check and clean."
+630.mp3,Wipe the cliff sensors clean and move the robot vacuum to a new location to start.
+640.mp3,"Fan error, please check and clean the dust compartment filter and the air duct."
+650.mp3,"Bumper error, please check if the bumper can rebound properly."
+660.mp3,"Charging error, please try cleaning the charging contacts."
+670.mp3,"Laser sensor error, please check and clean"
+680.mp3,Please check whether the protective cover of the laser sensor is stuck.
+690.mp3,Sensor along the edge error. Please check and clean the sensor along the edge.
+700.mp3,Please try cleaning the line laser sensor.
+710.mp3,"mop pad tray error, please check and clean"
+720.mp3,"The robot vacuum is stuck, please move it to a new location to start."
+730.mp3,The robot vacuum is suspended. Please move it to a new location to start.
+740.mp3,The robot vacuum is tilted. Please move it to a new location to start.
+750.mp3,The cleaning path is blocked. Please clear the surrounding obstacles.
+760.mp3,"Couldn't reach the target area, and the cleanup is uncompleted. Returning to the station to charge."
+771.mp3,"Couldn't find the target area, and the cleanup is uncompleted. Returning to the station to charge."
+780.mp3,Detected that the vacuum mop is in a restricted area. Please move the vacuum mop out of this area.
+800.mp3,Start to dry the mop pad
+801.mp3,Start cleaning the mop pad.
+802.mp3,Return to the station to clean the mop pads.
+803.mp3,"Dust collection is about to begin. 3, 2, 1."
+804.mp3,"Insufficient water in the clean water tank, please refill it in time."
+806.mp3,Please install the clean water tank.
+807.mp3,"The dirty water tank is full, please empty it before use."
+808.mp3,Please install the dirty water tank.
+810.mp3,Please install the disposable bag.
+815.mp3,Detected that the dirty water tank is not installed or is full
+816.mp3,Detected that the washboard is not installed or the water level is too high.
+817.mp3,and mop pad drying.
+818.mp3,Detected that the clean water tank is not installed or has insufficient water.
+900.mp3,"The robot vacuum and the station are paired abnormally, simultaneously press and hold the mop pad cleaning button and the dry button for 7 seconds to pair again."
+910.mp3,Please move the robot vacuum away from the carpet area.

@@ -1,0 +1,26 @@
+{
+  "base_url": "https://ksyru0-fusion.fds.api.xiaomi.com",
+  "models": ["d109gl", "d102gl"],
+  "languages": [
+    {"code": "en", "path": "audio/en.zip"},
+    {"code": "es", "path": "audio/20250303/es.zip"},
+    {"code": "fr", "path": "audio/20250303/fr.zip"},
+    {"code": "de", "path": "audio/de.zip"},
+    {"code": "it", "path": "audio/it.zip"},
+    {"code": "ru", "path": "audio/1104/ru.zip"},
+    {"code": "pl", "path": "audio/pl.zip"},
+    {"code": "tr", "path": "audio/tr.zip"},
+    {"code": "pt", "path": "audio/pt.zip"},
+    {"code": "th", "path": "audio/th.zip"},
+    {"code": "zh_tw", "path": "audio/zh_tw.zip"},
+    {"code": "zh", "path": "audio/zh.zip"},
+    {"code": "zh_hk", "path": "audio/zh_hk.zip"},
+    {"code": "uk", "path": "audio/uk.zip"},
+    {"code": "ja", "path": "audio/ja.zip"},
+    {"code": "ar", "path": "audio/ar.zip"},
+    {"code": "he", "path": "audio/he.zip"},
+    {"code": "pt_pt", "path": "audio/pt_pt.zip"},
+    {"code": "ko", "path": "audio/ko.zip"},
+    {"code": "nl", "path": "audio/nl.zip"}
+  ]
+}

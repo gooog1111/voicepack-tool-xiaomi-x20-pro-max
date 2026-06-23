@@ -1,0 +1,51 @@
+old_file,new_file,confidence,note
+power_on.wav,10.mp3,high,Включение
+power_off.wav,20.mp3,high,Выключение
+power_off_rejected.wav,30.mp3,high,Нельзя выключить на док-станции
+bl_recovery_start.wav,40.mp3,medium,Запуск восстановления заводских настроек
+timed_clean.wav,110.mp3,high,Уборка по расписанию
+start.wav,130.mp3,high,Запуск обычной уборки
+spot.wav,140.mp3,medium,Локальный режим заменяет настраиваемый режим
+zone.wav,150.mp3,medium,Зональная уборка заменяет настраиваемую уборку
+pause.wav,170.mp3,high,Пауза
+resume_clean.wav,180.mp3,high,Продолжение уборки
+power_resume_clean.wav,190.mp3,high,Возобновление после зарядки
+finish.wav,201.mp3,high,Уборка завершена
+clean_finish.wav,210.mp3,high,Уборка завершена и возврат на станцию
+home.wav,230.mp3,high,Возврат на станцию
+no_power.wav,250.mp3,high,Низкий заряд и возврат на станцию
+no_power_charging.wav,260.mp3,high,Требуется дополнительная зарядка
+return_yes.wav,270.mp3,medium,Не найдена станция; требуется переставить робот
+charging.wav,310.mp3,high,Начало зарядки
+resume_home.wav,320.mp3,medium,Старое продолжение возврата используется для команды возврата
+error9.wav,350.mp3,high,Установить пылесборник
+bin_out.wav,410.mp3,high,Пылесборник извлечён
+bin_in.wav,420.mp3,high,Пылесборник установлен
+sysupd_start.wav,430.mp3,high,Запуск обновления
+sysupd_notready.wav,431.mp3,high,Недостаточный заряд для обновления
+sysupd_complete.wav,440.mp3,high,Обновление завершено
+sysupd_failed.wav,450.mp3,high,Ошибка обновления
+sysupd_wip.wav,460.mp3,high,Обновление выполняется
+positioning.wav,470.mp3,high,Позиционирование
+restart_clean.wav,480.mp3,high,Новое место; начать новую уборку
+findme.wav,520.mp3,high,Робот здесь
+remote.wav,530.mp3,high,Дистанционное управление включено
+remote_complete.wav,540.mp3,high,Дистанционное управление выключено
+error5.wav,590.mp3,high,Ошибка основной щётки
+error6.wav,600.mp3,high,Ошибка боковой щётки
+error7.wav,610.mp3,high,Ошибка ведущего колеса
+error4.wav,630.mp3,high,Очистить датчики падения
+error18.wav,640.mp3,high,Ошибка вентилятора
+error2.wav,650.mp3,high,Ошибка бампера
+error13.wav,660.mp3,high,Ошибка зарядки
+error1.wav,670.mp3,high,Ошибка лазерного датчика
+error21.wav,680.mp3,high,Заклинила крышка лазерного датчика
+error15.wav,690.mp3,medium,Старый датчик стены соответствует новому краевому датчику
+error8.wav,720.mp3,medium,Робот заблокирован препятствиями
+error3.wav,730.mp3,medium,Старое сообщение требует перенести робот
+error16.wav,740.mp3,high,Робот стоит неровно
+back_dock_failed.wav,750.mp3,medium,Препятствие на пути к станции
+goto_failed.wav,760.mp3,high,Не удалось добраться до целевой зоны
+zone_failed.wav,771.mp3,high,Не удалось очистить целевую зону
+error11.wav,780.mp3,high,Виртуальная стена или запретная зона
+error24.wav,780.mp3,high,Более новый вариант сообщения о запретной зоне
