@@ -162,14 +162,35 @@ XIAOMI_DID=YOUR_DEVICE_DID
 [MIT](LICENSE)
 
 
-## Поддержать
+## Поддержать проект
 
 Выберите удобный способ:
 
 <p align="center">
   <a href="https://yoomoney.ru/fundraise/1IJBVM8MJMG.260624" target="_blank">
-    <img src="https://img.shields.io/badge/ЮМани-yellow?style=for-the-badge&logo=YooMoney&logoColor=white" alt="ЮМани">
+    <img src="https://img.shields.io/badge/ЮМопеу-Сбор средств-yellow?style=for-the-badge&logo=YooMoney&logoColor=white" alt="ЮМопеу">
   </a>
   <a href="https://t.tb.ru/c2c-qr-choose-bank?requisiteNumber=+79996363556&bankCode=100000000004" target="_blank">
-    <img src="https://img.shields.io/badge/СБП-blue?style=for-the-badge&logo=none" alt="Тбанк-Сбер">
+    <img src="https://img.shields.io/badge/СБП-Т-Банк%2FSber-blue?style=for-the-badge&logo=none" alt="СБП">
   </a>
+</p>
+
+---
+
+### USDT (TON)
+
+Если хотите поддержать криптовалютой — скопируйте адрес ниже:
+
+<div align="center" style="margin-top: 10px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; background: #f6f8fa; display: inline-block;">
+  <p style="font-family: monospace; font-size: 1.1em; margin: 0 0 8px 0; color: #24292e;">
+    UQA73kPkNHudFD5yV7DuP-GuXO1ExTpqH0gNioQX8sY4fU6L
+  </p>
+  <button onclick="copyAddress()" style="padding: 6px 14px; font-size: 0.9em; cursor: pointer; border: 1px solid #d1d5da; background: #fff; border-radius: 4px;">
+    Скопировать адрес
+  </button>
+</div>
+
+### USDT (TON)
+
+Адрес для перевода:  
+`UQA73kPkNHudFD5yV7DuP-GuXO1ExTpqH0gNioQX8sY4fU6L`
