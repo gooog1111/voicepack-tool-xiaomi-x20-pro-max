@@ -101,6 +101,12 @@ and archives expanding beyond 512 MiB are rejected.
 The complete old catalog contains 97 voice events. `sound.info` and
 `sound.ver` are metadata files and are not voice events.
 
+## Download Old Package
+
+https://4pda.to/forum/index.php?showtopic=881982
+
+[https://www.google.com/search](https://www.google.com/webhp) -> xiaomi voice pack download
+
 ## Build a Custom Package
 
 Use `custom_voicepack/table_ru.csv` and `table_en.csv` to find event numbers.
