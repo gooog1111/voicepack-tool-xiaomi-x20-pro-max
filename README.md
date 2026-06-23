@@ -5,6 +5,8 @@
 [![Downloads](https://img.shields.io/github/downloads/gooog1111/voicepack-tool-xiaomi-x20-pro-max/total?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases)
 [![License](https://img.shields.io/github/license/gooog1111/voicepack-tool-xiaomi-x20-pro-max?style=for-the-badge)](LICENSE)
 
+[![Visits](https://visitor-badge.laobi.icu/badge?page_id=gooog1111.voicepack-tool-xiaomi-x20-pro-max)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+
 [Русская версия](README.ru.md)
 
 Windows and Linux tool for Xiaomi robot vacuum voice packs. It converts old
