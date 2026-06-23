@@ -175,21 +175,6 @@ XIAOMI_DID=YOUR_DEVICE_DID
   </a>
 </p>
 
----
-
-### USDT (TON)
-
-Если хотите поддержать криптовалютой — скопируйте адрес ниже:
-
-<div align="center" style="margin-top: 10px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; background: #f6f8fa; display: inline-block;">
-  <p style="font-family: monospace; font-size: 1.1em; margin: 0 0 8px 0; color: #24292e;">
-    UQA73kPkNHudFD5yV7DuP-GuXO1ExTpqH0gNioQX8sY4fU6L
-  </p>
-  <button onclick="copyAddress()" style="padding: 6px 14px; font-size: 0.9em; cursor: pointer; border: 1px solid #d1d5da; background: #fff; border-radius: 4px;">
-    Скопировать адрес
-  </button>
-</div>
-
 ### USDT (TON)
 
 Адрес для перевода:  
