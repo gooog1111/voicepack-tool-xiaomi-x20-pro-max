@@ -21,7 +21,7 @@ if (Test-Path $EnvFile) {
     }
 }
 
-if ($Command -eq "menu") {
+function Show-Menu {
     Write-Host ""
     Write-Host "Xiaomi Voice Pack" -ForegroundColor Cyan
     Write-Host "=================" -ForegroundColor Cyan
@@ -36,6 +36,16 @@ if ($Command -eq "menu") {
     Write-Host "9. Скачать оригинальные пакеты d109gl/d102gl на всех языках"
     Write-Host "10. Выход"
     Write-Host ""
+}
+
+function Return-ToMenu {
+    Write-Host ""
+    Read-Host "Нажмите Enter для возврата в меню"
+    & $PSCommandPath menu
+}
+
+if ($Command -eq "menu") {
+    Show-Menu
     $choice = Read-Host "Выберите действие"
     $selectedCommand = switch ($choice) {
         "1" { "setup" }
@@ -93,23 +103,28 @@ if ($Command -eq "setup") {
         if ($LASTEXITCODE -ne 0) { throw "ffmpeg installation failed" }
     }
     Write-Host "Необходимое ПО установлено." -ForegroundColor Green
+    Return-ToMenu
     exit 0
 }
 
 if ($Command -eq "auth") {
     & $Python (Join-Path $Here "browser-login.py") @ExtraArgs
+    Return-ToMenu
     exit $LASTEXITCODE
 }
 
 if ($Command -eq "existing-auth") {
     & $Python (Join-Path $Here "import-browser-session.py") @ExtraArgs
+    Return-ToMenu
     exit $LASTEXITCODE
 }
 
 if ($Command -in @("convert-all", "build-custom", "verify-all", "install", "download-originals")) {
     & $Python (Join-Path $Here "voicepack_manager.py") $Command @ExtraArgs
+    Return-ToMenu
     exit $LASTEXITCODE
 }
 
 & $Python (Join-Path $Here "voicepack_cycle.py") $Command @ExtraArgs
+Return-ToMenu
 exit $LASTEXITCODE
