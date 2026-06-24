@@ -1,4 +1,4 @@
-name: 🔄 Update README Stats
+name: 🔄 Update README (Badges + Traffic Graph)
 
 on:
   push:
@@ -6,268 +6,216 @@ on:
   release:
     types: [published]
   schedule:
-    # Every day at 06:00 UTC
     - cron: '0 6 * * *'
   workflow_dispatch:
 
 permissions:
   contents: write
+  issues: write
 
 jobs:
   update-readme:
-    name: Refresh dynamic badges & stats
     runs-on: ubuntu-latest
 
     steps:
-      - name: ⬇️ Checkout repository
+      - name: ⬇️ Checkout
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🐍 Set up Python
+      - name: 🐍 Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: 'pip'
 
-      - name: 📦 Install dependencies
+      - name: 📦 Install
         run: pip install requests
 
-      - name: 📊 Update README.md
+      - name: 🔧 Update README (badges + graph)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
           python - <<'EOF'
-          import os, re, requests
-          from datetime import datetime, timezone
+          import os, re, requests, json
+          from datetime import datetime
 
-          repo    = os.environ["REPO"]          # e.g. gooog1111/voicepack-tool-xiaomi-x20-pro-max
-          token   = os.environ["GITHUB_TOKEN"]
+          repo = os.environ["REPO"]
+          token = os.environ["GITHUB_TOKEN"]
           headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
           repo_url = f"https://github.com/{repo}"
 
-          # ── Latest release ────────────────────────────────────────────────
-          rel      = requests.get(f"https://api.github.com/repos/{repo}/releases/latest", headers=headers, timeout=15).json()
-          tag      = rel.get("tag_name", "N/A")
-          pub      = rel.get("published_at", "")[:10]
-          dl_rel   = sum(a.get("download_count", 0) for a in rel.get("assets", []))
+          # ───────────────────────────────────────────────────────────────
+          # Cached API fetch
+          # ───────────────────────────────────────────────────────────────
+          def cached_get(url, cache_file):
+              if os.path.exists(cache_file):
+                  age = datetime.now().timestamp() - os.path.getmtime(cache_file)
+                  if age < 3600:
+                      try:
+                          return json.load(open(cache_file))
+                      except:
+                          pass
+              r = requests.get(url, headers=headers, timeout=15)
+              try:
+                  data = r.json()
+              except:
+                  data = {}
+              with open(cache_file, "w") as f:
+                  json.dump(data, f)
+              return data
 
-          # ── Total downloads ───────────────────────────────────────────────
-          all_rel  = requests.get(f"https://api.github.com/repos/{repo}/releases", headers=headers, timeout=15).json()
-          dl_total = sum(a.get("download_count", 0) for r in all_rel for a in r.get("assets", []))
+          # ───────────────────────────────────────────────────────────────
+          # GitHub Traffic API
+          # ───────────────────────────────────────────────────────────────
+          views = cached_get(f"https://api.github.com/repos/{repo}/traffic/views?per=day", ".cache_views.json")
+          clones = cached_get(f"https://api.github.com/repos/{repo}/traffic/clones", ".cache_clones.json")
 
-          # ── Repo meta ─────────────────────────────────────────────────────
-          ri       = requests.get(f"https://api.github.com/repos/{repo}", headers=headers, timeout=15).json()
-          stars    = ri.get("stargazers_count", 0)
-          forks    = ri.get("forks_count", 0)
+          gh_views = views.get("count", 0)
+          gh_unique = views.get("uniques", 0)
+          gh_clones = clones.get("count", 0)
 
-          # ── Open issues (excluding PRs) ───────────────────────────────────
-          issues_raw = requests.get(
-              f"https://api.github.com/repos/{repo}/issues",
+          # ───────────────────────────────────────────────────────────────
+          # Local view counter via issue
+          # ───────────────────────────────────────────────────────────────
+          issues_api = f"https://api.github.com/repos/{repo}/issues"
+          issues_list = requests.get(issues_api, headers=headers, timeout=15).json()
+
+          view_issue = None
+          if isinstance(issues_list, list):
+              for i in issues_list:
+                  if i.get("title") == "views-counter":
+                      view_issue = i
+                      break
+
+          if not view_issue:
+              view_issue = requests.post(
+                  issues_api,
+                  headers=headers,
+                  json={"title": "views-counter", "body": "0"},
+                  timeout=15
+              ).json()
+
+          try:
+              local_views = int(view_issue.get("body", "0").strip())
+          except:
+              local_views = 0
+
+          local_views += 1
+
+          requests.patch(
+              f"{issues_api}/{view_issue['number']}",
               headers=headers,
-              params={"state": "open", "per_page": 5, "sort": "created", "direction": "desc"},
+              json={"body": str(local_views)},
               timeout=15
-          ).json()
-          # GitHub issues API returns PRs too — filter them out
-          issues = [i for i in issues_raw if "pull_request" not in i] if isinstance(issues_raw, list) else []
+          )
+
+          # ───────────────────────────────────────────────────────────────
+          # Releases & repo meta
+          # ───────────────────────────────────────────────────────────────
+          rel = cached_get(f"https://api.github.com/repos/{repo}/releases/latest", ".cache_latest.json")
+          all_rel = cached_get(f"https://api.github.com/repos/{repo}/releases", ".cache_allrel.json")
+
+          if "tag_name" in rel:
+              tag = rel["tag_name"]
+              pub = rel.get("published_at", "")[:10]
+              dl_rel = sum(a.get("download_count", 0) for a in rel.get("assets", []))
+          else:
+              tag, pub, dl_rel = "N/A", "—", 0
+
+          dl_total = 0
+          if isinstance(all_rel, list):
+              dl_total = sum(a.get("download_count", 0) for r in all_rel for a in r.get("assets", []))
+
+          ri = cached_get(f"https://api.github.com/repos/{repo}", ".cache_repo.json")
+          stars = ri.get("stargazers_count", 0)
+          forks = ri.get("forks_count", 0)
           open_count = ri.get("open_issues_count", 0)
 
-          # ── Page-view counter via hits.sh (badge URL, resets never) ───────
-          # hits.sh counts every time the SVG badge is rendered → proxy for views
-          hits_badge = f"https://hits.sh/{repo}.svg?style=for-the-badge&label=👁+Просмотров&color=ff6900&labelColor=161b22"
-          hits_link  = f"https://hits.sh/{repo}/"
+          updated_at = datetime.now().strftime("%Y-%m-%d %H:%M UTC")
 
-          updated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+          # ───────────────────────────────────────────────────────────────
+          # Build SVG badges (Shields.io)
+          # ───────────────────────────────────────────────────────────────
+          badges_block = f"""
+<!-- STATS_START -->
+<!-- auto-updated by GitHub Actions · {updated_at} -->
 
-          print(f"tag={tag} pub={pub} dl_rel={dl_rel} dl_total={dl_total} stars={stars} forks={forks} issues={len(issues)}")
+[![Views (local)](https://img.shields.io/badge/Views(local)-{local_views}-ff6900?style=for-the-badge&logo=github)]({repo_url})
+[![Views (GitHub)](https://img.shields.io/badge/Views(GitHub)-{gh_views}-ff6900?style=for-the-badge&logo=github)]({repo_url})
+[![Unique visitors](https://img.shields.io/badge/Unique-{gh_unique}-blue?style=for-the-badge&logo=github)]({repo_url})
+[![Clones](https://img.shields.io/badge/Clones-{gh_clones}-purple?style=for-the-badge&logo=github)]({repo_url})
+[![Stars](https://img.shields.io/github/stars/{repo}?style=for-the-badge)]({repo_url}/stargazers)
+[![Forks](https://img.shields.io/github/forks/{repo}?style=for-the-badge)]({repo_url}/network/members)
+[![Downloads (release)](https://img.shields.io/badge/Downloads(release)-{dl_rel}-brightgreen?style=for-the-badge)]({repo_url}/releases/latest)
+[![Downloads (total)](https://img.shields.io/badge/Downloads(total)-{dl_total}-brightgreen?style=for-the-badge)]({repo_url}/releases)
 
-          # ════════════════════════════════════════════════════════════════
-          # Build STATS block (table + hits badge)
-          # ════════════════════════════════════════════════════════════════
-          stats_block = (
-              "<!-- STATS_START -->\n"
-              f"<!-- auto-updated by GitHub Actions · {updated_at} -->\n"
-              "\n"
-              f"[![Просмотры]({hits_badge})]({hits_link})\n"
-              "\n"
-              "| Показатель | Значение |\n"
-              "|---|---|\n"
-              f"| 🏷️ Последний релиз | [`{tag}`]({repo_url}/releases/latest) · {pub} |\n"
-              f"| ⬇️ Скачиваний (релиз) | {dl_rel:,} |\n"
-              f"| ⬇️ Скачиваний (всего) | {dl_total:,} |\n"
-              f"| ⭐ Звёзды | [{stars}]({repo_url}/stargazers) |\n"
-              f"| 🍴 Форки | [{forks}]({repo_url}/network/members) |\n"
-              f"| 🐛 Открытых задач | [{open_count}]({repo_url}/issues) |\n"
-              "<!-- STATS_END -->"
-          )
+<!-- STATS_END -->
+"""
 
-          # ════════════════════════════════════════════════════════════════
-          # Build ISSUES block
-          # ════════════════════════════════════════════════════════════════
-          if issues:
-              rows = "\n".join(
-                  f"| [`#{i['number']}`]({i['html_url']}) | {i['title'][:72]} | "
-                  f"{i['created_at'][:10]} |"
-                  for i in issues
-              )
-              issues_table = (
-                  "| # | Заголовок | Дата |\n"
-                  "|---|-----------|------|\n"
-                  + rows
-              )
-          else:
-              issues_table = "_Открытых задач нет — всё хорошо! 🎉_"
+          # ───────────────────────────────────────────────────────────────
+          # Build traffic graph (PNG)
+          # ───────────────────────────────────────────────────────────────
+          points = views.get("views", [])
+          if isinstance(points, list) and points:
+              labels = [p["timestamp"][:10] for p in points]
+              counts = [p["count"] for p in points]
 
-          issues_block = (
-              "<!-- ISSUES_START -->\n"
-              f"<!-- auto-updated by GitHub Actions · {updated_at} -->\n"
-              "\n"
-              "## 🐛 Открытые задачи\n"
-              "\n"
-              + issues_table + "\n"
-              "\n"
-              f"> 💡 **[Создать новую задачу]({repo_url}/issues/new/choose)** · "
-              f"[Все задачи]({repo_url}/issues)\n"
-              "<!-- ISSUES_END -->"
-          )
+              chart_config = {
+                  "type": "line",
+                  "data": {
+                      "labels": labels,
+                      "datasets": [{
+                          "label": "Views per day",
+                          "data": counts,
+                          "borderColor": "rgba(255,105,0,1)",
+                          "backgroundColor": "rgba(255,105,0,0.2)",
+                          "fill": True,
+                          "tension": 0.3
+                      }]
+                  },
+                  "options": {
+                      "plugins": {
+                          "title": {"display": True, "text": f"GitHub Traffic · {repo}"}
+                      },
+                      "scales": {"y": {"beginAtZero": True}}
+                  }
+              }
 
-          # ════════════════════════════════════════════════════════════════
+              r = requests.post("https://quickchart.io/chart", json={"chart": chart_config}, timeout=15)
+              with open("traffic-views.png", "wb") as f:
+                  f.write(r.content)
+
+          graph_block = """
+<!-- GRAPH_START -->
+![GitHub Traffic](./traffic-views.png)
+<!-- GRAPH_END -->
+"""
+
+          # ───────────────────────────────────────────────────────────────
           # Patch README.md
-          # ════════════════════════════════════════════════════════════════
+          # ───────────────────────────────────────────────────────────────
           with open("README.md", "r", encoding="utf-8") as f:
               content = f.read()
 
-          # --- STATS block ---
-          if "<!-- STATS_START -->" in content:
-              content = re.sub(
-                  r"<!-- STATS_START -->.*?<!-- STATS_END -->",
-                  stats_block, content, flags=re.DOTALL
-              )
-          else:
-              content = re.sub(r"(# .+?\n)", r"\1\n" + stats_block + "\n", content, count=1)
+          content = re.sub(r"<!-- STATS_START -->.*?<!-- STATS_END -->", badges_block, content, flags=re.DOTALL)
+          content = re.sub(r"<!-- GRAPH_START -->.*?<!-- GRAPH_END -->", graph_block, content, flags=re.DOTALL)
 
-          # --- ISSUES block ---
-          if "<!-- ISSUES_START -->" in content:
-              content = re.sub(
-                  r"<!-- ISSUES_START -->.*?<!-- ISSUES_END -->",
-                  issues_block, content, flags=re.DOTALL
-              )
-          else:
-              # Insert right after STATS block
-              content = content.replace(
-                  "<!-- STATS_END -->",
-                  "<!-- STATS_END -->\n\n" + issues_block
-              )
+          if "<!-- STATS_START -->" not in content:
+              content = re.sub(r"(# .+?\n)", r"\1\n" + badges_block + "\n", content, count=1)
+
+          if "<!-- GRAPH_START -->" not in content:
+              content = re.sub(r"(# .+?\n)", r"\1\n" + graph_block + "\n", content, count=1)
 
           with open("README.md", "w", encoding="utf-8") as f:
               f.write(content)
-          print("README.md updated ✓")
+
+          print("README updated ✓")
           EOF
 
-      - name: 🔁 Update README.en.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
-        run: |
-          python - <<'EOF'
-          import os, re, requests
-          from datetime import datetime, timezone
-
-          repo     = os.environ["REPO"]
-          token    = os.environ["GITHUB_TOKEN"]
-          headers  = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
-          repo_url = f"https://github.com/{repo}"
-
-          rel      = requests.get(f"https://api.github.com/repos/{repo}/releases/latest", headers=headers, timeout=15).json()
-          tag      = rel.get("tag_name", "N/A")
-          pub      = rel.get("published_at", "")[:10]
-          dl_rel   = sum(a.get("download_count", 0) for a in rel.get("assets", []))
-
-          all_rel  = requests.get(f"https://api.github.com/repos/{repo}/releases", headers=headers, timeout=15).json()
-          dl_total = sum(a.get("download_count", 0) for r in all_rel for a in r.get("assets", []))
-
-          ri       = requests.get(f"https://api.github.com/repos/{repo}", headers=headers, timeout=15).json()
-          stars    = ri.get("stargazers_count", 0)
-          forks    = ri.get("forks_count", 0)
-          open_cnt = ri.get("open_issues_count", 0)
-
-          issues_raw = requests.get(
-              f"https://api.github.com/repos/{repo}/issues",
-              headers=headers,
-              params={"state": "open", "per_page": 5, "sort": "created", "direction": "desc"},
-              timeout=15
-          ).json()
-          issues = [i for i in issues_raw if "pull_request" not in i] if isinstance(issues_raw, list) else []
-
-          hits_badge = f"https://hits.sh/{repo}.svg?style=for-the-badge&label=👁+Views&color=ff6900&labelColor=161b22"
-          hits_link  = f"https://hits.sh/{repo}/"
-          updated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-
-          stats_block = (
-              "<!-- STATS_START -->\n"
-              f"<!-- auto-updated by GitHub Actions · {updated_at} -->\n"
-              "\n"
-              f"[![Views]({hits_badge})]({hits_link})\n"
-              "\n"
-              "| Metric | Value |\n"
-              "|---|---|\n"
-              f"| 🏷️ Latest release | [`{tag}`]({repo_url}/releases/latest) · {pub} |\n"
-              f"| ⬇️ Downloads (release) | {dl_rel:,} |\n"
-              f"| ⬇️ Downloads (total) | {dl_total:,} |\n"
-              f"| ⭐ Stars | [{stars}]({repo_url}/stargazers) |\n"
-              f"| 🍴 Forks | [{forks}]({repo_url}/network/members) |\n"
-              f"| 🐛 Open issues | [{open_cnt}]({repo_url}/issues) |\n"
-              "<!-- STATS_END -->"
-          )
-
-          if issues:
-              rows = "\n".join(
-                  f"| [`#{i['number']}`]({i['html_url']}) | {i['title'][:72]} | {i['created_at'][:10]} |"
-                  for i in issues
-              )
-              issues_table = "| # | Title | Date |\n|---|-------|------|\n" + rows
-          else:
-              issues_table = "_No open issues — everything is fine! 🎉_"
-
-          issues_block = (
-              "<!-- ISSUES_START -->\n"
-              f"<!-- auto-updated by GitHub Actions · {updated_at} -->\n"
-              "\n"
-              "## 🐛 Open Issues\n"
-              "\n"
-              + issues_table + "\n"
-              "\n"
-              f"> 💡 **[Open a new issue]({repo_url}/issues/new/choose)** · "
-              f"[All issues]({repo_url}/issues)\n"
-              "<!-- ISSUES_END -->"
-          )
-
-          try:
-              with open("README.en.md", "r", encoding="utf-8") as f:
-                  content = f.read()
-          except FileNotFoundError:
-              print("README.en.md not found, skipping")
-              exit(0)
-
-          if "<!-- STATS_START -->" in content:
-              content = re.sub(r"<!-- STATS_START -->.*?<!-- STATS_END -->", stats_block, content, flags=re.DOTALL)
-          else:
-              content = re.sub(r"(# .+?\n)", r"\1\n" + stats_block + "\n", content, count=1)
-
-          if "<!-- ISSUES_START -->" in content:
-              content = re.sub(r"<!-- ISSUES_START -->.*?<!-- ISSUES_END -->", issues_block, content, flags=re.DOTALL)
-          else:
-              content = content.replace("<!-- STATS_END -->", "<!-- STATS_END -->\n\n" + issues_block)
-
-          with open("README.en.md", "w", encoding="utf-8") as f:
-              f.write(content)
-          print("README.en.md updated ✓")
-          EOF
-
-      - name: 💾 Commit & push (if changed)
+      - name: 💾 Commit & push
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add README.md README.en.md
-          git diff --cached --quiet || git commit -m "chore: auto-update README stats & issues [skip ci]"
+          git add README.md traffic-views.png
+          git diff --cached --quiet || git commit -m "chore: update README (badges + graph) [skip ci]"
           git push
