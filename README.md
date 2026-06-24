@@ -11,13 +11,6 @@
 <!-- GRAPH_END -->
 
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-24 09:45 UTC -->
-
-## 🐛 Открытые задачи
-
-_Открытых задач нет — всё хорошо! 🎉_
-
-> 💡 **[Создать новую задачу](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues/new/choose)** · [Все задачи](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues)
 <!-- ISSUES_END -->
 
 [English version](README.en.md)
