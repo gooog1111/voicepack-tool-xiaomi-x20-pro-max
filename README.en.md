@@ -1,15 +1,29 @@
 # Xiaomi Voice Pack Tool
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions on 2026-06-23 -->
+<!-- auto-updated by GitHub Actions · 2026-06-24 08:24 UTC -->
+
+[![Views](https://hits.sh/gooog1111/voicepack-tool-xiaomi-x20-pro-max.svg?style=for-the-badge&label=👁+Views&color=ff6900&labelColor=161b22)](https://hits.sh/gooog1111/voicepack-tool-xiaomi-x20-pro-max/)
+
 | Metric | Value |
 |---|---|
-| 🏷️ Latest release | `v1.0.0` (2026-06-23) |
+| 🏷️ Latest release | [`v1.0.0`](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases/latest) · 2026-06-23 |
 | ⬇️ Downloads (release) | 0 |
 | ⬇️ Downloads (total) | 0 |
-| ⭐ Stars | 0 |
-| 🍴 Forks | 0 |
+| ⭐ Stars | [0](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/stargazers) |
+| 🍴 Forks | [0](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/network/members) |
+| 🐛 Open issues | [0](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues) |
 <!-- STATS_END -->
+
+<!-- ISSUES_START -->
+<!-- auto-updated by GitHub Actions · 2026-06-24 08:24 UTC -->
+
+## 🐛 Open Issues
+
+_No open issues — everything is fine! 🎉_
+
+> 💡 **[Open a new issue](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues/new/choose)** · [All issues](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues)
+<!-- ISSUES_END -->
 
 [![Stars](https://img.shields.io/github/stars/gooog1111/voicepack-tool-xiaomi-x20-pro-max?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/stargazers)
 [![Latest Release](https://img.shields.io/github/v/release/gooog1111/voicepack-tool-xiaomi-x20-pro-max?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases/latest)

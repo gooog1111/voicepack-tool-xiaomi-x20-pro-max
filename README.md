@@ -1,15 +1,29 @@
 # Xiaomi Voice Pack Tool
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions on 2026-06-23 -->
+<!-- auto-updated by GitHub Actions · 2026-06-24 08:24 UTC -->
+
+[![Просмотры](https://hits.sh/gooog1111/voicepack-tool-xiaomi-x20-pro-max.svg?style=for-the-badge&label=👁+Просмотров&color=ff6900&labelColor=161b22)](https://hits.sh/gooog1111/voicepack-tool-xiaomi-x20-pro-max/)
+
 | Показатель | Значение |
 |---|---|
-| 🏷️ Последний релиз | `v1.0.0` (2026-06-23) |
+| 🏷️ Последний релиз | [`v1.0.0`](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases/latest) · 2026-06-23 |
 | ⬇️ Скачиваний (релиз) | 0 |
 | ⬇️ Скачиваний (всего) | 0 |
-| ⭐ Звёзды | 0 |
-| 🍴 Форки | 0 |
+| ⭐ Звёзды | [0](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/stargazers) |
+| 🍴 Форки | [0](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/network/members) |
+| 🐛 Открытых задач | [0](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues) |
 <!-- STATS_END -->
+
+<!-- ISSUES_START -->
+<!-- auto-updated by GitHub Actions · 2026-06-24 08:24 UTC -->
+
+## 🐛 Открытые задачи
+
+_Открытых задач нет — всё хорошо! 🎉_
+
+> 💡 **[Создать новую задачу](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues/new/choose)** · [Все задачи](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues)
+<!-- ISSUES_END -->
 
 [![Звезды](https://img.shields.io/github/stars/gooog1111/voicepack-tool-xiaomi-x20-pro-max?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/stargazers)
 [![Последняя версия](https://img.shields.io/github/v/release/gooog1111/voicepack-tool-xiaomi-x20-pro-max?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases/latest)
