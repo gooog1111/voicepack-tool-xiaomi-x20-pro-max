@@ -23,8 +23,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install deps
-        run: |
-          pip install requests deep-translator
+        run: pip install requests deep-translator
 
       - name: Update README
         env:
@@ -32,10 +31,7 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           python << 'EOF'
-          import os
-          import re
-          import json
-          import requests
+          import os, re, json, requests
           from datetime import datetime
           from deep_translator import GoogleTranslator
 
@@ -69,40 +65,53 @@ jobs:
 
               return data
 
+          def replace_block(text, start, end, block):
+              pattern = rf"<!-- {start} -->.*?<!-- {end} -->"
+              if re.search(pattern, text, flags=re.DOTALL):
+                  return re.sub(pattern, block, text, flags=re.DOTALL)
+              return block + "\n\n" + text
+
           def translate_markdown(text):
-              parts = re.split(r"(```.*?```)", text, flags=re.DOTALL)
+              protected = {}
+
+              def protect(match):
+                  key = f"__PROTECTED_BLOCK_{len(protected)}__"
+                  protected[key] = match.group(0)
+                  return key
+
+              text = re.sub(r"```.*?```", protect, text, flags=re.DOTALL)
+              text = re.sub(r"<!-- STATS_START -->.*?<!-- STATS_END -->", protect, text, flags=re.DOTALL)
+              text = re.sub(r"<!-- GRAPH_START -->.*?<!-- GRAPH_END -->", protect, text, flags=re.DOTALL)
+              text = re.sub(r"<!-- ISSUES_START -->.*?<!-- ISSUES_END -->", protect, text, flags=re.DOTALL)
+              text = re.sub(r"<!-- LANG_START -->.*?<!-- LANG_END -->", protect, text, flags=re.DOTALL)
+
+              chunks = [text[i:i + 3000] for i in range(0, len(text), 3000)]
               out = []
 
-              for part in parts:
-                  if part.startswith("```"):
-                      out.append(part)
+              for chunk in chunks:
+                  if not chunk.strip():
+                      out.append(chunk)
                       continue
 
-                  chunks = [part[i:i + 3500] for i in range(0, len(part), 3500)]
+                  try:
+                      translated = GoogleTranslator(source="ru", target="en").translate(chunk)
+                      out.append(translated if translated else chunk)
+                  except Exception as e:
+                      print("Translate failed:", e)
+                      out.append(chunk)
 
-                  for chunk in chunks:
-                      if not chunk.strip():
-                          out.append(chunk)
-                          continue
+              result = "\n".join(out)
 
-                      try:
-                          translated = GoogleTranslator(
-                              source="ru",
-                              target="en"
-                          ).translate(chunk)
+              for key, value in protected.items():
+                  result = result.replace(key, value)
 
-                          out.append(translated if translated else chunk)
-                      except Exception as e:
-                          print("Translate failed:", e)
-                          out.append(chunk)
-
-              return "\n".join(out)
+              result = re.sub(r"(?m)^##\s*", "## ", result)
+              return result
 
           views = cached_get(
               f"https://api.github.com/repos/{repo}/traffic/views?per=day",
               ".cache_views.json"
           )
-
           clones = cached_get(
               f"https://api.github.com/repos/{repo}/traffic/clones",
               ".cache_clones.json"
@@ -116,7 +125,6 @@ jobs:
           issues_list = requests.get(issues_api, headers=headers, timeout=20).json()
 
           view_issue = None
-
           if isinstance(issues_list, list):
               for i in issues_list:
                   if i.get("title") == "views-counter":
@@ -150,38 +158,36 @@ jobs:
               f"https://api.github.com/repos/{repo}/releases/latest",
               ".cache_latest.json"
           )
-
           all_rel = cached_get(
               f"https://api.github.com/repos/{repo}/releases",
               ".cache_allrel.json"
           )
-
-          if "tag_name" in rel:
-              dl_rel = sum(a.get("download_count", 0) for a in rel.get("assets", []))
-          else:
-              dl_rel = 0
-
-          dl_total = 0
-
-          if isinstance(all_rel, list):
-              dl_total = sum(
-                  a.get("download_count", 0)
-                  for r in all_rel
-                  for a in r.get("assets", [])
-              )
-
           ri = cached_get(
               f"https://api.github.com/repos/{repo}",
               ".cache_repo.json"
           )
+
+          dl_rel = sum(a.get("download_count", 0) for a in rel.get("assets", [])) if "tag_name" in rel else 0
+          dl_total = sum(
+              a.get("download_count", 0)
+              for r in all_rel
+              for a in r.get("assets", [])
+          ) if isinstance(all_rel, list) else 0
 
           stars = ri.get("stargazers_count", 0)
           forks = ri.get("forks_count", 0)
 
           updated_at = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
 
-          badges_block = f"""
-          <!-- STATS_START -->
+          lang_ru = """<!-- LANG_START -->
+          🇬🇧 [English version](README.en.md)
+          <!-- LANG_END -->"""
+
+          lang_en = """<!-- LANG_START -->
+          🇷🇺 [Русская версия](README.md)
+          <!-- LANG_END -->"""
+
+          stats_block = f"""<!-- STATS_START -->
           <!-- auto-updated by GitHub Actions · {updated_at} -->
 
           [![Views local](https://img.shields.io/badge/Views_local-{local_views}-ff6900?style=for-the-badge&logo=github)]({repo_url})
@@ -193,17 +199,11 @@ jobs:
           [![Downloads release](https://img.shields.io/badge/Downloads_release-{dl_rel}-brightgreen?style=for-the-badge)]({repo_url}/releases/latest)
           [![Downloads total](https://img.shields.io/badge/Downloads_total-{dl_total}-brightgreen?style=for-the-badge)]({repo_url}/releases)
 
-          <!-- STATS_END -->
-          """
+          <!-- STATS_END -->"""
 
           points = views.get("views", [])
-
-          if points:
-              labels = [p["timestamp"][:10] for p in points]
-              counts = [p["count"] for p in points]
-          else:
-              labels = [datetime.utcnow().date().isoformat()]
-              counts = [0]
+          labels = [p["timestamp"][:10] for p in points] if points else [datetime.utcnow().date().isoformat()]
+          counts = [p["count"] for p in points] if points else [0]
 
           chart = {
               "type": "line",
@@ -223,32 +223,14 @@ jobs:
                   "responsive": False,
                   "maintainAspectRatio": False,
                   "plugins": {
-                      "title": {
-                          "display": True,
-                          "text": f"GitHub Traffic · {repo}"
-                      },
-                      "legend": {
-                          "display": False
-                      }
+                      "title": {"display": True, "text": f"GitHub Traffic · {repo}"},
+                      "legend": {"display": False}
                   },
                   "scales": {
-                      "y": {
-                          "beginAtZero": True,
-                          "ticks": {
-                              "precision": 0
-                          }
-                      },
-                      "x": {
-                          "ticks": {
-                              "maxRotation": 0,
-                              "autoSkip": True,
-                              "maxTicksLimit": 7
-                          }
-                      }
+                      "y": {"beginAtZero": True, "ticks": {"precision": 0}},
+                      "x": {"ticks": {"maxRotation": 0, "autoSkip": True, "maxTicksLimit": 7}}
                   },
-                  "layout": {
-                      "padding": 4
-                  }
+                  "layout": {"padding": 4}
               }
           }
 
@@ -260,41 +242,29 @@ jobs:
               "backgroundColor": "white"
           }
 
-          r = requests.post(
-              "https://quickchart.io/chart",
-              json=payload,
-              timeout=30
-          )
-
+          r = requests.post("https://quickchart.io/chart", json=payload, timeout=30)
           if r.status_code == 200 and r.content:
               with open("traffic-views.png", "wb") as f:
                   f.write(r.content)
-          else:
-              print("QuickChart failed:", r.status_code, r.text[:300])
 
-          graph_block = """
-          <!-- GRAPH_START -->
+          graph_block = """<!-- GRAPH_START -->
           <p align="center">
             <img src="./traffic-views.png" width="100%" alt="GitHub Traffic">
           </p>
-          <!-- GRAPH_END -->
-          """
+          <!-- GRAPH_END -->"""
 
           issues_raw = requests.get(
               f"https://api.github.com/repos/{repo}/issues",
               headers=headers,
-              params={
-                  "state": "open",
-                  "per_page": 10,
-                  "sort": "created",
-                  "direction": "desc"
-              },
+              params={"state": "open", "per_page": 10, "sort": "created", "direction": "desc"},
               timeout=20
           ).json()
 
           issues = [
               i for i in issues_raw
-              if isinstance(i, dict) and "pull_request" not in i
+              if isinstance(i, dict)
+              and "pull_request" not in i
+              and i.get("title") != "views-counter"
           ]
 
           if issues:
@@ -302,17 +272,22 @@ jobs:
                   f"| [`#{i['number']}`]({i['html_url']}) | {i['title'][:70]} | {i['created_at'][:10]} |"
                   for i in issues
               )
-
-              issues_table = (
-                  "| # | Title | Date |\n"
-                  "|---|-------|------|\n"
-                  + rows
-              )
+              issues_table = "| # | Title | Date |\n|---|-------|------|\n" + rows
           else:
               issues_table = "_No open issues._"
 
-          issues_block = f"""
-          <!-- ISSUES_START -->
+          issues_block_ru = f"""<!-- ISSUES_START -->
+          <!-- auto-updated by GitHub Actions · {updated_at} -->
+
+          ## Открытые issues
+
+          {issues_table}
+
+          > [Создать issue]({repo_url}/issues/new/choose) · [Все issues]({repo_url}/issues)
+
+          <!-- ISSUES_END -->"""
+
+          issues_block_en = f"""<!-- ISSUES_START -->
           <!-- auto-updated by GitHub Actions · {updated_at} -->
 
           ## Open Issues
@@ -321,40 +296,27 @@ jobs:
 
           > [Create new issue]({repo_url}/issues/new/choose) · [All issues]({repo_url}/issues)
 
-          <!-- ISSUES_END -->
-          """
+          <!-- ISSUES_END -->"""
 
           with open("README.md", "r", encoding="utf-8") as f:
-              content = f.read()
+              ru = f.read()
 
-          content = re.sub(
-              r"<!-- STATS_START -->.*?<!-- STATS_END -->",
-              badges_block,
-              content,
-              flags=re.DOTALL
-          )
-
-          content = re.sub(
-              r"<!-- GRAPH_START -->.*?<!-- GRAPH_END -->",
-              graph_block,
-              content,
-              flags=re.DOTALL
-          )
-
-          content = re.sub(
-              r"<!-- ISSUES_START -->.*?<!-- ISSUES_END -->",
-              issues_block,
-              content,
-              flags=re.DOTALL
-          )
+          ru = replace_block(ru, "LANG_START", "LANG_END", lang_ru)
+          ru = replace_block(ru, "STATS_START", "STATS_END", stats_block)
+          ru = replace_block(ru, "GRAPH_START", "GRAPH_END", graph_block)
+          ru = replace_block(ru, "ISSUES_START", "ISSUES_END", issues_block_ru)
 
           with open("README.md", "w", encoding="utf-8") as f:
-              f.write(content)
+              f.write(ru)
 
-          translated = translate_markdown(content)
+          en = translate_markdown(ru)
+          en = replace_block(en, "LANG_START", "LANG_END", lang_en)
+          en = replace_block(en, "STATS_START", "STATS_END", stats_block)
+          en = replace_block(en, "GRAPH_START", "GRAPH_END", graph_block)
+          en = replace_block(en, "ISSUES_START", "ISSUES_END", issues_block_en)
 
           with open("README.en.md", "w", encoding="utf-8") as f:
-              f.write(translated)
+              f.write(en)
 
           print("README.md and README.en.md updated")
           EOF
