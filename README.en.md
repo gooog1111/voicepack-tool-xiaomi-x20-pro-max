@@ -13,15 +13,15 @@
 
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-24 19:00 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-24 20:43 UTC -->
 
-[![Views local](https://img.shields.io/badge/Views_local-14-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views local](https://img.shields.io/badge/Views_local-15-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Views GitHub](https://img.shields.io/badge/Views_GitHub-0-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Unique visitors](https://img.shields.io/badge/Unique-0-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Clones](https://img.shields.io/badge/Clones-0-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Stars](https://img.shields.io/badge/Stars-0-yellow?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/stargazers)
 [![Forks](https://img.shields.io/badge/Forks-0-green?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/network/members)
-[![Downloads latest release](https://img.shields.io/badge/Downloads_latest_release-1-brightgreen?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases/latest)
+[![Downloads latest release](https://img.shields.io/badge/Downloads_latest_release-0-brightgreen?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases/latest)
 [![Downloads total assets](https://img.shields.io/badge/Downloads_total_assets-3-brightgreen?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases)
 
 <!-- STATS_END -->
@@ -48,7 +48,7 @@
 
 
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-24 19:00 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-24 20:43 UTC -->
 
 ## Issues
 
@@ -86,7 +86,7 @@
 
 ## Xiaomi Voce Pack Tool
 
-A tool for Windows and Linux designed to work with voice
+A tool for Windows designed to work with voice
 packages of Xiaomi robot vacuum cleaners. It converts old Roborock packages,
 collects new Xiaomi numerical packages, checks archives, downloads official ones
 languages and installs the selected voicepack.
@@ -98,9 +98,8 @@ Tested on:
 
 ## Features
 
-- Interactive menu for Windows and Linux.
-- Xiaomi authorization in a temporary browser profile.
-- Consecutive session import from Chrome, Firefox, Edge, Yandex, Chromium,
+- Interactive menu for Windows.
+- Sequential import of sessions from Chrome, Firefox, Edge (definitely doesn’t work), Yandex, Chromium,
   Brave, Vivaldi, Opera, Opera GX and Tor Browser.
 - Unpacking old encrypted Roborock `.pkg`.
 - Recursive processing of ZIP with WAV, `.pkg` and mixed content.
@@ -123,28 +122,20 @@ Windows:
 .\run.ps1
 ```
 
-Linux:
-
-```bash
-chmod +x ./run.sh
-./run.sh
-```
-
 When you run it for the first time, select option 1. It will install the Python dependencies,
 Playwright Chromium, `ffmpeg` and, if necessary, `ccrypt`.
 
 ## Menu
 
-1. Install the necessary software.
-2. Xiaomi authorization in a temporary browser.
-3. Import the current session from installed browsers.
-4. Preliminary check of the device.
-5. Convert all old packages.
-6. Build a new custom voice pack.
-7. Check new military packs.
-8. Install a military pack from the list.
-9. Download original d109gl/d102gl packages in all languages.
-10. Exit.
+1. Importing a valid Xiaomi session from an installed browser
+2. Find DID in local network UDP 54321
+3. Preliminary check of the device
+4. Convert all old packages from the old_voicepacks folder
+5. Collect a new custom voicepack from the custom_voicepack folder
+6. Check new voice packs from the ready_voicepacks folder
+7. Install a voicepack from the ready_voicepacks list
+8. Download original d109gl/d102gl packages in all languages
+9. Exit
 
 ## Folder structure
 
@@ -194,40 +185,20 @@ Event numbers are in `custom_voicepack/table_en.csv` and
 `table_en.csv`. Put modified numeric MP3s, such as `130.mp3`, into
 `custom_voicepack/audio` and select item 6.
 
-Missing events are taken from the official Russian
-package which
-automatically downloaded the first time you use it. Replaceable files
+Missing events are taken from the official Russian package, which
+automatic
+downloaded the first time you use it. Replaceable files
 normalized to mono, 16 kHz, 32 kbps without ID3 and Xing.
 
 ## Authorization
 
-Step 2 opens the official Xiaomi page in a temporary browser profile.
-
-Step 3 sequentially checks installed browsers and stops searching
+Step 1 sequentially checks installed browsers and stops searching
 after the first full Xiaomi session. Modern Chrome can use
-application-specific encryption cookie `v20`; if Windows prohibits
-transfer, use point 2.
+Application-specific `v20` cookie encryption.
 
-Create `.env` based on `.env.example` and specify at least:
-
-```text
-XIAOMI_DID=YOUR_DEVICE_DID
-```
-## # Getting XIAOMI_DID
+## # Getting device information in MiHome
 
 Go to MiHome -> vacuum cleaner -> ⋮ -> Cleaning history -> quickly press with three fingers -> total duration, total cleanings, total number of times
-
-## Command line
-
-```powershell
-.\run.ps1 convert-all
-.\run.ps1 build-custom
-.\run.ps1 verify-all
-.\run.ps1 install
-.\run.ps1 download-originals
-```
-
-On Linux the same commands are available via `./run.sh`.
 
 ## Disclaimer
 
