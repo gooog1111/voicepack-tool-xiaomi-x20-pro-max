@@ -1,4 +1,4 @@
-name: Update README (badges + graph + issues + translation)
+name: Update README
 
 on:
   schedule:
@@ -21,80 +21,102 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: "pip"
 
       - name: Install deps
-        run: pip install requests
+        run: |
+          pip install requests deep-translator
 
-      - name: Update README (all blocks + translation)
+      - name: Update README
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
-          python - << 'EOF'
-          import os, re, requests, json
+          python << 'EOF'
+          import os
+          import re
+          import json
+          import requests
           from datetime import datetime
+          from deep_translator import GoogleTranslator
 
           repo = os.environ["REPO"]
           token = os.environ["GITHUB_TOKEN"]
-          headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
           repo_url = f"https://github.com/{repo}"
 
-          # ---------- SAFE TRANSLATOR (LibreTranslate + fallback) ----------
-          def safe_translate(text: str) -> str:
-              try:
-                  r = requests.post(
-                      "https://libretranslate.de/translate",
-                      json={
-                          "q": text,
-                          "source": "ru",
-                          "target": "en",
-                          "format": "text"
-                      },
-                      timeout=25
-                  )
-                  # Пытаемся распарсить JSON
-                  data = r.json()
-                  translated = data.get("translatedText", "")
-                  if translated and translated.strip():
-                      return translated
-                  print("Translation empty, using fallback")
-                  return ""
-              except Exception as e:
-                  print("Translation failed:", e)
-                  return ""
+          headers = {
+              "Authorization": f"Bearer {token}",
+              "Accept": "application/vnd.github+json"
+          }
 
-          # ---------- CACHED GET ----------
           def cached_get(url, cache_file):
               if os.path.exists(cache_file):
                   age = datetime.now().timestamp() - os.path.getmtime(cache_file)
                   if age < 3600:
                       try:
-                          return json.load(open(cache_file))
-                      except:
+                          with open(cache_file, "r", encoding="utf-8") as f:
+                              return json.load(f)
+                      except Exception:
                           pass
-              r = requests.get(url, headers=headers, timeout=15)
+
               try:
+                  r = requests.get(url, headers=headers, timeout=20)
                   data = r.json()
-              except:
+              except Exception:
                   data = {}
-              with open(cache_file, "w") as f:
+
+              with open(cache_file, "w", encoding="utf-8") as f:
                   json.dump(data, f)
+
               return data
 
-          # ---------- TRAFFIC ----------
-          views = cached_get(f"https://api.github.com/repos/{repo}/traffic/views?per=day", ".cache_views.json")
-          clones = cached_get(f"https://api.github.com/repos/{repo}/traffic/clones", ".cache_clones.json")
+          def translate_markdown(text):
+              parts = re.split(r"(```.*?```)", text, flags=re.DOTALL)
+              out = []
+
+              for part in parts:
+                  if part.startswith("```"):
+                      out.append(part)
+                      continue
+
+                  chunks = [part[i:i + 3500] for i in range(0, len(part), 3500)]
+
+                  for chunk in chunks:
+                      if not chunk.strip():
+                          out.append(chunk)
+                          continue
+
+                      try:
+                          translated = GoogleTranslator(
+                              source="ru",
+                              target="en"
+                          ).translate(chunk)
+
+                          out.append(translated if translated else chunk)
+                      except Exception as e:
+                          print("Translate failed:", e)
+                          out.append(chunk)
+
+              return "\n".join(out)
+
+          views = cached_get(
+              f"https://api.github.com/repos/{repo}/traffic/views?per=day",
+              ".cache_views.json"
+          )
+
+          clones = cached_get(
+              f"https://api.github.com/repos/{repo}/traffic/clones",
+              ".cache_clones.json"
+          )
 
           gh_views = views.get("count", 0)
           gh_unique = views.get("uniques", 0)
           gh_clones = clones.get("count", 0)
 
-          # ---------- LOCAL COUNTER VIA ISSUE ----------
           issues_api = f"https://api.github.com/repos/{repo}/issues"
-          issues_list = requests.get(issues_api, headers=headers, timeout=15).json()
+          issues_list = requests.get(issues_api, headers=headers, timeout=20).json()
 
           view_issue = None
+
           if isinstance(issues_list, list):
               for i in issues_list:
                   if i.get("title") == "views-counter":
@@ -106,71 +128,82 @@ jobs:
                   issues_api,
                   headers=headers,
                   json={"title": "views-counter", "body": "0"},
-                  timeout=15
+                  timeout=20
               ).json()
 
           try:
               local_views = int(view_issue.get("body", "0").strip())
-          except:
+          except Exception:
               local_views = 0
 
           local_views += 1
 
-          requests.patch(
-              f"{issues_api}/{view_issue['number']}",
-              headers=headers,
-              json={"body": str(local_views)},
-              timeout=15
+          if "number" in view_issue:
+              requests.patch(
+                  f"{issues_api}/{view_issue['number']}",
+                  headers=headers,
+                  json={"body": str(local_views)},
+                  timeout=20
+              )
+
+          rel = cached_get(
+              f"https://api.github.com/repos/{repo}/releases/latest",
+              ".cache_latest.json"
           )
 
-          # ---------- META ----------
-          rel = cached_get(f"https://api.github.com/repos/{repo}/releases/latest", ".cache_latest.json")
-          all_rel = cached_get(f"https://api.github.com/repos/{repo}/releases", ".cache_allrel.json")
+          all_rel = cached_get(
+              f"https://api.github.com/repos/{repo}/releases",
+              ".cache_allrel.json"
+          )
 
           if "tag_name" in rel:
-              tag = rel["tag_name"]
-              pub = rel.get("published_at", "")[:10]
               dl_rel = sum(a.get("download_count", 0) for a in rel.get("assets", []))
           else:
-              tag, pub, dl_rel = "N/A", "—", 0
+              dl_rel = 0
 
           dl_total = 0
-          if isinstance(all_rel, list):
-              dl_total = sum(a.get("download_count", 0) for r in all_rel for a in r.get("assets", []))
 
-          ri = cached_get(f"https://api.github.com/repos/{repo}", ".cache_repo.json")
+          if isinstance(all_rel, list):
+              dl_total = sum(
+                  a.get("download_count", 0)
+                  for r in all_rel
+                  for a in r.get("assets", [])
+              )
+
+          ri = cached_get(
+              f"https://api.github.com/repos/{repo}",
+              ".cache_repo.json"
+          )
+
           stars = ri.get("stargazers_count", 0)
           forks = ri.get("forks_count", 0)
-          open_count = ri.get("open_issues_count", 0)
 
-          updated_at = datetime.now().strftime("%Y-%m-%d %H:%M UTC")
+          updated_at = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
 
-          # ---------- BADGES BLOCK ----------
           badges_block = f"""
           <!-- STATS_START -->
           <!-- auto-updated by GitHub Actions · {updated_at} -->
 
-          [![Views (local)](https://img.shields.io/badge/Views(local)-{local_views}-ff6900?style=for-the-badge&logo=github)]({repo_url})
-          [![Views (GitHub)](https://img.shields.io/badge/Views(GitHub)-{gh_views}-ff6900?style=for-the-badge&logo=github)]({repo_url})
+          [![Views local](https://img.shields.io/badge/Views_local-{local_views}-ff6900?style=for-the-badge&logo=github)]({repo_url})
+          [![Views GitHub](https://img.shields.io/badge/Views_GitHub-{gh_views}-ff6900?style=for-the-badge&logo=github)]({repo_url})
           [![Unique visitors](https://img.shields.io/badge/Unique-{gh_unique}-blue?style=for-the-badge&logo=github)]({repo_url})
           [![Clones](https://img.shields.io/badge/Clones-{gh_clones}-purple?style=for-the-badge&logo=github)]({repo_url})
-          [![Stars](https://img.shields.io/github/stars/{repo}?style=for-the-badge)]({repo_url}/stargazers)
-          [![Forks](https://img.shields.io/github/forks/{repo}?style=for-the-badge)]({repo_url}/network/members)
-          [![Downloads (release)](https://img.shields.io/badge/Downloads(release)-{dl_rel}-brightgreen?style=for-the-badge)]({repo_url}/releases/latest)
-          [![Downloads (total)](https://img.shields.io/badge/Downloads(total)-{dl_total}-brightgreen?style=for-the-badge)]({repo_url}/releases)
+          [![Stars](https://img.shields.io/badge/Stars-{stars}-yellow?style=for-the-badge&logo=github)]({repo_url}/stargazers)
+          [![Forks](https://img.shields.io/badge/Forks-{forks}-green?style=for-the-badge&logo=github)]({repo_url}/network/members)
+          [![Downloads release](https://img.shields.io/badge/Downloads_release-{dl_rel}-brightgreen?style=for-the-badge)]({repo_url}/releases/latest)
+          [![Downloads total](https://img.shields.io/badge/Downloads_total-{dl_total}-brightgreen?style=for-the-badge)]({repo_url}/releases)
 
           <!-- STATS_END -->
           """
 
-          # ---------- GRAPH (COMPACT PNG 800x250) ----------
           points = views.get("views", [])
 
-          if not points:
-              labels = [(datetime.now().date()).isoformat()]
-              counts = [0]
-          else:
+          if points:
               labels = [p["timestamp"][:10] for p in points]
               counts = [p["count"] for p in points]
+          else:
+              labels = [datetime.utcnow().date().isoformat()]
+              counts = [0]
 
           chart = {
               "type": "line",
@@ -182,106 +215,160 @@ jobs:
                       "borderColor": "rgba(255,105,0,1)",
                       "backgroundColor": "rgba(255,105,0,0.15)",
                       "fill": True,
-                      "tension": 0.3
+                      "tension": 0.25,
+                      "pointRadius": 2
                   }]
               },
               "options": {
+                  "responsive": False,
+                  "maintainAspectRatio": False,
                   "plugins": {
-                      "title": {"display": True, "text": f"GitHub Traffic · {repo}"}
+                      "title": {
+                          "display": True,
+                          "text": f"GitHub Traffic · {repo}"
+                      },
+                      "legend": {
+                          "display": False
+                      }
                   },
-                  "scales": {"y": {"beginAtZero": True}},
-                  "layout": {"padding": 10}
+                  "scales": {
+                      "y": {
+                          "beginAtZero": True,
+                          "ticks": {
+                              "precision": 0
+                          }
+                      },
+                      "x": {
+                          "ticks": {
+                              "maxRotation": 0,
+                              "autoSkip": True,
+                              "maxTicksLimit": 7
+                          }
+                      }
+                  },
+                  "layout": {
+                      "padding": 4
+                  }
               }
           }
 
-          # ВАЖНО: width/height — на верхнем уровне JSON, а не внутри chart
           payload = {
               "chart": chart,
-              "width": 800,
-              "height": 250,
+              "width": 1200,
+              "height": 180,
               "format": "png",
               "backgroundColor": "white"
           }
 
-          r = requests.post("https://quickchart.io/chart", json=payload, timeout=20)
-          with open("traffic-views.png", "wb") as f:
-              f.write(r.content)
+          r = requests.post(
+              "https://quickchart.io/chart",
+              json=payload,
+              timeout=30
+          )
+
+          if r.status_code == 200 and r.content:
+              with open("traffic-views.png", "wb") as f:
+                  f.write(r.content)
+          else:
+              print("QuickChart failed:", r.status_code, r.text[:300])
 
           graph_block = """
           <!-- GRAPH_START -->
-          ![GitHub Traffic](./traffic-views.png)
+          <p align="center">
+            <img src="./traffic-views.png" width="100%" alt="GitHub Traffic">
+          </p>
           <!-- GRAPH_END -->
           """
 
-          # ---------- ISSUES BLOCK ----------
           issues_raw = requests.get(
               f"https://api.github.com/repos/{repo}/issues",
               headers=headers,
-              params={"state": "open", "per_page": 10, "sort": "created", "direction": "desc"},
-              timeout=15
+              params={
+                  "state": "open",
+                  "per_page": 10,
+                  "sort": "created",
+                  "direction": "desc"
+              },
+              timeout=20
           ).json()
 
-          issues = [i for i in issues_raw if isinstance(i, dict) and "pull_request" not in i]
+          issues = [
+              i for i in issues_raw
+              if isinstance(i, dict) and "pull_request" not in i
+          ]
 
           if issues:
               rows = "\n".join(
                   f"| [`#{i['number']}`]({i['html_url']}) | {i['title'][:70]} | {i['created_at'][:10]} |"
                   for i in issues
               )
+
               issues_table = (
                   "| # | Title | Date |\n"
                   "|---|-------|------|\n"
                   + rows
               )
           else:
-              issues_table = "_No open issues — everything is good! 🎉_"
+              issues_table = "_No open issues._"
 
           issues_block = f"""
           <!-- ISSUES_START -->
           <!-- auto-updated by GitHub Actions · {updated_at} -->
 
-          ## 🐛 Open Issues
+          ## Open Issues
 
           {issues_table}
 
-          > 💡 **[Create new issue]({repo_url}/issues/new/choose)** · [All issues]({repo_url}/issues)
+          > [Create new issue]({repo_url}/issues/new/choose) · [All issues]({repo_url}/issues)
 
           <!-- ISSUES_END -->
           """
 
-          # ---------- UPDATE README.md ----------
           with open("README.md", "r", encoding="utf-8") as f:
               content = f.read()
 
-          content = re.sub(r"<!-- STATS_START -->.*?<!-- STATS_END -->", badges_block, content, flags=re.DOTALL)
-          content = re.sub(r"<!-- GRAPH_START -->.*?<!-- GRAPH_END -->", graph_block, content, flags=re.DOTALL)
-          content = re.sub(r"<!-- ISSUES_START -->.*?<!-- ISSUES_END -->", issues_block, content, flags=re.DOTALL)
+          content = re.sub(
+              r"<!-- STATS_START -->.*?<!-- STATS_END -->",
+              badges_block,
+              content,
+              flags=re.DOTALL
+          )
+
+          content = re.sub(
+              r"<!-- GRAPH_START -->.*?<!-- GRAPH_END -->",
+              graph_block,
+              content,
+              flags=re.DOTALL
+          )
+
+          content = re.sub(
+              r"<!-- ISSUES_START -->.*?<!-- ISSUES_END -->",
+              issues_block,
+              content,
+              flags=re.DOTALL
+          )
 
           with open("README.md", "w", encoding="utf-8") as f:
               f.write(content)
 
-          # ---------- TRANSLATE README → README.en.md ----------
-          translated = safe_translate(content)
-          if not translated.strip():
-              # Fallback: если перевод не удался — хотя бы копируем
-              translated = "# English version (auto-fallback)\n\n" + content
+          translated = translate_markdown(content)
 
           with open("README.en.md", "w", encoding="utf-8") as f:
               f.write(translated)
 
-          print("README + README.en updated ✓")
+          print("README.md and README.en.md updated")
           EOF
 
-      - name: Commit & push
+      - name: Commit and push
         run: |
-          git config user.name  "github-actions[bot]"
+          git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git add README.md README.en.md traffic-views.png || true
 
           git diff --cached --quiet && echo "No changes to commit" && exit 0
 
-          git commit -m "update README (badges + graph + issues + translation) [skip ci]"
+          git commit -m "update README stats, graph and translation [skip ci]"
 
           git pull --rebase
           git push
