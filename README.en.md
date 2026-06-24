@@ -13,16 +13,16 @@
 
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-24 10:53 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-24 10:58 UTC -->
 
-[![Views local](https://img.shields.io/badge/Views_local-11-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views local](https://img.shields.io/badge/Views_local-12-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Views GitHub](https://img.shields.io/badge/Views_GitHub-0-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Unique visitors](https://img.shields.io/badge/Unique-0-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Clones](https://img.shields.io/badge/Clones-0-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Stars](https://img.shields.io/badge/Stars-0-yellow?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/stargazers)
 [![Forks](https://img.shields.io/badge/Forks-0-green?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/network/members)
-[![Downloads release](https://img.shields.io/badge/Downloads_release-1-brightgreen?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases/latest)
-[![Downloads total](https://img.shields.io/badge/Downloads_total-1-brightgreen?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases)
+[![Downloads latest release](https://img.shields.io/badge/Downloads_latest_release-1-brightgreen?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases/latest)
+[![Downloads total assets](https://img.shields.io/badge/Downloads_total_assets-1-brightgreen?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases)
 
 <!-- STATS_END -->
 
@@ -48,20 +48,41 @@
 
 
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-24 10:53 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-24 10:58 UTC -->
 
-## Open Issues
+## Issues
 
-_No open issues._
+<p>
+  <a href="https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues">
+    <img alt="Open issues" src="https://img.shields.io/badge/Open_issues-0-blue?style=for-the-badge&logo=github">
+  </a>
+  <a href="https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues/new/choose">
+    <img alt="Create issue" src="https://img.shields.io/badge/Create_issue-new-success?style=for-the-badge&logo=github">
+  </a>
+</p>
 
-> [Create new issue](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues/new/choose) · [All issues](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues)
+<details open>
+<summary><b>Open issues</b></summary>
+
+
+<p align="center">
+  <b>No open issues.</b><br>
+  <sub>The service issue <code>views-counter</code> is hidden from the list.</sub>
+</p>
+
+
+</details>
+
+<p>
+  <a href="https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues/new/choose">Create new issue</a> ·
+  <a href="https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues">All issues</a>
+</p>
 
 <!-- ISSUES_END -->
 
 
 
 
-[English version](README.en.md)
 
 ## Xiaomi Voce Pack Tool
 
@@ -173,8 +194,8 @@ Event numbers are in `custom_voicepack/table_en.csv` and
 `table_en.csv`. Put modified numeric MP3s, such as `130.mp3`, into
 `custom_voicepack/audio` and select item 6.
 
-Missing Events
-are taken from the official Russian package, which
+Missing events are taken from the official Russian
+package which
 automatically downloaded the first time you use it. Replaceable files
 normalized to mono, 16 kHz, 32 kbps without ID3 and Xing.
 
