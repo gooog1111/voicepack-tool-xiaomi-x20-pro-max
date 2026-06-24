@@ -42,47 +42,24 @@ jobs:
 
           # ---------------- SMART TRANSLATOR ----------------
           def smart_translate(text):
-              import re
-              protected = {}
-              def protect(match):
-                  key = f"__MD{len(protected)}__"
-                  protected[key] = match.group(0)
-                  return key
+              # Упрощённый, но красивый перевод без спецсимволов
+              replacements = {
+                  "Просмотров": "Views",
+                  "Открытые задачи": "Open Issues",
+                  "Заголовок": "Title",
+                  "Дата": "Date",
+                  "Создать новую задачу": "Create new issue",
+                  "Все задачи": "All issues",
+                  "Открытых задач нет — всё хорошо!": "No open issues — everything is good!",
+                  "авто‑обновлено": "auto‑updated",
+                  "Открытые задачи": "Open Issues",
+                  "Открытые задачи": "Open Issues",
+              }
 
-              text_protected = re.sub(r"`[^`]+`|
+              for ru, en in replacements.items():
+                  text = text.replace(ru, en)
 
-\[[^\]
-
-]+\]
-
-\([^)]+\)|\|.*?\|", protect, text)
-
-              lines = text_protected.split("\n")
-              translated_lines = []
-
-              for line in lines:
-                  if line.strip().startswith("#"):
-                      translated_lines.append(line)
-                      continue
-
-                  translated = (
-                      line.replace("Просмотров", "Views")
-                          .replace("Открытые задачи", "Open Issues")
-                          .replace("Заголовок", "Title")
-                          .replace("Дата", "Date")
-                          .replace("Создать новую задачу", "Create new issue")
-                          .replace("Все задачи", "All issues")
-                          .replace("Открытых задач нет — всё хорошо!", "No open issues — everything is good!")
-                          .replace("авто‑обновлено", "auto‑updated")
-                  )
-
-                  translated_lines.append(translated)
-
-              result = "\n".join(translated_lines)
-              for key, val in protected.items():
-                  result = result.replace(key, val)
-
-              return result
+              return text
 
           # ---------------- CACHED GET ----------------
           def cached_get(url, cache_file):
