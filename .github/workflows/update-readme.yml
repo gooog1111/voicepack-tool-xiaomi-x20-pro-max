@@ -1,0 +1,181 @@
+name: 🔄 Update README Stats
+
+on:
+  push:
+    branches: [main]
+  release:
+    types: [published]
+  schedule:
+    # Every day at 06:00 UTC — refreshes download counts and release info
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-readme:
+    name: Refresh dynamic badges & stats
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 📦 Install dependencies
+        run: pip install requests
+
+      - name: 📊 Fetch release stats & update README
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          python - <<'EOF'
+          import os
+          import re
+          import requests
+
+          repo  = os.environ["REPO"]
+          token = os.environ["GITHUB_TOKEN"]
+          headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
+
+          # ── Fetch latest release ───────────────────────────────────────────
+          rel_url = f"https://api.github.com/repos/{repo}/releases/latest"
+          rel = requests.get(rel_url, headers=headers, timeout=15).json()
+
+          tag          = rel.get("tag_name", "N/A")
+          published    = rel.get("published_at", "")[:10]   # YYYY-MM-DD
+          downloads    = sum(a.get("download_count", 0) for a in rel.get("assets", []))
+
+          # ── Fetch total downloads across ALL releases ──────────────────────
+          all_rel = requests.get(
+              f"https://api.github.com/repos/{repo}/releases",
+              headers=headers, timeout=15
+          ).json()
+          total_dl = sum(
+              a.get("download_count", 0)
+              for r in all_rel for a in r.get("assets", [])
+          )
+
+          # ── Fetch repo stars & forks ───────────────────────────────────────
+          repo_info = requests.get(
+              f"https://api.github.com/repos/{repo}", headers=headers, timeout=15
+          ).json()
+          stars = repo_info.get("stargazers_count", 0)
+          forks = repo_info.get("forks_count", 0)
+
+          print(f"Release : {tag}  ({published})")
+          print(f"Downloads (latest release): {downloads}")
+          print(f"Downloads (total)         : {total_dl}")
+          print(f"Stars: {stars}  Forks: {forks}")
+
+          # ── Read README ────────────────────────────────────────────────────
+          with open("README.md", "r", encoding="utf-8") as f:
+              content = f.read()
+
+          # ── Patch <!-- STATS_START --> … <!-- STATS_END --> block ──────────
+          stats_block = (
+              "<!-- STATS_START -->\n"
+              f"<!-- auto-updated by GitHub Actions on {published} -->\n"
+              f"| Показатель | Значение |\n"
+              f"|---|---|\n"
+              f"| 🏷️ Последний релиз | `{tag}` ({published}) |\n"
+              f"| ⬇️ Скачиваний (релиз) | {downloads:,} |\n"
+              f"| ⬇️ Скачиваний (всего) | {total_dl:,} |\n"
+              f"| ⭐ Звёзды | {stars} |\n"
+              f"| 🍴 Форки | {forks} |\n"
+              "<!-- STATS_END -->"
+          )
+
+          # Replace existing block or insert after first H1
+          if "<!-- STATS_START -->" in content:
+              content = re.sub(
+                  r"<!-- STATS_START -->.*?<!-- STATS_END -->",
+                  stats_block,
+                  content,
+                  flags=re.DOTALL,
+              )
+          else:
+              # Insert after first heading line
+              content = re.sub(
+                  r"(# .+?\n)",
+                  r"\1\n" + stats_block + "\n",
+                  content,
+                  count=1,
+              )
+
+          with open("README.md", "w", encoding="utf-8") as f:
+              f.write(content)
+
+          print("README.md updated ✓")
+          EOF
+
+      - name: 🔁 Do same for README.en.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          python - <<'EOF'
+          import os, re, requests
+
+          repo  = os.environ["REPO"]
+          token = os.environ["GITHUB_TOKEN"]
+          headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
+
+          rel   = requests.get(f"https://api.github.com/repos/{repo}/releases/latest", headers=headers, timeout=15).json()
+          tag   = rel.get("tag_name", "N/A")
+          pub   = rel.get("published_at", "")[:10]
+          dl_r  = sum(a.get("download_count",0) for a in rel.get("assets",[]))
+
+          all_rel = requests.get(f"https://api.github.com/repos/{repo}/releases", headers=headers, timeout=15).json()
+          dl_t  = sum(a.get("download_count",0) for r in all_rel for a in r.get("assets",[]))
+
+          ri    = requests.get(f"https://api.github.com/repos/{repo}", headers=headers, timeout=15).json()
+          stars = ri.get("stargazers_count",0)
+          forks = ri.get("forks_count",0)
+
+          try:
+              with open("README.en.md","r",encoding="utf-8") as f:
+                  content = f.read()
+          except FileNotFoundError:
+              print("README.en.md not found, skipping")
+              exit(0)
+
+          block = (
+              "<!-- STATS_START -->\n"
+              f"<!-- auto-updated by GitHub Actions on {pub} -->\n"
+              f"| Metric | Value |\n"
+              f"|---|---|\n"
+              f"| 🏷️ Latest release | `{tag}` ({pub}) |\n"
+              f"| ⬇️ Downloads (release) | {dl_r:,} |\n"
+              f"| ⬇️ Downloads (total) | {dl_t:,} |\n"
+              f"| ⭐ Stars | {stars} |\n"
+              f"| 🍴 Forks | {forks} |\n"
+              "<!-- STATS_END -->"
+          )
+
+          if "<!-- STATS_START -->" in content:
+              content = re.sub(r"<!-- STATS_START -->.*?<!-- STATS_END -->", block, content, flags=re.DOTALL)
+          else:
+              content = re.sub(r"(# .+?\n)", r"\1\n" + block + "\n", content, count=1)
+
+          with open("README.en.md","w",encoding="utf-8") as f:
+              f.write(content)
+          print("README.en.md updated ✓")
+          EOF
+
+      - name: 💾 Commit changes (if any)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md README.en.md
+          # Only commit if there are actual changes
+          git diff --cached --quiet || git commit -m "chore: auto-update README stats [skip ci]"
+          git push
