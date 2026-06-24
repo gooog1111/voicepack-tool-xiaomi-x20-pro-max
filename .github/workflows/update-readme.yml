@@ -44,7 +44,17 @@ jobs:
               "Accept": "application/vnd.github+json"
           }
 
-          def cached_get(url, cache_file):
+          def gh_get(url, params=None):
+              try:
+                  r = requests.get(url, headers=headers, params=params, timeout=25)
+                  if r.status_code >= 400:
+                      print("GitHub API error:", r.status_code, url, r.text[:300])
+                  return r.json()
+              except Exception as e:
+                  print("GET failed:", url, e)
+                  return {}
+
+          def cached_get(url, cache_file, params=None):
               if os.path.exists(cache_file):
                   age = datetime.now().timestamp() - os.path.getmtime(cache_file)
                   if age < 3600:
@@ -54,11 +64,7 @@ jobs:
                       except Exception:
                           pass
 
-              try:
-                  r = requests.get(url, headers=headers, timeout=20)
-                  data = r.json()
-              except Exception:
-                  data = {}
+              data = gh_get(url, params=params)
 
               with open(cache_file, "w", encoding="utf-8") as f:
                   json.dump(data, f)
@@ -70,6 +76,37 @@ jobs:
               if re.search(pattern, text, flags=re.DOTALL):
                   return re.sub(pattern, block, text, flags=re.DOTALL)
               return block + "\n\n" + text
+
+          def force_lang_switch(text, lang):
+              text = re.sub(
+                  r"<!-- LANG_START -->.*?<!-- LANG_END -->",
+                  "",
+                  text,
+                  flags=re.DOTALL
+              )
+
+              text = re.sub(
+                  r"(?mi)^.*English version.*README\.en\.md.*\n?",
+                  "",
+                  text
+              )
+
+              text = re.sub(
+                  r"(?mi)^.*Русская версия.*README\.md.*\n?",
+                  "",
+                  text
+              )
+
+              if lang == "ru":
+                  switch = """<!-- LANG_START -->
+          🇬🇧 [English version](README.en.md)
+          <!-- LANG_END -->"""
+              else:
+                  switch = """<!-- LANG_START -->
+          🇷🇺 [Русская версия](README.md)
+          <!-- LANG_END -->"""
+
+              return switch + "\n\n" + text.strip() + "\n"
 
           def translate_markdown(text):
               protected = {}
@@ -109,12 +146,15 @@ jobs:
               return result
 
           views = cached_get(
-              f"https://api.github.com/repos/{repo}/traffic/views?per=day",
-              ".cache_views.json"
+              f"https://api.github.com/repos/{repo}/traffic/views",
+              ".cache_views.json",
+              params={"per": "day"}
           )
+
           clones = cached_get(
               f"https://api.github.com/repos/{repo}/traffic/clones",
-              ".cache_clones.json"
+              ".cache_clones.json",
+              params={"per": "day"}
           )
 
           gh_views = views.get("count", 0)
@@ -122,7 +162,7 @@ jobs:
           gh_clones = clones.get("count", 0)
 
           issues_api = f"https://api.github.com/repos/{repo}/issues"
-          issues_list = requests.get(issues_api, headers=headers, timeout=20).json()
+          issues_list = gh_get(issues_api, params={"state": "open", "per_page": 100})
 
           view_issue = None
           if isinstance(issues_list, list):
@@ -154,38 +194,39 @@ jobs:
                   timeout=20
               )
 
-          rel = cached_get(
-              f"https://api.github.com/repos/{repo}/releases/latest",
-              ".cache_latest.json"
-          )
-          all_rel = cached_get(
+          releases = cached_get(
               f"https://api.github.com/repos/{repo}/releases",
-              ".cache_allrel.json"
+              ".cache_releases.json",
+              params={"per_page": 100}
           )
+
+          latest_release = None
+          if isinstance(releases, list) and releases:
+              latest_release = releases[0]
+
+          dl_rel = 0
+          dl_total = 0
+          release_assets_count = 0
+
+          if isinstance(releases, list):
+              for release in releases:
+                  assets = release.get("assets", [])
+                  release_assets_count += len(assets)
+                  release_sum = sum(a.get("download_count", 0) for a in assets)
+                  dl_total += release_sum
+
+              if latest_release:
+                  dl_rel = sum(a.get("download_count", 0) for a in latest_release.get("assets", []))
+
           ri = cached_get(
               f"https://api.github.com/repos/{repo}",
               ".cache_repo.json"
           )
 
-          dl_rel = sum(a.get("download_count", 0) for a in rel.get("assets", [])) if "tag_name" in rel else 0
-          dl_total = sum(
-              a.get("download_count", 0)
-              for r in all_rel
-              for a in r.get("assets", [])
-          ) if isinstance(all_rel, list) else 0
-
           stars = ri.get("stargazers_count", 0)
           forks = ri.get("forks_count", 0)
 
           updated_at = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
-
-          lang_ru = """<!-- LANG_START -->
-          🇬🇧 [English version](README.en.md)
-          <!-- LANG_END -->"""
-
-          lang_en = """<!-- LANG_START -->
-          🇷🇺 [Русская версия](README.md)
-          <!-- LANG_END -->"""
 
           stats_block = f"""<!-- STATS_START -->
           <!-- auto-updated by GitHub Actions · {updated_at} -->
@@ -196,10 +237,14 @@ jobs:
           [![Clones](https://img.shields.io/badge/Clones-{gh_clones}-purple?style=for-the-badge&logo=github)]({repo_url})
           [![Stars](https://img.shields.io/badge/Stars-{stars}-yellow?style=for-the-badge&logo=github)]({repo_url}/stargazers)
           [![Forks](https://img.shields.io/badge/Forks-{forks}-green?style=for-the-badge&logo=github)]({repo_url}/network/members)
-          [![Downloads release](https://img.shields.io/badge/Downloads_release-{dl_rel}-brightgreen?style=for-the-badge)]({repo_url}/releases/latest)
-          [![Downloads total](https://img.shields.io/badge/Downloads_total-{dl_total}-brightgreen?style=for-the-badge)]({repo_url}/releases)
+          [![Downloads latest release](https://img.shields.io/badge/Downloads_latest_release-{dl_rel}-brightgreen?style=for-the-badge)]({repo_url}/releases/latest)
+          [![Downloads total assets](https://img.shields.io/badge/Downloads_total_assets-{dl_total}-brightgreen?style=for-the-badge)]({repo_url}/releases)
 
           <!-- STATS_END -->"""
+
+          print(f"Release assets found: {release_assets_count}")
+          print(f"Latest release downloads: {dl_rel}")
+          print(f"Total release asset downloads: {dl_total}")
 
           points = views.get("views", [])
           labels = [p["timestamp"][:10] for p in points] if points else [datetime.utcnow().date().isoformat()]
@@ -246,6 +291,8 @@ jobs:
           if r.status_code == 200 and r.content:
               with open("traffic-views.png", "wb") as f:
                   f.write(r.content)
+          else:
+              print("QuickChart failed:", r.status_code, r.text[:300])
 
           graph_block = """<!-- GRAPH_START -->
           <p align="center">
@@ -253,12 +300,15 @@ jobs:
           </p>
           <!-- GRAPH_END -->"""
 
-          issues_raw = requests.get(
+          issues_raw = gh_get(
               f"https://api.github.com/repos/{repo}/issues",
-              headers=headers,
-              params={"state": "open", "per_page": 10, "sort": "created", "direction": "desc"},
-              timeout=20
-          ).json()
+              params={
+                  "state": "open",
+                  "per_page": 10,
+                  "sort": "created",
+                  "direction": "desc"
+              }
+          )
 
           issues = [
               i for i in issues_raw
@@ -267,41 +317,115 @@ jobs:
               and i.get("title") != "views-counter"
           ]
 
-          if issues:
-              rows = "\n".join(
-                  f"| [`#{i['number']}`]({i['html_url']}) | {i['title'][:70]} | {i['created_at'][:10]} |"
-                  for i in issues
-              )
-              issues_table = "| # | Title | Date |\n|---|-------|------|\n" + rows
-          else:
-              issues_table = "_No open issues._"
+          issue_count = len(issues)
+
+          def issue_cards(lang):
+              if not issues:
+                  if lang == "ru":
+                      return """
+          <p align="center">
+            <b>Открытых issues нет.</b><br>
+            <sub>Служебный issue <code>views-counter</code> скрыт из списка.</sub>
+          </p>
+          """
+                  return """
+          <p align="center">
+            <b>No open issues.</b><br>
+            <sub>The service issue <code>views-counter</code> is hidden from the list.</sub>
+          </p>
+          """
+
+              cards = []
+              for i in issues:
+                  num = i["number"]
+                  title = i["title"]
+                  url = i["html_url"]
+                  date = i["created_at"][:10]
+                  labels = i.get("labels", [])
+
+                  label_html = ""
+                  if labels:
+                      label_html = " ".join(
+                          f"<code>{l.get('name', '')}</code>"
+                          for l in labels[:5]
+                      )
+
+                  cards.append(f"""
+          <tr>
+            <td width="90"><a href="{url}"><b>#{num}</b></a></td>
+            <td><b>{title}</b><br><sub>{label_html}</sub></td>
+            <td width="120"><sub>{date}</sub></td>
+          </tr>""")
+
+              return """
+          <table>
+            <tr>
+              <th align="left">Issue</th>
+              <th align="left">Title</th>
+              <th align="left">Created</th>
+            </tr>
+          """ + "\n".join(cards) + "\n</table>"
 
           issues_block_ru = f"""<!-- ISSUES_START -->
           <!-- auto-updated by GitHub Actions · {updated_at} -->
 
-          ## Открытые issues
+          ## Issues
 
-          {issues_table}
+          <p>
+            <a href="{repo_url}/issues">
+              <img alt="Open issues" src="https://img.shields.io/badge/Open_issues-{issue_count}-blue?style=for-the-badge&logo=github">
+            </a>
+            <a href="{repo_url}/issues/new/choose">
+              <img alt="Create issue" src="https://img.shields.io/badge/Create_issue-new-success?style=for-the-badge&logo=github">
+            </a>
+          </p>
 
-          > [Создать issue]({repo_url}/issues/new/choose) · [Все issues]({repo_url}/issues)
+          <details open>
+          <summary><b>Открытые issues</b></summary>
+
+          {issue_cards("ru")}
+
+          </details>
+
+          <p>
+            <a href="{repo_url}/issues/new/choose">Создать issue</a> ·
+            <a href="{repo_url}/issues">Все issues</a>
+          </p>
 
           <!-- ISSUES_END -->"""
 
           issues_block_en = f"""<!-- ISSUES_START -->
           <!-- auto-updated by GitHub Actions · {updated_at} -->
 
-          ## Open Issues
+          ## Issues
 
-          {issues_table}
+          <p>
+            <a href="{repo_url}/issues">
+              <img alt="Open issues" src="https://img.shields.io/badge/Open_issues-{issue_count}-blue?style=for-the-badge&logo=github">
+            </a>
+            <a href="{repo_url}/issues/new/choose">
+              <img alt="Create issue" src="https://img.shields.io/badge/Create_issue-new-success?style=for-the-badge&logo=github">
+            </a>
+          </p>
 
-          > [Create new issue]({repo_url}/issues/new/choose) · [All issues]({repo_url}/issues)
+          <details open>
+          <summary><b>Open issues</b></summary>
+
+          {issue_cards("en")}
+
+          </details>
+
+          <p>
+            <a href="{repo_url}/issues/new/choose">Create new issue</a> ·
+            <a href="{repo_url}/issues">All issues</a>
+          </p>
 
           <!-- ISSUES_END -->"""
 
           with open("README.md", "r", encoding="utf-8") as f:
               ru = f.read()
 
-          ru = replace_block(ru, "LANG_START", "LANG_END", lang_ru)
+          ru = force_lang_switch(ru, "ru")
           ru = replace_block(ru, "STATS_START", "STATS_END", stats_block)
           ru = replace_block(ru, "GRAPH_START", "GRAPH_END", graph_block)
           ru = replace_block(ru, "ISSUES_START", "ISSUES_END", issues_block_ru)
@@ -310,7 +434,7 @@ jobs:
               f.write(ru)
 
           en = translate_markdown(ru)
-          en = replace_block(en, "LANG_START", "LANG_END", lang_en)
+          en = force_lang_switch(en, "en")
           en = replace_block(en, "STATS_START", "STATS_END", stats_block)
           en = replace_block(en, "GRAPH_START", "GRAPH_END", graph_block)
           en = replace_block(en, "ISSUES_START", "ISSUES_END", issues_block_en)
@@ -330,7 +454,7 @@ jobs:
 
           git diff --cached --quiet && echo "No changes to commit" && exit 0
 
-          git commit -m "update README stats, graph and translation [skip ci]"
+          git commit -m "update README stats, graph, issues and translation [skip ci]"
 
           git pull --rebase
           git push
