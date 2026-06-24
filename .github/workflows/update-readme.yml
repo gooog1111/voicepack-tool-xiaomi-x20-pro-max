@@ -40,28 +40,31 @@ jobs:
           headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
           repo_url = f"https://github.com/{repo}"
 
-          # ---------------- SMART TRANSLATOR ----------------
-          def smart_translate(text):
-              # Упрощённый, но красивый перевод без спецсимволов
-              replacements = {
-                  "Просмотров": "Views",
-                  "Открытые задачи": "Open Issues",
-                  "Заголовок": "Title",
-                  "Дата": "Date",
-                  "Создать новую задачу": "Create new issue",
-                  "Все задачи": "All issues",
-                  "Открытых задач нет — всё хорошо!": "No open issues — everything is good!",
-                  "авто‑обновлено": "auto‑updated",
-                  "Открытые задачи": "Open Issues",
-                  "Открытые задачи": "Open Issues",
-              }
+          # ---------- SAFE TRANSLATOR (LibreTranslate + fallback) ----------
+          def safe_translate(text: str) -> str:
+              try:
+                  r = requests.post(
+                      "https://libretranslate.de/translate",
+                      json={
+                          "q": text,
+                          "source": "ru",
+                          "target": "en",
+                          "format": "text"
+                      },
+                      timeout=25
+                  )
+                  # Пытаемся распарсить JSON
+                  data = r.json()
+                  translated = data.get("translatedText", "")
+                  if translated and translated.strip():
+                      return translated
+                  print("Translation empty, using fallback")
+                  return ""
+              except Exception as e:
+                  print("Translation failed:", e)
+                  return ""
 
-              for ru, en in replacements.items():
-                  text = text.replace(ru, en)
-
-              return text
-
-          # ---------------- CACHED GET ----------------
+          # ---------- CACHED GET ----------
           def cached_get(url, cache_file):
               if os.path.exists(cache_file):
                   age = datetime.now().timestamp() - os.path.getmtime(cache_file)
@@ -79,7 +82,7 @@ jobs:
                   json.dump(data, f)
               return data
 
-          # ---------------- TRAFFIC ----------------
+          # ---------- TRAFFIC ----------
           views = cached_get(f"https://api.github.com/repos/{repo}/traffic/views?per=day", ".cache_views.json")
           clones = cached_get(f"https://api.github.com/repos/{repo}/traffic/clones", ".cache_clones.json")
 
@@ -87,7 +90,7 @@ jobs:
           gh_unique = views.get("uniques", 0)
           gh_clones = clones.get("count", 0)
 
-          # ---------------- LOCAL COUNTER ----------------
+          # ---------- LOCAL COUNTER VIA ISSUE ----------
           issues_api = f"https://api.github.com/repos/{repo}/issues"
           issues_list = requests.get(issues_api, headers=headers, timeout=15).json()
 
@@ -120,7 +123,7 @@ jobs:
               timeout=15
           )
 
-          # ---------------- META ----------------
+          # ---------- META ----------
           rel = cached_get(f"https://api.github.com/repos/{repo}/releases/latest", ".cache_latest.json")
           all_rel = cached_get(f"https://api.github.com/repos/{repo}/releases", ".cache_allrel.json")
 
@@ -142,7 +145,7 @@ jobs:
 
           updated_at = datetime.now().strftime("%Y-%m-%d %H:%M UTC")
 
-          # ---------------- BADGES ----------------
+          # ---------- BADGES BLOCK ----------
           badges_block = f"""
           <!-- STATS_START -->
           <!-- auto-updated by GitHub Actions · {updated_at} -->
@@ -159,7 +162,7 @@ jobs:
           <!-- STATS_END -->
           """
 
-          # ---------------- GRAPH ----------------
+          # ---------- GRAPH (COMPACT PNG 800x250) ----------
           points = views.get("views", [])
 
           if not points:
@@ -169,7 +172,7 @@ jobs:
               labels = [p["timestamp"][:10] for p in points]
               counts = [p["count"] for p in points]
 
-          chart_config = {
+          chart = {
               "type": "line",
               "data": {
                   "labels": labels,
@@ -188,12 +191,19 @@ jobs:
                   },
                   "scales": {"y": {"beginAtZero": True}},
                   "layout": {"padding": 10}
-              },
-              "width": 800,
-              "height": 250
+              }
           }
 
-          r = requests.post("https://quickchart.io/chart", json={"chart": chart_config}, timeout=15)
+          # ВАЖНО: width/height — на верхнем уровне JSON, а не внутри chart
+          payload = {
+              "chart": chart,
+              "width": 800,
+              "height": 250,
+              "format": "png",
+              "backgroundColor": "white"
+          }
+
+          r = requests.post("https://quickchart.io/chart", json=payload, timeout=20)
           with open("traffic-views.png", "wb") as f:
               f.write(r.content)
 
@@ -203,7 +213,7 @@ jobs:
           <!-- GRAPH_END -->
           """
 
-          # ---------------- ISSUES ----------------
+          # ---------- ISSUES BLOCK ----------
           issues_raw = requests.get(
               f"https://api.github.com/repos/{repo}/issues",
               headers=headers,
@@ -239,7 +249,7 @@ jobs:
           <!-- ISSUES_END -->
           """
 
-          # ---------------- UPDATE README.md ----------------
+          # ---------- UPDATE README.md ----------
           with open("README.md", "r", encoding="utf-8") as f:
               content = f.read()
 
@@ -250,8 +260,11 @@ jobs:
           with open("README.md", "w", encoding="utf-8") as f:
               f.write(content)
 
-          # ---------------- TRANSLATE README.en.md ----------------
-          translated = smart_translate(content)
+          # ---------- TRANSLATE README → README.en.md ----------
+          translated = safe_translate(content)
+          if not translated.strip():
+              # Fallback: если перевод не удался — хотя бы копируем
+              translated = "# English version (auto-fallback)\n\n" + content
 
           with open("README.en.md", "w", encoding="utf-8") as f:
               f.write(translated)
