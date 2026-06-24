@@ -1,4 +1,4 @@
-name: Update README (badges + traffic graph)
+name: Update README (badges + graph + issues + translation)
 
 on:
   schedule:
@@ -26,7 +26,7 @@ jobs:
       - name: Install deps
         run: pip install requests
 
-      - name: Update README (badges + graph)
+      - name: Update README (all blocks + translation)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
@@ -140,7 +140,6 @@ jobs:
           # Graph
           points = views.get("views", [])
 
-          # ALWAYS create graph
           if not points:
               labels = [(datetime.now().date()).isoformat()]
               counts = [0]
@@ -179,22 +178,75 @@ jobs:
           <!-- GRAPH_END -->
           """
 
+          # Issues
+          issues_raw = requests.get(
+              f"https://api.github.com/repos/{repo}/issues",
+              headers=headers,
+              params={"state": "open", "per_page": 10, "sort": "created", "direction": "desc"},
+              timeout=15
+          ).json()
+
+          issues = [i for i in issues_raw if isinstance(i, dict) and "pull_request" not in i]
+
+          if issues:
+              rows = "\n".join(
+                  f"| [`#{i['number']}`]({i['html_url']}) | {i['title'][:70]} | {i['created_at'][:10]} |"
+                  for i in issues
+              )
+              issues_table = (
+                  "| # | Заголовок | Дата |\n"
+                  "|---|-----------|------|\n"
+                  + rows
+              )
+          else:
+              issues_table = "_Открытых задач нет — всё хорошо! 🎉_"
+
+          issues_block = f"""
+          <!-- ISSUES_START -->
+          <!-- auto-updated by GitHub Actions · {updated_at} -->
+
+          ## 🐛 Открытые задачи
+
+          {issues_table}
+
+          > 💡 **[Создать новую задачу]({repo_url}/issues/new/choose)** · [Все задачи]({repo_url}/issues)
+
+          <!-- ISSUES_END -->
+          """
+
+          # Update README.md
           with open("README.md", "r", encoding="utf-8") as f:
               content = f.read()
 
           content = re.sub(r"<!-- STATS_START -->.*?<!-- STATS_END -->", badges_block, content, flags=re.DOTALL)
           content = re.sub(r"<!-- GRAPH_START -->.*?<!-- GRAPH_END -->", graph_block, content, flags=re.DOTALL)
+          content = re.sub(r"<!-- ISSUES_START -->.*?<!-- ISSUES_END -->", issues_block, content, flags=re.DOTALL)
 
           with open("README.md", "w", encoding="utf-8") as f:
               f.write(content)
 
-          print("README updated ✓")
+          # Translate README.md → README.en.md
+          translated = requests.post(
+              "https://libretranslate.de/translate",
+              data={
+                  "q": content,
+                  "source": "ru",
+                  "target": "en",
+                  "format": "text"
+              },
+              timeout=20
+          ).json().get("translatedText", "")
+
+          with open("README.en.md", "w", encoding="utf-8") as f:
+              f.write(translated)
+
+          print("README + README.en updated ✓")
           EOF
 
       - name: Commit & push
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add README.md traffic-views.png || true
-          git diff --cached --quiet || git commit -m "update README (badges + graph) [skip ci]"
+          git add README.md README.en.md traffic-views.png || true
+          git diff --cached --quiet || git commit -m "update README (badges + graph + issues + translation) [skip ci]"
           git push
