@@ -5,12 +5,15 @@ import hashlib
 import json
 import os
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
 import time
 import zipfile
 from pathlib import Path
+import ipaddress
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import parse_qs, urlsplit
 
 import requests
@@ -120,6 +123,373 @@ def make_api(args):
     print("Cloud auth: password login OK")
     return cloud
 
+
+
+MIIO_PORT = 54321
+MIIO_HELLO = bytes.fromhex("21310020ffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+
+
+def guess_local_subnet() -> str:
+    """Return a conservative /24 subnet based on the active local IPv4 address."""
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            sock.connect(("8.8.8.8", 80))
+            local_ip = sock.getsockname()[0]
+        finally:
+            sock.close()
+        parts = local_ip.split(".")
+        if len(parts) == 4:
+            return ".".join(parts[:3]) + ".0/24"
+    except OSError:
+        pass
+    return "192.168.1.0/24"
+
+
+def parse_miio_hello_response(data: bytes, ip: str) -> dict | None:
+    if len(data) < 16 or data[:2] != b"\x21\x31":
+        return None
+    did = int.from_bytes(data[8:12], "big", signed=False)
+    stamp = int.from_bytes(data[12:16], "big", signed=False)
+    token_part = data[16:32].hex() if len(data) >= 32 else ""
+    if did <= 0:
+        return None
+    return {
+        "name": "",
+        "did": str(did),
+        "model": "",
+        "ip": ip,
+        "mac": "",
+        "online": True,
+        "source": "local-miio-udp-54321",
+        "stamp": stamp,
+        "token_preview": token_part,
+    }
+
+
+def probe_miio_host(host: str, timeout: float, raw: bool = False) -> dict | None:
+    """Send a Xiaomi miIO hello packet to one host and parse the response."""
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.settimeout(timeout)
+    try:
+        sock.sendto(MIIO_HELLO, (host, MIIO_PORT))
+        try:
+            data, address = sock.recvfrom(1024)
+        except socket.timeout:
+            return None
+        if raw:
+            print(f"RAW {address[0]}:{address[1]} len={len(data)} hex={data.hex()}")
+        return parse_miio_hello_response(data, address[0])
+    except OSError:
+        return None
+    finally:
+        sock.close()
+
+
+def local_miio_scan(args) -> list[dict]:
+    subnet = args.scan_subnet or guess_local_subnet()
+    timeout = float(args.scan_timeout)
+    devices: list[dict] = []
+    seen: set[tuple[str, str]] = set()
+
+    def add_device(item: dict | None) -> None:
+        if not item:
+            return
+        key = (item.get("did", ""), item.get("ip", ""))
+        if key not in seen:
+            seen.add(key)
+            devices.append(item)
+
+    # Exact host mode. Useful when nmap/router already showed the vacuum IP.
+    scan_host = getattr(args, "scan_host", "") or ""
+    if scan_host:
+        print(f"Подождите, отправляю miIO hello на {scan_host}:{MIIO_PORT}...")
+        add_device(probe_miio_host(scan_host, timeout, raw=getattr(args, "raw_scan", False)))
+        return devices
+
+    # Broadcast mode is fast, but many routers/devices drop it. Keep it optional.
+    if not getattr(args, "direct_scan", False):
+        try:
+            network = ipaddress.ip_network(subnet, strict=False)
+            broadcast = str(network.broadcast_address)
+        except ValueError:
+            broadcast = "255.255.255.255"
+        print(f"Локальный быстрый поиск miIO: broadcast UDP {MIIO_PORT}, timeout {timeout}s")
+        print(f"Broadcast probe: {broadcast}:{MIIO_PORT}")
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.settimeout(timeout)
+        try:
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            sock.sendto(MIIO_HELLO, (broadcast, MIIO_PORT))
+            deadline = time.time() + timeout
+            while time.time() < deadline:
+                try:
+                    data, address = sock.recvfrom(1024)
+                except socket.timeout:
+                    break
+                if getattr(args, "raw_scan", False):
+                    print(f"RAW {address[0]}:{address[1]} len={len(data)} hex={data.hex()}")
+                add_device(parse_miio_hello_response(data, address[0]))
+        finally:
+            sock.close()
+        return devices
+
+    # Directed subnet scan: send hello to every address in the subnet and wait for replies.
+    try:
+        hosts = [str(host) for host in ipaddress.ip_network(subnet, strict=False).hosts()]
+    except ValueError as exc:
+        raise RuntimeError(f"Invalid --scan-subnet: {subnet}") from exc
+
+    workers = max(1, int(getattr(args, "scan_workers", 96)))
+    total = len(hosts)
+    print(f"Подождите, идёт сканирование сети {subnet} по UDP {MIIO_PORT}...")
+    print(f"На каждый найденный/доступный адрес отправляется miIO hello. Адресов: {total}, потоков: {workers}, timeout: {timeout}s")
+
+    done = 0
+    next_report = 0
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        futures = {executor.submit(probe_miio_host, host, timeout, getattr(args, "raw_scan", False)): host for host in hosts}
+        for future in as_completed(futures):
+            done += 1
+            item = None
+            try:
+                item = future.result()
+            except Exception:
+                item = None
+            if item:
+                add_device(item)
+                print("Найден miIO: " + json.dumps({"ip": item.get("ip"), "did": item.get("did"), "stamp": item.get("stamp")}, ensure_ascii=False))
+            if done >= next_report or done == total:
+                print(f"Сканирование: {done}/{total}")
+                next_report = done + 32
+
+    return devices
+
+def print_local_devices(devices: list[dict]) -> None:
+    if not devices:
+        print("No local miIO devices answered on UDP 54321")
+        return
+    print("Local miIO devices:")
+    for item in devices:
+        public = {k: item.get(k, "") for k in ("did", "ip", "source", "stamp")}
+        print("  " + json.dumps(public, ensure_ascii=False))
+
+
+
+def request_json_any(api, paths: list[str], country: str, payload: dict) -> tuple[str, dict]:
+    errors: list[str] = []
+    for path in paths:
+        try:
+            return path, request_json(api, path, country, payload)
+        except Exception as exc:
+            errors.append(f"{path}: {type(exc).__name__}: {exc}")
+    raise RuntimeError("all Xiaomi API paths failed: " + " | ".join(errors))
+
+
+def load_env_lines(path: Path) -> list[str]:
+    if not path.exists():
+        return []
+    return path.read_text(encoding="utf-8-sig").splitlines()
+
+
+def save_env_value(path: Path, name: str, value: str) -> None:
+    lines = load_env_lines(path)
+    updated = False
+    output: list[str] = []
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith(f"{name}=") or stripped.startswith(f"# {name}=") or stripped.startswith(f"#{name}="):
+            output.append(f"{name}={value}")
+            updated = True
+        else:
+            output.append(line)
+    if not updated:
+        output.append(f"{name}={value}")
+    path.write_text("\n".join(output).rstrip() + "\n", encoding="utf-8")
+
+
+def first_present(raw: dict, names: tuple[str, ...], default=""):
+    for name in names:
+        value = raw.get(name)
+        if value not in (None, ""):
+            return value
+    return default
+
+
+def normalize_device(raw: dict, source: str = "") -> dict:
+    did = str(first_present(raw, ("did", "deviceID", "device_id", "id"), ""))
+    return {
+        "name": first_present(raw, ("name", "desc", "device_name", "nickname", "model"), ""),
+        "did": did,
+        "model": first_present(raw, ("model", "product_model", "modelName"), ""),
+        "ip": first_present(raw, ("localip", "localIp", "ip", "ip_address"), ""),
+        "mac": first_present(raw, ("mac", "bssid"), ""),
+        "online": raw.get("isOnline", raw.get("online", raw.get("is_online"))),
+        "source": source,
+    }
+
+
+def walk_devices(value, source: str) -> list[dict]:
+    """Collect device-like dicts from Xiaomi cloud responses with varying layouts."""
+    found: list[dict] = []
+    if isinstance(value, dict):
+        if any(key in value for key in ("did", "deviceID", "device_id")):
+            item = normalize_device(value, source)
+            if item["did"]:
+                found.append(item)
+        for child in value.values():
+            found.extend(walk_devices(child, source))
+    elif isinstance(value, list):
+        for child in value:
+            found.extend(walk_devices(child, source))
+    return found
+
+
+def unique_devices(devices: list[dict]) -> list[dict]:
+    result: list[dict] = []
+    by_did: dict[str, dict] = {}
+    for item in devices:
+        did = item.get("did") or ""
+        if not did:
+            continue
+        existing = by_did.get(did)
+        if not existing:
+            by_did[did] = item
+            result.append(item)
+            continue
+        for key in ("name", "model", "ip", "mac", "online"):
+            if not existing.get(key) and item.get(key):
+                existing[key] = item[key]
+        if item.get("source") and item["source"] not in existing.get("source", ""):
+            existing["source"] = (existing.get("source", "") + "," + item["source"]).strip(",")
+    return result
+
+
+def request_json_any(api, paths: list[str], country: str, payload: dict) -> tuple[str, dict]:
+    errors = []
+    for path in paths:
+        try:
+            return path, request_json(api, path, country, payload)
+        except Exception as exc:
+            errors.append(f"{path}: {type(exc).__name__}: {exc}")
+    raise RuntimeError("; ".join(errors))
+
+
+def list_cloud_devices(api, args) -> list[dict]:
+    """
+    Xiaomi has several cloud layouts. Some accounts return an empty
+    /device_list but still expose devices through homeroom/home-list APIs.
+    """
+    attempts: list[tuple[list[str], dict]] = [
+        (["/v2/home/device_list", "/home/device_list"], {"getVirtualModel": False, "getHuamiDevices": 0}),
+        (["/v2/home/device_list", "/home/device_list"], {}),
+        (["/v2/home/device_list_page", "/home/device_list_page"], {"getVirtualModel": False, "getHuamiDevices": 0, "limit": 300}),
+        (["/v2/homeroom/gethome", "/homeroom/gethome"], {"fetch_share": True, "fetch_share_dev": True, "limit": 300}),
+        (["/v2/homeroom/gethome", "/homeroom/gethome"], {"fetch_share": 1, "fetch_share_dev": 1, "limit": 300}),
+    ]
+    all_devices: list[dict] = []
+    errors: list[str] = []
+    for paths, payload in attempts:
+        try:
+            path, response = request_json_any(api, paths, args.country, payload)
+            devices = walk_devices(response.get("result") or response, path)
+            if devices:
+                all_devices.extend(devices)
+            if getattr(args, "debug_devices", False):
+                print(f"DEBUG {path}: devices={len(devices)}")
+        except Exception as exc:
+            errors.append(f"{paths[0]}: {type(exc).__name__}: {exc}")
+            if getattr(args, "debug_devices", False):
+                print(f"DEBUG {paths[0]} failed: {type(exc).__name__}: {exc}", file=sys.stderr)
+    devices = unique_devices(all_devices)
+    if devices or errors:
+        return devices
+    raise RuntimeError("cannot get Xiaomi device list")
+
+
+def print_devices(devices: list[dict]) -> None:
+    if not devices:
+        print("No Xiaomi devices found in this account/region")
+        return
+    print("Xiaomi devices:")
+    for item in devices:
+        print(
+            "  "
+            + json.dumps(
+                {
+                    "name": item.get("name", ""),
+                    "did": item.get("did", ""),
+                    "model": item.get("model", ""),
+                    "ip": item.get("ip", ""),
+                    "online": item.get("online"),
+                    "source": item.get("source", ""),
+                },
+                ensure_ascii=False,
+            )
+        )
+
+
+def resolve_did(api, args) -> str:
+    if args.did and args.did != "YOUR_DEVICE_DID":
+        return args.did
+
+    devices: list[dict] = []
+    cloud_error = None
+    try:
+        devices = list_cloud_devices(api, args)
+    except Exception as exc:
+        cloud_error = exc
+        if getattr(args, "debug_devices", False):
+            print(f"Cloud device list failed: {type(exc).__name__}: {exc}", file=sys.stderr)
+
+    candidates = devices
+    if args.device_ip:
+        candidates = [item for item in candidates if item.get("ip") == args.device_ip]
+    if args.model:
+        model_matches = [item for item in candidates if item.get("model") == args.model]
+        if model_matches:
+            candidates = model_matches
+    if args.device_name:
+        needle = args.device_name.lower()
+        candidates = [item for item in candidates if needle in str(item.get("name", "")).lower()]
+
+    if len(candidates) == 1:
+        did = candidates[0]["did"]
+        print("Auto DID from cloud: " + json.dumps(candidates[0], ensure_ascii=False))
+        if args.save_did:
+            save_env_value(local_write_path(args.env_file, "env file"), "XIAOMI_DID", did)
+            print(f"Saved XIAOMI_DID to {args.env_file}")
+        return did
+
+    # Fallback: local miIO discovery. This does not require the local device token.
+    # For deploy/preflight we must not rely on broadcast: many Xiaomi vacuums ignore
+    # broadcast but answer direct UDP hello. If no exact host is configured, scan the
+    # detected /24 subnet directly.
+    if not getattr(args, "scan_host", "") and not getattr(args, "device_ip", ""):
+        args.direct_scan = True
+    local_devices = local_miio_scan(args)
+    local_candidates = local_devices
+    if args.device_ip:
+        local_candidates = [item for item in local_candidates if item.get("ip") == args.device_ip]
+
+    if len(local_candidates) == 1:
+        did = local_candidates[0]["did"]
+        print("Auto DID from local UDP scan: " + json.dumps(local_candidates[0], ensure_ascii=False))
+        if args.save_did:
+            env_path = local_write_path(args.env_file, "env file")
+            save_env_value(env_path, "XIAOMI_DID", did)
+            if local_candidates[0].get("ip"):
+                save_env_value(env_path, "XIAOMI_DEVICE_IP", local_candidates[0]["ip"])
+            print(f"Saved XIAOMI_DID to {args.env_file}")
+        return did
+
+    if cloud_error:
+        print(f"Cloud device list failed: {type(cloud_error).__name__}: {cloud_error}")
+    print_devices(devices)
+    print_local_devices(local_devices)
+    if not candidates and not local_candidates:
+        raise RuntimeError("DID was not set and no matching device was found. Use --device-ip, --scan-subnet, --direct-scan or --did.")
+    raise RuntimeError("DID was not set and more than one matching device was found. Use --device-ip or --did.")
 
 def safe_extract_voice(archive: Path, destination: Path) -> None:
     destination.mkdir(parents=True, exist_ok=True)
@@ -322,6 +692,10 @@ def send_action(api, args, language: str, url: str, md5: str, size: int) -> dict
     return response
 
 
+class VoiceStatusUnavailable(RuntimeError):
+    pass
+
+
 def voice_status(api, args) -> dict:
     payload = {
         "params": {
@@ -332,7 +706,13 @@ def voice_status(api, args) -> dict:
         }
     }
     response = request_json(api, "/miotspec/action", args.country, payload)
-    out = response["result"]["out"]
+    result = response.get("result") or {}
+    out = result.get("out")
+    if not isinstance(out, list) or len(out) < 4:
+        raise VoiceStatusUnavailable(
+            "voice status response has no usable result.out: "
+            + json.dumps(response, ensure_ascii=False)
+        )
     return {
         "target": out[0],
         "current": out[1],
@@ -341,19 +721,33 @@ def voice_status(api, args) -> dict:
     }
 
 
-def wait_voice(api, args, target: str, timeout: int = 120) -> dict:
+def wait_voice(api, args, target: str, timeout: int = 180) -> dict:
     deadline = time.time() + timeout
     last = None
+    status_errors = 0
     while time.time() < deadline:
-        current = voice_status(api, args)
+        try:
+            current = voice_status(api, args)
+        except VoiceStatusUnavailable as error:
+            status_errors += 1
+            if status_errors <= 3:
+                print(f"Voice status temporarily unavailable, retrying: {error}")
+            if last and last.get("current") == target and last.get("status") in (0, 4):
+                return last
+            time.sleep(2)
+            continue
+
+        status_errors = 0
         if current != last:
             print("Voice status: " + json.dumps(current, ensure_ascii=False))
             last = current
         if current["current"] == target and current["status"] in (0, 4):
             return current
         if current["status"] in (3, 5):
-            raise RuntimeError("voice install failed: " + json.dumps(current))
+            raise RuntimeError("voice install failed: " + json.dumps(current, ensure_ascii=False))
         time.sleep(2)
+    if last:
+        print("Last voice status before timeout: " + json.dumps(last, ensure_ascii=False))
     raise TimeoutError(f"voice install did not finish in {timeout}s")
 
 
@@ -382,6 +776,17 @@ def install_pack(api, args, archive: Path, get_url: str) -> None:
 def add_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--country", default=env("XIAOMI_COUNTRY", DEFAULT_COUNTRY))
     parser.add_argument("--did", default=env("XIAOMI_DID", DEFAULT_DID))
+    parser.add_argument("--device-ip", default=env("XIAOMI_DEVICE_IP", ""), help="Optional local IP used to select the device from the Mi Cloud device list")
+    parser.add_argument("--device-name", default=env("XIAOMI_DEVICE_NAME", ""), help="Optional name substring used to select the device from the Mi Cloud device list")
+    parser.add_argument("--debug-devices", action="store_true", help="Print device API probing diagnostics")
+    parser.add_argument("--scan-subnet", default=env("XIAOMI_SCAN_SUBNET", ""), help="Local subnet for miIO UDP discovery, for example 192.168.1.0/24")
+    parser.add_argument("--scan-host", default=env("XIAOMI_SCAN_HOST", env("XIAOMI_DEVICE_IP", "")), help="Probe one exact local IP with miIO hello")
+    parser.add_argument("--scan-timeout", type=float, default=float(env("XIAOMI_SCAN_TIMEOUT", "0.35")), help="UDP discovery timeout per host in seconds")
+    parser.add_argument("--scan-workers", type=int, default=int(env("XIAOMI_SCAN_WORKERS", "96")), help="Parallel workers for directed subnet scan")
+    parser.add_argument("--direct-scan", action="store_true", help="Probe every address in --scan-subnet instead of broadcast only")
+    parser.add_argument("--raw-scan", action="store_true", help="Print raw UDP replies during local scan")
+    parser.add_argument("--save-did", action="store_true", help="Save the auto-detected DID to .env")
+    parser.add_argument("--env-file", default=str(HERE / ".env"))
     parser.add_argument("--model", default=env("XIAOMI_MODEL", "xiaomi.vacuum.d109gl"))
     parser.add_argument(
         "--service-id", type=int, default=int(env("XIAOMI_VOICE_SIID", "15"))
@@ -421,20 +826,36 @@ def main() -> int:
     add_common(parser)
     parser.add_argument(
         "command",
-        choices=("preflight", "download", "build", "verify", "deploy", "all"),
+        choices=("list-devices", "local-scan", "preflight", "download", "build", "verify", "deploy", "all"),
     )
     parser.add_argument("--refresh-original", action="store_true")
     args = parser.parse_args()
 
-    if args.command in {"preflight", "deploy", "all"} and (
-        not args.did or args.did == "YOUR_DEVICE_DID"
-    ):
-        raise RuntimeError(
-            "Device DID is required. Set XIAOMI_DID in .env or pass --did."
-        )
+    if args.command == "local-scan":
+        print_local_devices(local_miio_scan(args))
+        return 0
+
+    if args.command == "list-devices":
+        api = make_api(args)
+        try:
+            print_devices(list_cloud_devices(api, args))
+        except Exception as exc:
+            print(f"Cloud device list failed: {type(exc).__name__}: {exc}")
+            print_devices([])
+        print_local_devices(local_miio_scan(args))
+        return 0
+
+    if args.command in {"preflight", "deploy", "all"}:
+        api = make_api(args)
+        # When a DID is discovered during install/preflight, persist it so the next run
+        # does not need to rescan the LAN.
+        if not args.did:
+            args.save_did = True
+        args.did = resolve_did(api, args)
+    else:
+        api = None
 
     if args.command == "preflight":
-        api = make_api(args)
         status = voice_status(api, args)
         print(
             "Preflight OK: "
@@ -472,7 +893,9 @@ def main() -> int:
         archive = Path(args.archive)
         verify_pack(args, archive)
 
-    api = make_api(args)
+    if api is None:
+        api = make_api(args)
+        args.did = resolve_did(api, args)
     _, get_url = generate_upload(api, args, archive)
     install_pack(api, args, archive, get_url)
     print("Custom voice cycle completed successfully")

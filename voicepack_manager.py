@@ -194,7 +194,15 @@ def install_selected(args) -> int:
     report = verify_archive(archive)
     if not report["ok"]:
         raise RuntimeError("Selected voice pack is invalid: " + json.dumps(report))
-    run([sys.executable, HERE / "voicepack_cycle.py", "deploy", "--archive", archive])
+    run([
+        sys.executable,
+        HERE / "voicepack_cycle.py",
+        "deploy",
+        "--archive",
+        archive,
+        "--direct-scan",
+        "--save-did",
+    ])
     return 0
 
 
