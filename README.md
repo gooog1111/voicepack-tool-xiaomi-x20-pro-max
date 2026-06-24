@@ -4,11 +4,27 @@
 
 </div>
 
+
 <!-- STATS_START -->
+<!-- auto-updated by GitHub Actions · 2026-06-24 10:16 UTC -->
+
+[![Views (local)](https://img.shields.io/badge/Views(local)-5-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views (GitHub)](https://img.shields.io/badge/Views(GitHub)-0-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Unique visitors](https://img.shields.io/badge/Unique-0-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Clones](https://img.shields.io/badge/Clones-0-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Stars](https://img.shields.io/github/stars/gooog1111/voicepack-tool-xiaomi-x20-pro-max?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/stargazers)
+[![Forks](https://img.shields.io/github/forks/gooog1111/voicepack-tool-xiaomi-x20-pro-max?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/network/members)
+[![Downloads (release)](https://img.shields.io/badge/Downloads(release)-1-brightgreen?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases/latest)
+[![Downloads (total)](https://img.shields.io/badge/Downloads(total)-1-brightgreen?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases)
+
 <!-- STATS_END -->
 
+
+
 <!-- GRAPH_START -->
+![GitHub Traffic](./traffic-views.png)
 <!-- GRAPH_END -->
+
 
 <!-- ISSUES_START -->
 <!-- ISSUES_END -->
