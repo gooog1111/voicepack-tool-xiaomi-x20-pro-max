@@ -31,7 +31,7 @@ _Открытых задач нет — всё хорошо! 🎉_
 
 [English version](README.en.md)
 
-## Xiaomi VOcepack Tool
+## Xiaomi Voce Pack Tool
 
 Инструмент для Windows и Linux, предназначенный для работы с голосовыми
 пакетами роботов-пылесосов Xiaomi. Он конвертирует старые пакеты Roborock,
