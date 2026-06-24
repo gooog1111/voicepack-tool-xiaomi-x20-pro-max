@@ -1,4 +1,8 @@
-# Xiaomi Voice Pack Tool
+<div align="center">
+
+<img src="resources/header.svg" alt="Xiaomi Voice Pack Tool" width="900"/>
+
+</div>
 
 <!-- STATS_START -->
 <!-- auto-updated by GitHub Actions · 2026-06-24 09:41 UTC -->
