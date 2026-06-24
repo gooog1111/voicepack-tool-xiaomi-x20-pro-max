@@ -140,6 +140,7 @@ jobs:
           # Graph
           points = views.get("views", [])
 
+          # ALWAYS create graph
           if not points:
               labels = [(datetime.now().date()).isoformat()]
               counts = [0]
