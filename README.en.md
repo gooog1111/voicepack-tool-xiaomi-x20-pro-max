@@ -13,9 +13,9 @@
 
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-24 20:43 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-24 21:16 UTC -->
 
-[![Views local](https://img.shields.io/badge/Views_local-15-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views local](https://img.shields.io/badge/Views_local-16-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Views GitHub](https://img.shields.io/badge/Views_GitHub-0-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Unique visitors](https://img.shields.io/badge/Unique-0-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Clones](https://img.shields.io/badge/Clones-0-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
@@ -48,7 +48,7 @@
 
 
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-24 20:43 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-24 21:16 UTC -->
 
 ## Issues
 
@@ -87,7 +87,7 @@
 ## Xiaomi Voce Pack Tool
 
 A tool for Windows designed to work with voice
-packages of Xiaomi robot vacuum cleaners. It converts old Roborock packages,
+packages (voices) of the Xiaomi x20 pro (d102gl) and x20 max (d109gl) robot vacuum cleaners. It converts old Roborock packages,
 collects new Xiaomi numerical packages, checks archives, downloads official ones
 languages and installs the selected voicepack.
 
@@ -95,6 +95,12 @@ Tested on:
 
 - `xiaomi.vacuum.d109gl`
 - `xiaomi.vacuum.d102gl`
+
+## And also
+
+- `the list will be updated with all the vacuum cleaners I can get my hands on`
+
+
 
 ## Features
 
@@ -182,19 +188,19 @@ https://4pda.to/forum/index.php?showtopic=881982
 ## Manual custom package
 
 Event numbers are in `custom_voicepack/table_en.csv` and
-`table_en.csv`. Put modified numeric MP3s, such as `130.mp3`, into
+`table_en.csv`. Put modified numeric MP3s, e.g.
+`130.mp3`, in
 `custom_voicepack/audio` and select item 6.
 
 Missing events are taken from the official Russian package, which
-automatic
-downloaded the first time you use it. Replaceable files
+automatically downloaded the first time you use it. Replaceable files
 normalized to mono, 16 kHz, 32 kbps without ID3 and Xing.
 
 ## Authorization
 
 Step 1 sequentially checks installed browsers and stops searching
 after the first full Xiaomi session. Modern Chrome can use
-Application-specific `v20` cookie encryption.
+Application-specific `v20` cookie encryption (not tested).
 
 ## # Getting device information in MiHome
 
