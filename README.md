@@ -25,14 +25,6 @@ _Открытых задач нет — всё хорошо! 🎉_
 > 💡 **[Создать новую задачу](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues/new/choose)** · [Все задачи](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues)
 <!-- ISSUES_END -->
 
-[![Звезды](https://img.shields.io/github/stars/gooog1111/voicepack-tool-xiaomi-x20-pro-max?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/stargazers)
-[![Последняя версия](https://img.shields.io/github/v/release/gooog1111/voicepack-tool-xiaomi-x20-pro-max?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases/latest)
-[![Скачиваний](https://img.shields.io/github/downloads/gooog1111/voicepack-tool-xiaomi-x20-pro-max/total?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases)
-[![Лицензия](https://img.shields.io/github/license/gooog1111/voicepack-tool-xiaomi-x20-pro-max?style=for-the-badge)](LICENSE)
-
-[![Посещений](https://visitor-badge.laobi.icu/badge?page_id=gooog1111.voicepack-tool-xiaomi-x20-pro-max)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
-
-
 [English version](README.en.md)
 
 Инструмент для Windows и Linux, предназначенный для работы с голосовыми
