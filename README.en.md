@@ -1,3 +1,5 @@
+# English version (auto-fallback)
+
 <div align="center">
 
 <img src="resources/header.svg" alt="Xiaomi Voice Pack Tool" width="900"/>
@@ -6,10 +8,11 @@
 
 
 
-<!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-24 10:36 UTC -->
 
-[![Views (local)](https://img.shields.io/badge/Views(local)-8-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+<!-- STATS_START -->
+<!-- auto-updated by GitHub Actions · 2026-06-24 10:40 UTC -->
+
+[![Views (local)](https://img.shields.io/badge/Views(local)-9-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Views (GitHub)](https://img.shields.io/badge/Views(GitHub)-0-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Unique visitors](https://img.shields.io/badge/Unique-0-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Clones](https://img.shields.io/badge/Clones-0-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
@@ -24,6 +27,8 @@
 
 
 
+
+
 <!-- GRAPH_START -->
 ![GitHub Traffic](./traffic-views.png)
 <!-- GRAPH_END -->
@@ -31,8 +36,10 @@
 
 
 
+
+
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-24 10:36 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-24 10:40 UTC -->
 
 ## 🐛 Open Issues
 
@@ -43,6 +50,7 @@
 > 💡 **[Create new issue](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues/new/choose)** · [All issues](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues)
 
 <!-- ISSUES_END -->
+
 
 
 [English version](README.en.md)
