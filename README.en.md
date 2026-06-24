@@ -1,5 +1,16 @@
 # Xiaomi Voice Pack Tool
 
+<!-- STATS_START -->
+<!-- auto-updated by GitHub Actions on 2026-06-23 -->
+| Metric | Value |
+|---|---|
+| 🏷️ Latest release | `v1.0.0` (2026-06-23) |
+| ⬇️ Downloads (release) | 0 |
+| ⬇️ Downloads (total) | 0 |
+| ⭐ Stars | 0 |
+| 🍴 Forks | 0 |
+<!-- STATS_END -->
+
 [![Stars](https://img.shields.io/github/stars/gooog1111/voicepack-tool-xiaomi-x20-pro-max?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/stargazers)
 [![Latest Release](https://img.shields.io/github/v/release/gooog1111/voicepack-tool-xiaomi-x20-pro-max?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/gooog1111/voicepack-tool-xiaomi-x20-pro-max/total?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases)
