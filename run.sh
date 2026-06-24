@@ -124,14 +124,7 @@ install_system_tools() {
   fi
 }
 
-if [[ -f "$HERE/.env" ]]; then
-  set -a
-  # shellcheck disable=SC1091
-  source "$HERE/.env"
-  set +a
-fi
-
-if [[ "$COMMAND" == "menu" ]]; then
+show_menu() {
   printf '\nXiaomi Voice Pack\n=================\n'
   printf '1. Установить необходимое ПО\n'
   printf '2. Авторизация Xiaomi во временном браузере\n'
@@ -143,7 +136,22 @@ if [[ "$COMMAND" == "menu" ]]; then
   printf '8. Установить войспак из списка ready_voicepacks\n'
   printf '9. Скачать оригинальные пакеты d109gl/d102gl на всех языках\n'
   printf '10. Выход\n\n'
+}
 
+return_to_menu() {
+  read -r -p 'Нажмите Enter для возврата в меню...'
+  exec "$0" menu
+}
+
+if [[ -f "$HERE/.env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "$HERE/.env"
+  set +a
+fi
+
+if [[ "$COMMAND" == "menu" ]]; then
+  show_menu
   read -r -p 'Выберите действие: ' choice
 
   case "$choice" in
@@ -176,20 +184,24 @@ if [[ "$COMMAND" == "setup" ]]; then
   install_system_tools
 
   echo "Необходимое ПО установлено."
-  exit 0
+  return_to_menu
 fi
 
 case "$COMMAND" in
   auth)
-    exec "$PYTHON_BIN" "$HERE/browser-login.py" "$@"
+    "$PYTHON_BIN" "$HERE/browser-login.py" "$@"
+    return_to_menu
     ;;
   existing-auth)
-    exec "$PYTHON_BIN" "$HERE/import-browser-session.py" "$@"
+    "$PYTHON_BIN" "$HERE/import-browser-session.py" "$@"
+    return_to_menu
     ;;
   convert-all|build-custom|verify-all|install|download-originals)
-    exec "$PYTHON_BIN" "$HERE/voicepack_manager.py" "$COMMAND" "$@"
+    "$PYTHON_BIN" "$HERE/voicepack_manager.py" "$COMMAND" "$@"
+    return_to_menu
     ;;
   *)
-    exec "$PYTHON_BIN" "$HERE/voicepack_cycle.py" "$COMMAND" "$@"
+    "$PYTHON_BIN" "$HERE/voicepack_cycle.py" "$COMMAND" "$@"
+    return_to_menu
     ;;
 esac
