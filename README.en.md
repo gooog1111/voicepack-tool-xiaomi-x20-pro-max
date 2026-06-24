@@ -1,63 +1,79 @@
-# Xiaomi Voice Pack Tool
+<div align="center">
+
+<img src="resources/header.svg" alt="Xiaomi Voice Pack Tool" width="900"/>
+
+</div>
+
+
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-24 09:45 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-24 10:36 UTC -->
 
-[![Views](https://hits.sh/gooog1111/voicepack-tool-xiaomi-x20-pro-max.svg?style=for-the-badge&label=👁+Views&color=ff6900&labelColor=161b22)](https://hits.sh/gooog1111/voicepack-tool-xiaomi-x20-pro-max/)
+[![Views (local)](https://img.shields.io/badge/Views(local)-8-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views (GitHub)](https://img.shields.io/badge/Views(GitHub)-0-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Unique visitors](https://img.shields.io/badge/Unique-0-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Clones](https://img.shields.io/badge/Clones-0-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Stars](https://img.shields.io/github/stars/gooog1111/voicepack-tool-xiaomi-x20-pro-max?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/stargazers)
+[![Forks](https://img.shields.io/github/forks/gooog1111/voicepack-tool-xiaomi-x20-pro-max?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/network/members)
+[![Downloads (release)](https://img.shields.io/badge/Downloads(release)-1-brightgreen?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases/latest)
+[![Downloads (total)](https://img.shields.io/badge/Downloads(total)-1-brightgreen?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases)
 
-| Metric | Value |
-|---|---|
-| 🏷️ Latest release | [`v1.0.0`](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases/latest) · 2026-06-23 |
-| ⬇️ Downloads (release) | 0 |
-| ⬇️ Downloads (total) | 0 |
-| ⭐ Stars | [1](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/stargazers) |
-| 🍴 Forks | [0](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/network/members) |
-| 🐛 Open issues | [0](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues) |
 <!-- STATS_END -->
 
+
+
+
+
+<!-- GRAPH_START -->
+![GitHub Traffic](./traffic-views.png)
+<!-- GRAPH_END -->
+
+
+
+
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-24 09:45 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-24 10:36 UTC -->
 
 ## 🐛 Open Issues
 
-_No open issues — everything is fine! 🎉_
+| # | Title | Date |
+|---|-------|------|
+| [`#1`](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues/1) | views-counter | 2026-06-24 |
 
-> 💡 **[Open a new issue](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues/new/choose)** · [All issues](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues)
+> 💡 **[Create new issue](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues/new/choose)** · [All issues](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/issues)
+
 <!-- ISSUES_END -->
 
-[![Stars](https://img.shields.io/github/stars/gooog1111/voicepack-tool-xiaomi-x20-pro-max?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/stargazers)
-[![Latest Release](https://img.shields.io/github/v/release/gooog1111/voicepack-tool-xiaomi-x20-pro-max?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/gooog1111/voicepack-tool-xiaomi-x20-pro-max/total?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases)
-[![License](https://img.shields.io/github/license/gooog1111/voicepack-tool-xiaomi-x20-pro-max?style=for-the-badge)](LICENSE)
 
-[![Visits](https://visitor-badge.laobi.icu/badge?page_id=gooog1111.voicepack-tool-xiaomi-x20-pro-max)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[English version](README.en.md)
 
-[Русская версия](README.md)
+## Xiaomi Voce Pack Tool
 
-Windows and Linux tool for Xiaomi robot vacuum voice packs. It converts old
-Roborock packages, builds numeric Xiaomi voice packs, validates archives,
-downloads official language packages, and installs a selected package.
+Инструмент для Windows и Linux, предназначенный для работы с голосовыми
+пакетами роботов-пылесосов Xiaomi. Он конвертирует старые пакеты Roborock,
+собирает новые числовые пакеты Xiaomi, проверяет архивы, скачивает официальные
+языки и устанавливает выбранный войспак.
 
-Tested with:
+Проверено на:
 
 - `xiaomi.vacuum.d109gl`
 - `xiaomi.vacuum.d102gl`
 
-## Features
+## Возможности
 
-- Interactive Windows and Linux menu.
-- Temporary-browser Xiaomi authorization.
-- Automatic session import from installed Chrome, Firefox, Edge, Yandex,
-  Chromium, Brave, Vivaldi, Opera, Opera GX, and Tor Browser.
-- Conversion of old encrypted Roborock `.pkg` files.
-- Recursive ZIP processing for WAV, `.pkg`, and mixed archives.
-- Batch conversion of every package in `old_voicepacks`.
-- Manual package creation using Russian and English event tables.
-- Exact validation of all 101 numeric MP3 events.
-- Selection and installation of a package from `ready_voicepacks`.
-- Downloading 20 official languages for d109gl and d102gl.
+- Интерактивное меню для Windows и Linux.
+- Авторизация Xiaomi во временном профиле браузера.
+- Последовательный импорт сессии из Chrome, Firefox, Edge, Яндекс, Chromium,
+  Brave, Vivaldi, Opera, Opera GX и Tor Browser.
+- Распаковка старых зашифрованных Roborock `.pkg`.
+- Рекурсивная обработка ZIP с WAV, `.pkg` и смешанным содержимым.
+- Пакетная конвертация всей папки `old_voicepacks`.
+- Ручная сборка по русской и английской таблицам событий.
+- Проверка точного набора из 101 числового MP3.
+- Выбор и установка пакета из `ready_voicepacks`.
+- Скачивание 20 официальных языков для d109gl и d102gl.
 
-## Quick Start
+## Быстрый старт
 
 ```bash
 git clone https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max.git
@@ -77,96 +93,93 @@ chmod +x ./run.sh
 ./run.sh
 ```
 
-Choose menu item 1 on first use. It installs the required Python packages,
-Playwright Chromium, `ffmpeg`, and `ccrypt` where required.
+При первом запуске выберите пункт 1. Он установит Python-зависимости,
+Playwright Chromium, `ffmpeg` и, при необходимости, `ccrypt`.
 
-## Menu
+## Меню
 
-1. Install required software.
-2. Authorize Xiaomi in a temporary browser.
-3. Import an existing browser session.
-4. Run a device preflight check.
-5. Convert all old packages.
-6. Build a custom voice pack.
-7. Verify new voice packs.
-8. Install a voice pack selected from a list.
-9. Download all official d109gl/d102gl language packages.
-10. Exit.
+1. Установить необходимое ПО.
+2. Авторизация Xiaomi во временном браузере.
+3. Импорт действующей сессии из установленных браузеров.
+4. Предварительная проверка устройства.
+5. Конвертировать все старые пакеты.
+6. Собрать новый кастомный войспак.
+7. Проверить новые войспаки.
+8. Установить войспак из списка.
+9. Скачать оригинальные пакеты d109gl/d102gl на всех языках.
+10. Выход.
 
-## Directory Layout
+## Структура папок
 
 ```text
-old_voicepacks/             Old .pkg, ZIP, WAV files, or directories
-ready_voicepacks/           Converted and manually built packages
+old_voicepacks/             Старые .pkg, ZIP, WAV или подпапки
+ready_voicepacks/           Готовые новые пакеты
 custom_voicepack/
-  audio/                    Numeric MP3 replacements
-  table_en.csv              English reference for 101 events
-  table_ru.csv              Russian reference for 101 events
-official_voicepacks/        Downloaded official packages
-resources/                  Mappings, donor cache, and runtime files
-state/                      Local credentials and upload state
-work/                       Temporary files
+  audio/                    Числовые MP3 для ручной замены
+  table_en.csv              Английская таблица 101 события
+  table_ru.csv              Русская таблица 101 события
+official_voicepacks/        Скачанные оригинальные пакеты
+resources/                  Таблицы, кэш донора и служебные файлы
+state/                      Локальная авторизация и состояние загрузки
+work/                       Временные файлы
 ```
 
-Credentials, generated packages, downloaded originals, and temporary files are
-excluded from Git.
+Авторизация, готовые сборки, скачанные оригиналы и временные файлы исключены из
+Git.
 
-## Convert Old Packages
+## Конвертация старых пакетов
 
-Place each input in `old_voicepacks` and choose menu item 5. Supported layouts:
+Поместите каждый исходник в `old_voicepacks` и выберите пункт 5. Поддерживаются:
 
-- standalone encrypted `.pkg`;
-- ZIP containing WAV files;
-- ZIP containing one or more `.pkg` files;
-- ZIP containing both WAV and `.pkg`;
-- directories containing WAV, ZIP, and `.pkg`;
-- nested ZIP archives up to four levels.
+- отдельный зашифрованный `.pkg`;
+- ZIP с WAV;
+- ZIP с одним или несколькими `.pkg`;
+- ZIP, одновременно содержащий WAV и `.pkg`;
+- подпапки с WAV, ZIP и `.pkg`;
+- вложенные ZIP до четырёх уровней.
 
-A loose WAV overrides a same-named file from a nested package. Unsafe ZIP paths
-and archives expanding beyond 512 MiB are rejected.
+Отдельный WAV имеет приоритет над одноимённым файлом из вложенного пакета.
+Небезопасные пути ZIP и архивы размером более 512 МиБ после распаковки
+отклоняются.
 
-The complete old catalog contains 97 voice events. `sound.info` and
-`sound.ver` are metadata files and are not voice events.
+Полный старый каталог содержит 97 голосовых событий. `sound.info` и
+`sound.ver` являются служебными файлами и не считаются голосами.
 
-## Download Old Package
+## Скачать старые голосовые пакеты
 
 https://4pda.to/forum/index.php?showtopic=881982
 
-[https://www.google.com/search](https://www.google.com/webhp) -> xiaomi voice pack download
+[https://www.google.com/search](https://www.google.com/webhp) -> xiaomi voice pack скачать
 
-## Build a Custom Package
+## Ручной кастомный пакет
 
-Use `custom_voicepack/table_ru.csv` and `table_en.csv` to find event numbers.
-Put changed numeric MP3 files, such as `130.mp3`, in
-`custom_voicepack/audio`, then choose menu item 6.
+Номера событий находятся в `custom_voicepack/table_ru.csv` и
+`table_en.csv`. Положите изменённые числовые MP3, например `130.mp3`, в
+`custom_voicepack/audio` и выберите пункт 6.
 
-Missing events are taken from the official Russian donor package, downloaded
-automatically on first use. Replacements are normalized to mono, 16 kHz,
-32 kbps without ID3 or Xing metadata.
+Отсутствующие события берутся из официального русского пакета, который
+автоматически скачивается при первом использовании. Заменяемые файлы
+нормализуются в mono, 16 kHz, 32 kbps без ID3 и Xing.
 
-## Authorization
+## Авторизация
 
-Menu item 2 opens the official Xiaomi account page in a temporary browser
-profile.
+Пункт 2 открывает официальную страницу Xiaomi во временном профиле браузера.
 
-Menu item 3 checks installed browsers sequentially and stops after finding the
-first complete Xiaomi session. Modern Chrome may use application-bound `v20`
-cookie encryption; use menu item 2 when Windows prevents cookie transfer.
+Пункт 3 последовательно проверяет установленные браузеры и прекращает поиск
+после первой полной Xiaomi-сессии. Современный Chrome может использовать
+привязанное к приложению шифрование cookie `v20`; если Windows запрещает
+перенос, используйте пункт 2.
 
-Create `.env` from `.env.example` and set at least:
+Создайте `.env` на основе `.env.example` и укажите как минимум:
 
 ```text
 XIAOMI_DID=YOUR_DEVICE_DID
 ```
+### Получение XIAOMI_DID
 
-### Getting XIAOMI_DID
+Зайдите в MiHome -> пылесос -> ⋮ -> История уборок -> тремя пальцами быстро нажимать на -> общая продолжительность, всего уборок, общее количество раз
 
-Go to MiHome app -> Vacuum Cleaner -> ⋮ -> Cleaning History -> quickly tap with three fingers on -> total duration, total cleanings, total number of times
-
-Never publish `.env`, `state/*.json`, robot tokens, credentials, or signed
-download URLs.
-
-## Command Line
+## Командная строка
 
 ```powershell
 .\run.ps1 convert-all
@@ -176,13 +189,34 @@ download URLs.
 .\run.ps1 download-originals
 ```
 
-Linux provides the same commands through `./run.sh`.
+В Linux доступны те же команды через `./run.sh`.
 
-## Disclaimer
+## Отказ от ответственности
 
-This is an independent community project and is not affiliated with Xiaomi or
-Roborock. Installing unofficial voice packs is performed at your own risk.
+Это независимый проект, не связанный с Xiaomi или Roborock.
+Установка неофициальных войспаков выполняется на ваш страх и риск, и может повлечь за собой отказ от гарантийного обслуживания.
 
-## License
+## Лицензия
 
 [MIT](LICENSE)
+
+
+## Поддержать проект
+
+Выберите удобный способ:
+
+<p align="center">
+  <a href="https://yoomoney.ru/fundraise/1IJBVM8MJMG.260624" target="_blank">
+    <img src="https://img.shields.io/badge/ЮМоnеу-Сбор средств-yellow?style=for-the-badge&logo=YooMoney&logoColor=white" alt="ЮМоnеу">
+  </a>
+  <a href="https://t.tb.ru/c2c-qr-choose-bank?requisiteNumber=+79996363556&bankCode=100000000004" target="_blank">
+    <img src="https://img.shields.io/badge/СБП-Т Банк | Sber-blue?style=for-the-badge&logo=none" alt="СБП">
+  </a>
+</p>
+
+### USDT (TON)
+
+Адрес для перевода:  
+```bash
+UQA73kPkNHudFD5yV7DuP-GuXO1ExTpqH0gNioQX8sY4fU6L
+```
