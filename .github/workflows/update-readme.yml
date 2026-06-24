@@ -1,4 +1,4 @@
-name: 🔄 Update README (Badges + Traffic Graph)
+name: Update README (badges + traffic graph)
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   release:
     types: [published]
   schedule:
-    - cron: '0 6 * * *'
+    - cron: "0 6 * * *"
   workflow_dispatch:
 
 permissions:
@@ -18,24 +18,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: ⬇️ Checkout
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: 🐍 Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-          cache: 'pip'
+          python-version: "3.12"
+          cache: "pip"
 
-      - name: 📦 Install
+      - name: Install deps
         run: pip install requests
 
-      - name: 🔧 Update README (badges + graph)
+      - name: Update README (badges + graph)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
-          python - <<'EOF'
+          python - << 'EOF'
           import os, re, requests, json
           from datetime import datetime
 
@@ -44,9 +44,6 @@ jobs:
           headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
           repo_url = f"https://github.com/{repo}"
 
-          # ───────────────────────────────────────────────────────────────
-          # Cached API fetch
-          # ───────────────────────────────────────────────────────────────
           def cached_get(url, cache_file):
               if os.path.exists(cache_file):
                   age = datetime.now().timestamp() - os.path.getmtime(cache_file)
@@ -64,9 +61,7 @@ jobs:
                   json.dump(data, f)
               return data
 
-          # ───────────────────────────────────────────────────────────────
-          # GitHub Traffic API
-          # ───────────────────────────────────────────────────────────────
+          # Traffic
           views = cached_get(f"https://api.github.com/repos/{repo}/traffic/views?per=day", ".cache_views.json")
           clones = cached_get(f"https://api.github.com/repos/{repo}/traffic/clones", ".cache_clones.json")
 
@@ -74,9 +69,7 @@ jobs:
           gh_unique = views.get("uniques", 0)
           gh_clones = clones.get("count", 0)
 
-          # ───────────────────────────────────────────────────────────────
-          # Local view counter via issue
-          # ───────────────────────────────────────────────────────────────
+          # Local counter via issue
           issues_api = f"https://api.github.com/repos/{repo}/issues"
           issues_list = requests.get(issues_api, headers=headers, timeout=15).json()
 
@@ -109,9 +102,7 @@ jobs:
               timeout=15
           )
 
-          # ───────────────────────────────────────────────────────────────
           # Releases & repo meta
-          # ───────────────────────────────────────────────────────────────
           rel = cached_get(f"https://api.github.com/repos/{repo}/releases/latest", ".cache_latest.json")
           all_rel = cached_get(f"https://api.github.com/repos/{repo}/releases", ".cache_allrel.json")
 
@@ -133,28 +124,23 @@ jobs:
 
           updated_at = datetime.now().strftime("%Y-%m-%d %H:%M UTC")
 
-          # ───────────────────────────────────────────────────────────────
-          # Build SVG badges (Shields.io)
-          # ───────────────────────────────────────────────────────────────
           badges_block = f"""
-<!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · {updated_at} -->
+          <!-- STATS_START -->
+          <!-- auto-updated by GitHub Actions · {updated_at} -->
 
-[![Views (local)](https://img.shields.io/badge/Views(local)-{local_views}-ff6900?style=for-the-badge&logo=github)]({repo_url})
-[![Views (GitHub)](https://img.shields.io/badge/Views(GitHub)-{gh_views}-ff6900?style=for-the-badge&logo=github)]({repo_url})
-[![Unique visitors](https://img.shields.io/badge/Unique-{gh_unique}-blue?style=for-the-badge&logo=github)]({repo_url})
-[![Clones](https://img.shields.io/badge/Clones-{gh_clones}-purple?style=for-the-badge&logo=github)]({repo_url})
-[![Stars](https://img.shields.io/github/stars/{repo}?style=for-the-badge)]({repo_url}/stargazers)
-[![Forks](https://img.shields.io/github/forks/{repo}?style=for-the-badge)]({repo_url}/network/members)
-[![Downloads (release)](https://img.shields.io/badge/Downloads(release)-{dl_rel}-brightgreen?style=for-the-badge)]({repo_url}/releases/latest)
-[![Downloads (total)](https://img.shields.io/badge/Downloads(total)-{dl_total}-brightgreen?style=for-the-badge)]({repo_url}/releases)
+          [![Views (local)](https://img.shields.io/badge/Views(local)-{local_views}-ff6900?style=for-the-badge&logo=github)]({repo_url})
+          [![Views (GitHub)](https://img.shields.io/badge/Views(GitHub)-{gh_views}-ff6900?style=for-the-badge&logo=github)]({repo_url})
+          [![Unique visitors](https://img.shields.io/badge/Unique-{gh_unique}-blue?style=for-the-badge&logo=github)]({repo_url})
+          [![Clones](https://img.shields.io/badge/Clones-{gh_clones}-purple?style=for-the-badge&logo=github)]({repo_url})
+          [![Stars](https://img.shields.io/github/stars/{repo}?style=for-the-badge)]({repo_url}/stargazers)
+          [![Forks](https://img.shields.io/github/forks/{repo}?style=for-the-badge)]({repo_url}/network/members)
+          [![Downloads (release)](https://img.shields.io/badge/Downloads(release)-{dl_rel}-brightgreen?style=for-the-badge)]({repo_url}/releases/latest)
+          [![Downloads (total)](https://img.shields.io/badge/Downloads(total)-{dl_total}-brightgreen?style=for-the-badge)]({repo_url}/releases)
 
-<!-- STATS_END -->
-"""
+          <!-- STATS_END -->
+          """
 
-          # ───────────────────────────────────────────────────────────────
-          # Build traffic graph (PNG)
-          # ───────────────────────────────────────────────────────────────
+          # Graph
           points = views.get("views", [])
           if isinstance(points, list) and points:
               labels = [p["timestamp"][:10] for p in points]
@@ -186,24 +172,22 @@ jobs:
                   f.write(r.content)
 
           graph_block = """
-<!-- GRAPH_START -->
-![GitHub Traffic](./traffic-views.png)
-<!-- GRAPH_END -->
-"""
+          <!-- GRAPH_START -->
+          ![GitHub Traffic](./traffic-views.png)
+          <!-- GRAPH_END -->
+          """
 
-          # ───────────────────────────────────────────────────────────────
-          # Patch README.md
-          # ───────────────────────────────────────────────────────────────
           with open("README.md", "r", encoding="utf-8") as f:
               content = f.read()
 
-          content = re.sub(r"<!-- STATS_START -->.*?<!-- STATS_END -->", badges_block, content, flags=re.DOTALL)
-          content = re.sub(r"<!-- GRAPH_START -->.*?<!-- GRAPH_END -->", graph_block, content, flags=re.DOTALL)
-
-          if "<!-- STATS_START -->" not in content:
+          if "<!-- STATS_START -->" in content:
+              content = re.sub(r"<!-- STATS_START -->.*?<!-- STATS_END -->", badges_block, content, flags=re.DOTALL)
+          else:
               content = re.sub(r"(# .+?\n)", r"\1\n" + badges_block + "\n", content, count=1)
 
-          if "<!-- GRAPH_START -->" not in content:
+          if "<!-- GRAPH_START -->" in content:
+              content = re.sub(r"<!-- GRAPH_START -->.*?<!-- GRAPH_END -->", graph_block, content, flags=re.DOTALL)
+          else:
               content = re.sub(r"(# .+?\n)", r"\1\n" + graph_block + "\n", content, count=1)
 
           with open("README.md", "w", encoding="utf-8") as f:
@@ -212,10 +196,10 @@ jobs:
           print("README updated ✓")
           EOF
 
-      - name: 💾 Commit & push
+      - name: Commit & push
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add README.md traffic-views.png
+          git add README.md traffic-views.png || true
           git diff --cached --quiet || git commit -m "chore: update README (badges + graph) [skip ci]"
           git push
