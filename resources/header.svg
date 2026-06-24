@@ -1,0 +1,148 @@
+<svg width="900" height="180" viewBox="0 0 900 180" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>Xiaomi Voice Pack Tool</title>
+  <desc>Animated banner with robot vacuum driving left-right</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#13181f"/>
+    </linearGradient>
+    <linearGradient id="ln" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox">
+      <stop offset="0%"   stop-color="#ff6900" stop-opacity="0"/>
+      <stop offset="20%"  stop-color="#ff6900"/>
+      <stop offset="80%"  stop-color="#ff8c00"/>
+      <stop offset="100%" stop-color="#ff8c00" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="clip"><rect width="900" height="180" rx="14"/></clipPath>
+    <symbol id="roboR" viewBox="-60 -60 160 120" overflow="visible">
+      <circle r="52" fill="#ff690008" stroke="#ff690022" stroke-width="1"/>
+      <circle r="42" fill="#1c2130" stroke="#ff6900" stroke-width="1.5"/>
+      <circle r="30" fill="none" stroke="#ff690025" stroke-width="1" stroke-dasharray="3 5"/>
+      <rect x="-8" y="-41" width="16" height="8" rx="4" fill="#ff6900"/>
+      <circle r="5" cy="-24" fill="#ff6900">
+        <animate attributeName="r"       values="5;6.2;5"   dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <text text-anchor="middle" dy="5" font-family="Arial Black,Arial" font-weight="900" font-size="15" fill="#ff6900" letter-spacing="2">MI</text>
+      <rect x="-30" y="33" width="14" height="6" rx="3" fill="#ff690050"/>
+      <rect x="16"  y="33" width="14" height="6" rx="3" fill="#ff690050"/>
+      <path d="M 54 -12 Q 65 0 54 12" fill="none" stroke="#ff6900" stroke-width="1.5" stroke-linecap="round">
+        <animate attributeName="opacity" values="0.2;1;0.2" dur="1.3s" repeatCount="indefinite"/>
+      </path>
+      <path d="M 65 -20 Q 80 0 65 20" fill="none" stroke="#ff8c00" stroke-width="1.5" stroke-linecap="round">
+        <animate attributeName="opacity" values="0.1;0.7;0.1" dur="1.3s" begin="0.25s" repeatCount="indefinite"/>
+      </path>
+      <path d="M 76 -28 Q 95 0 76 28" fill="none" stroke="#ff8c00" stroke-width="1.2" stroke-linecap="round">
+        <animate attributeName="opacity" values="0.05;0.4;0.05" dur="1.3s" begin="0.5s" repeatCount="indefinite"/>
+      </path>
+    </symbol>
+    <symbol id="roboL" viewBox="-100 -60 160 120" overflow="visible">
+      <circle r="52" fill="#ff690008" stroke="#ff690022" stroke-width="1"/>
+      <circle r="42" fill="#1c2130" stroke="#ff6900" stroke-width="1.5"/>
+      <circle r="30" fill="none" stroke="#ff690025" stroke-width="1" stroke-dasharray="3 5"/>
+      <rect x="-8" y="-41" width="16" height="8" rx="4" fill="#ff6900"/>
+      <circle r="5" cy="-24" fill="#ff6900">
+        <animate attributeName="r"       values="5;6.2;5"   dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <text text-anchor="middle" dy="5" font-family="Arial Black,Arial" font-weight="900" font-size="15" fill="#ff6900" letter-spacing="2">MI</text>
+      <rect x="-30" y="33" width="14" height="6" rx="3" fill="#ff690050"/>
+      <rect x="16"  y="33" width="14" height="6" rx="3" fill="#ff690050"/>
+      <path d="M -54 -12 Q -65 0 -54 12" fill="none" stroke="#ff6900" stroke-width="1.5" stroke-linecap="round">
+        <animate attributeName="opacity" values="0.2;1;0.2" dur="1.3s" repeatCount="indefinite"/>
+      </path>
+      <path d="M -65 -20 Q -80 0 -65 20" fill="none" stroke="#ff8c00" stroke-width="1.5" stroke-linecap="round">
+        <animate attributeName="opacity" values="0.1;0.7;0.1" dur="1.3s" begin="0.25s" repeatCount="indefinite"/>
+      </path>
+      <path d="M -76 -28 Q -95 0 -76 28" fill="none" stroke="#ff8c00" stroke-width="1.2" stroke-linecap="round">
+        <animate attributeName="opacity" values="0.05;0.4;0.05" dur="1.3s" begin="0.5s" repeatCount="indefinite"/>
+      </path>
+    </symbol>
+  </defs>
+
+  <rect width="900" height="180" rx="14" fill="url(#bg)"/>
+
+  <g clip-path="url(#clip)" opacity="0.055">
+    <g id="row">
+      <circle cx="0"   cy="0" r="1" fill="#fff"/><circle cx="30"  cy="0" r="1" fill="#fff"/>
+      <circle cx="60"  cy="0" r="1" fill="#fff"/><circle cx="90"  cy="0" r="1" fill="#fff"/>
+      <circle cx="120" cy="0" r="1" fill="#fff"/><circle cx="150" cy="0" r="1" fill="#fff"/>
+      <circle cx="180" cy="0" r="1" fill="#fff"/><circle cx="210" cy="0" r="1" fill="#fff"/>
+      <circle cx="240" cy="0" r="1" fill="#fff"/><circle cx="270" cy="0" r="1" fill="#fff"/>
+      <circle cx="300" cy="0" r="1" fill="#fff"/><circle cx="330" cy="0" r="1" fill="#fff"/>
+      <circle cx="360" cy="0" r="1" fill="#fff"/><circle cx="390" cy="0" r="1" fill="#fff"/>
+      <circle cx="420" cy="0" r="1" fill="#fff"/><circle cx="450" cy="0" r="1" fill="#fff"/>
+      <circle cx="480" cy="0" r="1" fill="#fff"/><circle cx="510" cy="0" r="1" fill="#fff"/>
+      <circle cx="540" cy="0" r="1" fill="#fff"/><circle cx="570" cy="0" r="1" fill="#fff"/>
+      <circle cx="600" cy="0" r="1" fill="#fff"/><circle cx="630" cy="0" r="1" fill="#fff"/>
+      <circle cx="660" cy="0" r="1" fill="#fff"/><circle cx="690" cy="0" r="1" fill="#fff"/>
+      <circle cx="720" cy="0" r="1" fill="#fff"/><circle cx="750" cy="0" r="1" fill="#fff"/>
+      <circle cx="780" cy="0" r="1" fill="#fff"/><circle cx="810" cy="0" r="1" fill="#fff"/>
+      <circle cx="840" cy="0" r="1" fill="#fff"/><circle cx="870" cy="0" r="1" fill="#fff"/>
+      <circle cx="900" cy="0" r="1" fill="#fff"/>
+    </g>
+    <use href="#row" y="30"/><use href="#row" y="60"/><use href="#row" y="90"/>
+    <use href="#row" y="120"/><use href="#row" y="150"/><use href="#row" y="180"/>
+  </g>
+
+  <rect x="0" y="0" width="900" height="3" rx="1.5" fill="url(#ln)"/>
+
+  <g opacity="1">
+    <animateTransform attributeName="transform" type="translate"
+      values="-60,90; 250,90; 250,90; 250,90; -60,90; -60,90"
+      keyTimes="0; 0.3846; 0.3846; 0.4231; 0.8077; 1"
+      calcMode="spline"
+      keySplines="0.4 0 0.6 1; 0 0 1 1; 0 0 1 1; 0.4 0 0.6 1; 0 0 1 1"
+      dur="13s" repeatCount="indefinite"/>
+    <animate attributeName="opacity"
+      values="1;1;0;0;0;1"
+      keyTimes="0; 0.3846; 0.4231; 0.4231; 1; 1"
+      calcMode="discrete"
+      dur="13s" repeatCount="indefinite"/>
+    <use href="#roboR" x="-60" y="-60" width="160" height="120"/>
+  </g>
+
+  <g opacity="0">
+    <animateTransform attributeName="transform" type="translate"
+      values="-60,90; 250,90; 250,90; 250,90; -60,90; -60,90"
+      keyTimes="0; 0.3846; 0.3846; 0.4231; 0.8077; 1"
+      calcMode="spline"
+      keySplines="0.4 0 0.6 1; 0 0 1 1; 0 0 1 1; 0.4 0 0.6 1; 0 0 1 1"
+      dur="13s" repeatCount="indefinite"/>
+    <animate attributeName="opacity"
+      values="0;0;1;1;1;0"
+      keyTimes="0; 0.3846; 0.4231; 0.4231; 0.8077; 1"
+      calcMode="discrete"
+      dur="13s" repeatCount="indefinite"/>
+    <use href="#roboL" x="-100" y="-60" width="160" height="120"/>
+  </g>
+
+  <text x="310" y="66"
+        font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif"
+        font-weight="700" font-size="30" fill="#f0f6fc" letter-spacing="-0.3">
+    Xiaomi Voice Pack Tool
+  </text>
+  <rect x="310" y="75" width="500" height="1.5" rx="0.75" fill="url(#ln)" opacity="0.7"/>
+  <text x="310" y="100"
+        font-family="'Segoe UI',Arial,sans-serif"
+        font-size="14" fill="#8b949e" letter-spacing="0.2">
+    Конвертер · Конструктор · Установщик голосовых пакетов
+  </text>
+  <text x="310" y="120"
+        font-family="'Segoe UI',Arial,sans-serif"
+        font-size="12.5" fill="#6e7681" letter-spacing="0.4">
+    X20 Pro · X20 Max  ·  Windows &amp; Linux
+  </text>
+  <rect x="310" y="136" width="148" height="24" rx="12" fill="#ff690018" stroke="#ff690045" stroke-width="1"/>
+  <text x="384" y="152" text-anchor="middle"
+        font-family="'Consolas','Courier New',monospace"
+        font-size="11" fill="#ff9060">xiaomi.vacuum.d109gl</text>
+  <rect x="466" y="136" width="148" height="24" rx="12" fill="#ff690018" stroke="#ff690045" stroke-width="1"/>
+  <text x="540" y="152" text-anchor="middle"
+        font-family="'Consolas','Courier New',monospace"
+        font-size="11" fill="#ff9060">xiaomi.vacuum.d102gl</text>
+
+  <path d="M 16 38 L 16 16 L 38 16" fill="none" stroke="#ff6900" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <path d="M 862 16 L 884 16 L 884 38" fill="none" stroke="#ff8c00" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <path d="M 16 142 L 16 164 L 38 164" fill="none" stroke="#ff6900" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <path d="M 862 164 L 884 164 L 884 142" fill="none" stroke="#ff8c00" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+</svg>
