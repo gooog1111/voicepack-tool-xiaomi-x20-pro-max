@@ -40,6 +40,51 @@ jobs:
           headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
           repo_url = f"https://github.com/{repo}"
 
+          # ---------------- SMART TRANSLATOR ----------------
+          def smart_translate(text):
+              import re
+              protected = {}
+              def protect(match):
+                  key = f"__MD{len(protected)}__"
+                  protected[key] = match.group(0)
+                  return key
+
+              text_protected = re.sub(r"`[^`]+`|
+
+\[[^\]
+
+]+\]
+
+\([^)]+\)|\|.*?\|", protect, text)
+
+              lines = text_protected.split("\n")
+              translated_lines = []
+
+              for line in lines:
+                  if line.strip().startswith("#"):
+                      translated_lines.append(line)
+                      continue
+
+                  translated = (
+                      line.replace("Просмотров", "Views")
+                          .replace("Открытые задачи", "Open Issues")
+                          .replace("Заголовок", "Title")
+                          .replace("Дата", "Date")
+                          .replace("Создать новую задачу", "Create new issue")
+                          .replace("Все задачи", "All issues")
+                          .replace("Открытых задач нет — всё хорошо!", "No open issues — everything is good!")
+                          .replace("авто‑обновлено", "auto‑updated")
+                  )
+
+                  translated_lines.append(translated)
+
+              result = "\n".join(translated_lines)
+              for key, val in protected.items():
+                  result = result.replace(key, val)
+
+              return result
+
+          # ---------------- CACHED GET ----------------
           def cached_get(url, cache_file):
               if os.path.exists(cache_file):
                   age = datetime.now().timestamp() - os.path.getmtime(cache_file)
@@ -57,7 +102,7 @@ jobs:
                   json.dump(data, f)
               return data
 
-          # Traffic
+          # ---------------- TRAFFIC ----------------
           views = cached_get(f"https://api.github.com/repos/{repo}/traffic/views?per=day", ".cache_views.json")
           clones = cached_get(f"https://api.github.com/repos/{repo}/traffic/clones", ".cache_clones.json")
 
@@ -65,7 +110,7 @@ jobs:
           gh_unique = views.get("uniques", 0)
           gh_clones = clones.get("count", 0)
 
-          # Local counter via issue
+          # ---------------- LOCAL COUNTER ----------------
           issues_api = f"https://api.github.com/repos/{repo}/issues"
           issues_list = requests.get(issues_api, headers=headers, timeout=15).json()
 
@@ -98,7 +143,7 @@ jobs:
               timeout=15
           )
 
-          # Releases & repo meta
+          # ---------------- META ----------------
           rel = cached_get(f"https://api.github.com/repos/{repo}/releases/latest", ".cache_latest.json")
           all_rel = cached_get(f"https://api.github.com/repos/{repo}/releases", ".cache_allrel.json")
 
@@ -120,7 +165,7 @@ jobs:
 
           updated_at = datetime.now().strftime("%Y-%m-%d %H:%M UTC")
 
-          # Badges
+          # ---------------- BADGES ----------------
           badges_block = f"""
           <!-- STATS_START -->
           <!-- auto-updated by GitHub Actions · {updated_at} -->
@@ -137,7 +182,7 @@ jobs:
           <!-- STATS_END -->
           """
 
-          # Graph (compact)
+          # ---------------- GRAPH ----------------
           points = views.get("views", [])
 
           if not points:
@@ -181,7 +226,7 @@ jobs:
           <!-- GRAPH_END -->
           """
 
-          # Issues
+          # ---------------- ISSUES ----------------
           issues_raw = requests.get(
               f"https://api.github.com/repos/{repo}/issues",
               headers=headers,
@@ -197,27 +242,27 @@ jobs:
                   for i in issues
               )
               issues_table = (
-                  "| # | Заголовок | Дата |\n"
-                  "|---|-----------|------|\n"
+                  "| # | Title | Date |\n"
+                  "|---|-------|------|\n"
                   + rows
               )
           else:
-              issues_table = "_Открытых задач нет — всё хорошо! 🎉_"
+              issues_table = "_No open issues — everything is good! 🎉_"
 
           issues_block = f"""
           <!-- ISSUES_START -->
           <!-- auto-updated by GitHub Actions · {updated_at} -->
 
-          ## 🐛 Открытые задачи
+          ## 🐛 Open Issues
 
           {issues_table}
 
-          > 💡 **[Создать новую задачу]({repo_url}/issues/new/choose)** · [Все задачи]({repo_url}/issues)
+          > 💡 **[Create new issue]({repo_url}/issues/new/choose)** · [All issues]({repo_url}/issues)
 
           <!-- ISSUES_END -->
           """
 
-          # Update README.md
+          # ---------------- UPDATE README.md ----------------
           with open("README.md", "r", encoding="utf-8") as f:
               content = f.read()
 
@@ -228,17 +273,8 @@ jobs:
           with open("README.md", "w", encoding="utf-8") as f:
               f.write(content)
 
-          # Translate README.md → README.en.md
-          translated = requests.post(
-              "https://libretranslate.de/translate",
-              data={
-                  "q": content,
-                  "source": "ru",
-                  "target": "en",
-                  "format": "text"
-              },
-              timeout=20
-          ).json().get("translatedText", "")
+          # ---------------- TRANSLATE README.en.md ----------------
+          translated = smart_translate(content)
 
           with open("README.en.md", "w", encoding="utf-8") as f:
               f.write(translated)
