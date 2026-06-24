@@ -1,10 +1,6 @@
 name: Update README (badges + traffic graph)
 
 on:
-  push:
-    branches: [main]
-  release:
-    types: [published]
   schedule:
     - cron: "0 6 * * *"
   workflow_dispatch:
@@ -124,6 +120,7 @@ jobs:
 
           updated_at = datetime.now().strftime("%Y-%m-%d %H:%M UTC")
 
+          # Badges
           badges_block = f"""
           <!-- STATS_START -->
           <!-- auto-updated by GitHub Actions · {updated_at} -->
@@ -142,34 +139,38 @@ jobs:
 
           # Graph
           points = views.get("views", [])
-          if isinstance(points, list) and points:
+
+          if not points:
+              labels = [(datetime.now().date()).isoformat()]
+              counts = [0]
+          else:
               labels = [p["timestamp"][:10] for p in points]
               counts = [p["count"] for p in points]
 
-              chart_config = {
-                  "type": "line",
-                  "data": {
-                      "labels": labels,
-                      "datasets": [{
-                          "label": "Views per day",
-                          "data": counts,
-                          "borderColor": "rgba(255,105,0,1)",
-                          "backgroundColor": "rgba(255,105,0,0.2)",
-                          "fill": True,
-                          "tension": 0.3
-                      }]
+          chart_config = {
+              "type": "line",
+              "data": {
+                  "labels": labels,
+                  "datasets": [{
+                      "label": "Views per day",
+                      "data": counts,
+                      "borderColor": "rgba(255,105,0,1)",
+                      "backgroundColor": "rgba(255,105,0,0.2)",
+                      "fill": True,
+                      "tension": 0.3
+                  }]
+              },
+              "options": {
+                  "plugins": {
+                      "title": {"display": True, "text": f"GitHub Traffic · {repo}"}
                   },
-                  "options": {
-                      "plugins": {
-                          "title": {"display": True, "text": f"GitHub Traffic · {repo}"}
-                      },
-                      "scales": {"y": {"beginAtZero": True}}
-                  }
+                  "scales": {"y": {"beginAtZero": True}}
               }
+          }
 
-              r = requests.post("https://quickchart.io/chart", json={"chart": chart_config}, timeout=15)
-              with open("traffic-views.png", "wb") as f:
-                  f.write(r.content)
+          r = requests.post("https://quickchart.io/chart", json={"chart": chart_config}, timeout=15)
+          with open("traffic-views.png", "wb") as f:
+              f.write(r.content)
 
           graph_block = """
           <!-- GRAPH_START -->
@@ -180,15 +181,8 @@ jobs:
           with open("README.md", "r", encoding="utf-8") as f:
               content = f.read()
 
-          if "<!-- STATS_START -->" in content:
-              content = re.sub(r"<!-- STATS_START -->.*?<!-- STATS_END -->", badges_block, content, flags=re.DOTALL)
-          else:
-              content = re.sub(r"(# .+?\n)", r"\1\n" + badges_block + "\n", content, count=1)
-
-          if "<!-- GRAPH_START -->" in content:
-              content = re.sub(r"<!-- GRAPH_START -->.*?<!-- GRAPH_END -->", graph_block, content, flags=re.DOTALL)
-          else:
-              content = re.sub(r"(# .+?\n)", r"\1\n" + graph_block + "\n", content, count=1)
+          content = re.sub(r"<!-- STATS_START -->.*?<!-- STATS_END -->", badges_block, content, flags=re.DOTALL)
+          content = re.sub(r"<!-- GRAPH_START -->.*?<!-- GRAPH_END -->", graph_block, content, flags=re.DOTALL)
 
           with open("README.md", "w", encoding="utf-8") as f:
               f.write(content)
@@ -201,5 +195,5 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add README.md traffic-views.png || true
-          git diff --cached --quiet || git commit -m "chore: update README (badges + graph) [skip ci]"
+          git diff --cached --quiet || git commit -m "update README (badges + graph) [skip ci]"
           git push
