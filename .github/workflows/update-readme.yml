@@ -137,7 +137,7 @@ jobs:
           <!-- STATS_END -->
           """
 
-          # Graph
+          # Graph (compact)
           points = views.get("views", [])
 
           if not points:
@@ -155,7 +155,7 @@ jobs:
                       "label": "Views per day",
                       "data": counts,
                       "borderColor": "rgba(255,105,0,1)",
-                      "backgroundColor": "rgba(255,105,0,0.2)",
+                      "backgroundColor": "rgba(255,105,0,0.15)",
                       "fill": True,
                       "tension": 0.3
                   }]
@@ -164,8 +164,11 @@ jobs:
                   "plugins": {
                       "title": {"display": True, "text": f"GitHub Traffic · {repo}"}
                   },
-                  "scales": {"y": {"beginAtZero": True}}
-              }
+                  "scales": {"y": {"beginAtZero": True}},
+                  "layout": {"padding": 10}
+              },
+              "width": 800,
+              "height": 250
           }
 
           r = requests.post("https://quickchart.io/chart", json={"chart": chart_config}, timeout=15)
@@ -247,6 +250,12 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
           git add README.md README.en.md traffic-views.png || true
-          git diff --cached --quiet || git commit -m "update README (badges + graph + issues + translation) [skip ci]"
+
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+
+          git commit -m "update README (badges + graph + issues + translation) [skip ci]"
+
+          git pull --rebase
           git push
