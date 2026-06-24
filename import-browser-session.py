@@ -76,7 +76,7 @@ def decrypt_chromium_cookie(encrypted: bytes, key: bytes, host: str) -> str:
     return plain.decode("utf-8")
 
 
-def default_sources() -> list[BrowserSource]:
+def default_sources_windows() -> list[BrowserSource]:
     local = Path(os.environ.get("LOCALAPPDATA", ""))
     roaming = Path(os.environ.get("APPDATA", ""))
     home = Path.home()
@@ -97,6 +97,44 @@ def default_sources() -> list[BrowserSource]:
         ),
     ]
     return [source for source in candidates if source.root.is_dir()]
+
+
+def default_sources_linux() -> list[BrowserSource]:
+    home = Path.home()
+    candidates = [
+        BrowserSource("Chrome", "chromium", home / ".config/google-chrome/Default"),
+        BrowserSource("Chromium", "chromium", home / ".config/chromium/Default"),
+        BrowserSource("Firefox", "firefox", home / ".mozilla/firefox"),
+        BrowserSource("Brave", "chromium", home / ".config/BraveSoftware/Brave-Browser/Default"),
+        BrowserSource("Vivaldi", "chromium", home / ".config/vivaldi/Default"),
+        BrowserSource("Opera", "chromium", home / ".config/opera"),
+        BrowserSource("Yandex", "chromium", home / ".config/yandex-browser/Default"),
+    ]
+    return [source for source in candidates if source.root.is_dir()]
+
+
+def default_sources_macos() -> list[BrowserSource]:
+    home = Path.home()
+    candidates = [
+        BrowserSource("Chrome", "chromium", home / "Library/Application Support/Google/Chrome/Default"),
+        BrowserSource("Chromium", "chromium", home / "Library/Application Support/Chromium/Default"),
+        BrowserSource("Firefox", "firefox", home / "Library/Application Support/Firefox/Profiles"),
+        BrowserSource("Brave", "chromium", home / "Library/Application Support/BraveSoftware/Brave-Browser/Default"),
+        BrowserSource("Vivaldi", "chromium", home / "Library/Application Support/Vivaldi/Default"),
+        BrowserSource("Opera", "chromium", home / "Library/Application Support/Opera/Default"),
+    ]
+    return [source for source in candidates if source.root.is_dir()]
+
+
+def default_sources() -> list[BrowserSource]:
+    if os.name == "nt":
+        return default_sources_windows()
+    elif sys.platform == "linux":
+        return default_sources_linux()
+    elif sys.platform == "darwin":
+        return default_sources_macos()
+    else:
+        raise RuntimeError(f"unsupported platform: {sys.platform}")
 
 
 def profiles(source: BrowserSource) -> list[Path]:
@@ -130,10 +168,14 @@ def open_snapshot(database: Path) -> tuple[sqlite3.Connection, tempfile.Temporar
         return sqlite3.connect(snapshot, timeout=5), temporary
     except sqlite3.OperationalError as exc:
         temporary.cleanup()
-        raise RuntimeError("could not read the browser cookie database") from exc
+        raise RuntimeError(
+            "The browser is currently open. Please close it completely and try again."
+        ) from exc
     except OSError as exc:
         temporary.cleanup()
-        raise RuntimeError("close this browser completely and try again") from exc
+        raise RuntimeError(
+            "The browser is currently open. Please close it completely and try again."
+        ) from exc
 
 
 def chromium_cookies(profile: Path, key: bytes) -> list[dict]:
@@ -212,8 +254,6 @@ def main() -> int:
     parser.add_argument("--kind", choices=("chromium", "firefox"), default="chromium")
     parser.add_argument("--output", type=Path, default=HERE / "state/cloud_auth.json")
     args = parser.parse_args()
-    if os.name != "nt":
-        raise RuntimeError("automatic browser profile import is currently Windows-only")
 
     sources = default_sources()
     if args.profile:
