@@ -13,9 +13,9 @@
 
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-25 20:07 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-26 03:37 UTC -->
 
-[![Views local](https://img.shields.io/badge/Views_local-19-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views local](https://img.shields.io/badge/Views_local-20-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Views GitHub](https://img.shields.io/badge/Views_GitHub-0-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Unique visitors](https://img.shields.io/badge/Unique-0-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Clones](https://img.shields.io/badge/Clones-0-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
@@ -48,7 +48,7 @@
 
 
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-25 20:07 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-26 03:37 UTC -->
 
 ## Issues
 
@@ -105,7 +105,7 @@ Tested on:
 ## Features
 
 - Interactive menu for Windows.
-- Sequential import of sessions from Chrome, Firefox, Edge (definitely doesn’t work), Yandex, Chromium,
+- Consecutive session import from Chrome, Firefox, Edge, Yandex, Chromium,
   Brave, Vivaldi, Opera, Opera GX and Tor Browser.
 - Unpacking old encrypted Roborock `.pkg`.
 - Recursive processing of ZIP with WAV, `.pkg` and mixed content.
@@ -188,9 +188,9 @@ https://4pda.to/forum/index.php?showtopic=881982
 ## Manual custom package
 
 Event numbers are in `custom_voicepack/table_en.csv` and
-`table_en.csv`. Put modified numeric MP3s, e.g.
-`130.mp3`, in
-`custom_voicepack/audio` and select item 6.
+`table_en.csv`. Put modified numeric MP3s, such as `130.mp3`, into
+`custo
+m_voicepack/audio` and select item 6.
 
 Missing events are taken from the official Russian package, which
 automatically downloaded the first time you use it. Replaceable files
@@ -211,10 +211,13 @@ Go to MiHome -> vacuum cleaner -> ⋮ -> Cleaning history -> quickly press with 
 This is an independent project not associated with Xiaomi or Roborock.
 Installation of unofficial voicepacks is at your own risk and may void warranty service.
 
+## Special thanks
+
+- Many thanks to [runassu](https://github.com/runassu) for the Chromium v20 cookie decryption methods.
+
 ## License
 
-[MIT](LICENSE)
-
+[MIT](LICENSE.md)
 
 ## Support the project
 
