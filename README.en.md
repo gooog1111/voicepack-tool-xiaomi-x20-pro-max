@@ -13,9 +13,9 @@
 
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-26 03:37 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-26 03:58 UTC -->
 
-[![Views local](https://img.shields.io/badge/Views_local-20-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views local](https://img.shields.io/badge/Views_local-21-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Views GitHub](https://img.shields.io/badge/Views_GitHub-0-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Unique visitors](https://img.shields.io/badge/Unique-0-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Clones](https://img.shields.io/badge/Clones-0-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
@@ -48,7 +48,7 @@
 
 
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-26 03:37 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-26 03:58 UTC -->
 
 ## Issues
 
@@ -211,9 +211,9 @@ Go to MiHome -> vacuum cleaner -> ⋮ -> Cleaning history -> quickly press with 
 This is an independent project not associated with Xiaomi or Roborock.
 Installation of unofficial voicepacks is at your own risk and may void warranty service.
 
-## Special thanks
+## Acknowledgments
 
-- Many thanks to [runassu](https://github.com/runassu) for the Chromium v20 cookie decryption methods.
+Special thanks to [runassu](https://github.com/runassu) for the research and Chromium v20 cookie decryption methods used in this project.
 
 ## License
 
