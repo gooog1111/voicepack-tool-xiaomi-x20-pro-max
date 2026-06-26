@@ -130,7 +130,7 @@
   <text x="310" y="120"
         font-family="'Segoe UI',Arial,sans-serif"
         font-size="12.5" fill="#6e7681" letter-spacing="0.4">
-    X20 Pro · X20 Max  · ONLY Windows &amp;
+    X20 Pro · X20 Max  · Windows only
   </text>
   <rect x="310" y="136" width="148" height="24" rx="12" fill="#ff690018" stroke="#ff690045" stroke-width="1"/>
   <text x="384" y="152" text-anchor="middle"
