@@ -25,6 +25,12 @@ $RequirementsFile = Join-Path $Here "requirements.txt"
 $RequirementsHashFile = Join-Path $Venv ".requirements.sha256"
 $PlaywrightMarkerFile = Join-Path $Venv ".playwright.chromium.installed"
 
+# Версия текущего пакета. Меняй при выпуске нового релиза.
+# Значение должно совпадать с тегом GitHub Release, например: v1.0.0
+$CurrentVersion = "v1.0.1-2"
+$RepoUrl = "https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max"
+$GitHubApiLatestRelease = "https://api.github.com/repos/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases/latest"
+
 if (Test-Path $EnvFile) {
     Get-Content -LiteralPath $EnvFile | ForEach-Object {
         $line = $_.Trim()
@@ -53,6 +59,63 @@ function Get-CommandPath {
     }
 
     return $CommandInfo.Path
+}
+
+function Convert-VersionTagToComparableString {
+    param([Parameter(Mandatory = $true)][string]$VersionTag)
+
+    $normalized = $VersionTag.Trim()
+    if ($normalized.StartsWith("v", [System.StringComparison]::OrdinalIgnoreCase)) {
+        $normalized = $normalized.Substring(1)
+    }
+
+    return $normalized
+}
+
+function Test-NewVersionAvailable {
+    try {
+        $headers = @{
+            "User-Agent" = "xiaomi-voicepack-tool"
+            "Accept"     = "application/vnd.github+json"
+        }
+
+        $release = Invoke-RestMethod `
+            -Uri $GitHubApiLatestRelease `
+            -Headers $headers `
+            -TimeoutSec 5 `
+            -ErrorAction Stop
+
+        $LatestVersion = [string]$release.tag_name
+        if (-not $LatestVersion) {
+            return
+        }
+
+        $latestComparable = Convert-VersionTagToComparableString $LatestVersion
+        $currentComparable = Convert-VersionTagToComparableString $CurrentVersion
+
+        $isNewer = $false
+        try {
+            $latestSemver = [version]$latestComparable
+            $currentSemver = [version]$currentComparable
+            $isNewer = $latestSemver -gt $currentSemver
+        }
+        catch {
+            # Если тег не похож на SemVer, просто сравниваем строки.
+            $isNewer = $LatestVersion -ne $CurrentVersion
+        }
+
+        if ($isNewer) {
+            Write-Host ""
+            Write-Host "Доступна новая версия: $LatestVersion" -ForegroundColor Yellow
+            Write-Host "Текущая версия: $CurrentVersion" -ForegroundColor DarkGray
+            Write-Host "Скачать: $RepoUrl/releases/latest" -ForegroundColor Cyan
+            Write-Host ""
+        }
+    }
+    catch {
+        # Нет интернета, GitHub недоступен, release отсутствует или rate limit.
+        # Проверка обновлений не критична, поэтому продолжаем без ошибки.
+    }
 }
 
 function Ensure-PythonVenv {
@@ -199,8 +262,10 @@ function Ensure-Environment {
 
 function Show-Menu {
     Write-Host ""
-    Write-Host "Xiaomi Voice Pack" -ForegroundColor Cyan
+    Write-Host "Xiaomi Voice Pack Tool" -ForegroundColor Cyan
     Write-Host "=================" -ForegroundColor Cyan
+    Write-Host "Version: $CurrentVersion" -ForegroundColor DarkGray
+    Write-Host ""
     Write-Host "1. Импорт действующей Xiaomi-сессии из установленного браузера"
     Write-Host "2. Найти DID в локальной сети UDP 54321"
     Write-Host "3. Предварительная проверка устройства"
@@ -220,6 +285,7 @@ function Return-ToMenu {
 }
 
 if ($Command -eq "menu") {
+    Test-NewVersionAvailable
     Show-Menu
     $choice = Read-Host "Выберите действие"
     $selectedCommand = switch ($choice) {
