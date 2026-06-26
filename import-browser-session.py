@@ -301,8 +301,14 @@ def derive_v20_master_key(parsed_data: dict) -> bytes:
     return cipher.decrypt(parsed_data["iv"], parsed_data["ciphertext"] + parsed_data["tag"], None)
 
 
-def get_v20_master_key(local_state_path: Path) -> bytes | None:
-    """Return Chromium v20/App-Bound master key, or None if this browser does not use it."""
+def get_v20_master_key(local_state_path: Path, browser_name: str = "") -> bytes | None:
+    """Return Chromium v20/App-Bound master key, or None if this browser does not use it.
+
+    Chrome and Edge/Brave currently wrap the APPB key differently:
+      * Edge/Brave: after SYSTEM DPAPI and USER DPAPI, the final 32 bytes are the AES-GCM cookie key.
+      * Chrome: after both DPAPI layers, the inner key material still has to be unwrapped with
+        the app-bound CNG/NCrypt + XOR/AES-GCM path.
+    """
     local_state = json.loads(local_state_path.read_text(encoding="utf-8"))
     app_bound = local_state.get("os_crypt", {}).get("app_bound_encrypted_key")
     if not app_bound:
@@ -321,21 +327,41 @@ def get_v20_master_key(local_state_path: Path) -> bytes | None:
 
     key_blob_user_decrypted = windows.crypto.dpapi.unprotect(key_blob_system_decrypted)
 
+    browser_lc = browser_name.lower()
+    prefer_tail_key = any(name in browser_lc for name in ("edge", "brave"))
+
+    # Edge/Brave: the final AES-GCM key is the last 32 bytes after both DPAPI layers.
+    # Do this before the generic parser, otherwise random wrapper bytes can be misread
+    # as a Chromium flag and produce misleading InvalidTag errors.
+    if prefer_tail_key:
+        if len(key_blob_user_decrypted) >= 32:
+            print("  v20 Edge/Brave key mode: using last 32 bytes after SYSTEM+USER DPAPI")
+            return key_blob_user_decrypted[-32:]
+        raise RuntimeError(
+            f"Edge/Brave v20 key blob is too short after DPAPI: {len(key_blob_user_decrypted)} bytes"
+        )
+
     errors: list[str] = []
     for parsed in parse_key_blob_candidates(key_blob_user_decrypted):
         try:
             master_key = derive_v20_master_key(parsed)
             if len(master_key) in (16, 24, 32):
-                print(f"  v20 key blob candidate accepted: flag={parsed['flag']} offset={parsed.get('offset')}")
+                print(f"  v20 Chrome key blob candidate accepted: flag={parsed['flag']} offset={parsed.get('offset')}")
                 return master_key
             errors.append(f"flag={parsed['flag']} offset={parsed.get('offset')}: unexpected key length {len(master_key)}")
         except Exception as exc:
             errors.append(f"flag={parsed['flag']} offset={parsed.get('offset')}: {type(exc).__name__}: {exc}")
 
+    # Non-Chrome Chromium builds sometimes match the Edge/Brave layout but have a
+    # different product name. Keep this as a last-resort fallback, not for Chrome.
+    if "chrome" not in browser_lc and len(key_blob_user_decrypted) >= 32:
+        print("  v20 fallback key mode: using last 32 bytes after SYSTEM+USER DPAPI")
+        return key_blob_user_decrypted[-32:]
+
     raise RuntimeError("all v20 key blob candidates failed; " + " | ".join(errors[:8]))
 
 
-def chromium_keys(root: Path, *, enable_v20: bool = True) -> ChromiumKeys:
+def chromium_keys(root: Path, *, enable_v20: bool = True, browser_name: str = "") -> ChromiumKeys:
     state_file = root / "Local State"
     if not state_file.is_file():
         raise RuntimeError(f"Local State not found: {state_file}")
@@ -355,7 +381,7 @@ def chromium_keys(root: Path, *, enable_v20: bool = True) -> ChromiumKeys:
 
     v20: bytes | None = None
     if enable_v20 and state.get("os_crypt", {}).get("app_bound_encrypted_key"):
-        v20 = get_v20_master_key(state_file)
+        v20 = get_v20_master_key(state_file, browser_name=browser_name)
 
     return ChromiumKeys(legacy=legacy, v20=v20)
 
@@ -607,7 +633,7 @@ def main() -> int:
         try:
             keys = None
             if source.kind == "chromium":
-                keys = chromium_keys(source.root, enable_v20=not args.no_v20)
+                keys = chromium_keys(source.root, enable_v20=not args.no_v20, browser_name=source.name)
                 print(
                     "  Chromium keys: "
                     f"legacy={'yes' if keys.legacy else 'no'}, "
