@@ -253,11 +253,41 @@ function Ensure-Ffmpeg {
     }
 }
 
+function Ensure-ArchiveExtractor {
+    if (Get-Command 7z -ErrorAction SilentlyContinue) {
+        return
+    }
+
+    $SevenZipPaths = @(
+        (Join-Path $env:ProgramFiles "7-Zip\7z.exe"),
+        (Join-Path ${env:ProgramFiles(x86)} "7-Zip\7z.exe")
+    )
+
+    foreach ($path in $SevenZipPaths) {
+        if ($path -and (Test-Path -LiteralPath $path)) {
+            return
+        }
+    }
+
+    $winget = Get-Command winget -ErrorAction SilentlyContinue
+    if (-not $winget) {
+        Write-Warning "7-Zip не найден, а winget недоступен. Для RAR установите 7-Zip, unrar, unar или bsdtar вручную."
+        return
+    }
+
+    Write-Host "7-Zip не найден. Устанавливаю 7-Zip для распаковки RAR..." -ForegroundColor Yellow
+    & (Get-CommandPath $winget) install --id 7zip.7zip -e --accept-source-agreements --accept-package-agreements
+    if ($LASTEXITCODE -ne 0) {
+        throw "7-Zip installation failed"
+    }
+}
+
 function Ensure-Environment {
     Ensure-PythonVenv
     Ensure-PythonRequirements
     Ensure-PlaywrightChromium
     Ensure-Ffmpeg
+    Ensure-ArchiveExtractor
 }
 
 function Show-Menu {
@@ -317,8 +347,14 @@ if ($Command -eq "setup") {
     & $Python (Join-Path $Here "import-browser-session.py") --output $CloudAuthFile
     $code = $LASTEXITCODE
     if ($code -ne 0) {
-        Return-ToMenu
-        exit $code
+        Write-Host ""
+        Write-Host "Импорт из браузера не получился. Запускаю QR-авторизацию Xiaomi..." -ForegroundColor Yellow
+        & $Python (Join-Path $Here "xiaomi-qr-auth.py") --output $CloudAuthFile
+        $code = $LASTEXITCODE
+        if ($code -ne 0) {
+            Return-ToMenu
+            exit $code
+        }
     }
 
     Write-Host ""

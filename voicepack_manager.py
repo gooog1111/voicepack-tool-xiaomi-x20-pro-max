@@ -65,7 +65,7 @@ def conversion_inputs() -> list[tuple[str, Path]]:
     for path in sorted(OLD_DIR.iterdir(), key=lambda item: item.name.lower()):
         if path.is_dir():
             entries.append((path.name, path))
-        elif path.suffix.lower() in {".pkg", ".zip"}:
+        elif path.suffix.lower() in {".pkg", ".zip", ".rar"}:
             entries.append((path.stem, path))
         elif path.suffix.lower() == ".wav":
             loose_wavs.append(path)
@@ -83,7 +83,7 @@ def convert_all(args) -> int:
     ensure_layout()
     entries = conversion_inputs()
     if not entries:
-        print(f"No .pkg, .zip, WAV files, or subdirectories found in {OLD_DIR}")
+        print(f"No .pkg, .zip, .rar, WAV files, or subdirectories found in {OLD_DIR}")
         return 0
 
     success = 0

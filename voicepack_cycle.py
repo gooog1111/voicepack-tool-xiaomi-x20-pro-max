@@ -38,6 +38,31 @@ def file_info(path: Path) -> tuple[str, int]:
     return hashlib.md5(data).hexdigest(), len(data)
 
 
+def auth_marker_path(path: Path) -> Path:
+    return path.with_name(path.stem + ".sha256")
+
+
+def file_sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def auth_marker_ok(path: Path) -> bool:
+    marker = auth_marker_path(path)
+    return path.exists() and marker.exists() and marker.read_text(encoding="utf-8").strip() == file_sha256(path)
+
+
+def mark_auth_verified(path: str | Path) -> None:
+    auth_path = Path(path).expanduser()
+    if not auth_path.exists():
+        return
+    marker = auth_marker_path(auth_path)
+    marker.write_text(file_sha256(auth_path) + "\n", encoding="utf-8")
+    try:
+        os.chmod(marker, 0o600)
+    except OSError:
+        pass
+
+
 def local_write_path(value: str | Path, label: str) -> Path:
     path = Path(value).expanduser()
     path = (path if path.is_absolute() else HERE / path).resolve()
@@ -106,6 +131,10 @@ def make_api(args):
             cloud.cuser_id = data.get("cuser_id")
             cloud.pass_token = data.get("pass_token")
             print(f"Cloud auth: browser session {cloud_auth_file}")
+            if auth_marker_ok(cloud_auth_file):
+                print(f"Cloud auth marker: verified {auth_marker_path(cloud_auth_file)}")
+            else:
+                print("Cloud auth marker: not verified yet; it will be updated after a successful Xiaomi Cloud call")
             return cloud
     session_file = Path(args.session_file).expanduser()
     if session_file.exists():
@@ -929,6 +958,7 @@ def main() -> int:
         devices = []
         try:
             devices = list_cloud_devices(api, args)
+            mark_auth_verified(args.cloud_auth_file)
             print_devices(devices)
         except Exception as exc:
             print(f"Cloud device list failed: {type(exc).__name__}: {exc}")
@@ -950,6 +980,7 @@ def main() -> int:
 
     if args.command == "preflight":
         status = voice_status(api, args)
+        mark_auth_verified(args.cloud_auth_file)
         print(
             "Preflight OK: "
             + json.dumps(
@@ -991,6 +1022,7 @@ def main() -> int:
         args.did = resolve_did(api, args)
     _, get_url = generate_upload(api, args, archive)
     install_pack(api, args, archive, get_url)
+    mark_auth_verified(args.cloud_auth_file)
     print("Custom voice cycle completed successfully")
     return 0
 

@@ -1,6 +1,7 @@
 .venv/
 .env
 state/*.json
+state/*.sha256
 __pycache__/
 *.pyc
 work/*

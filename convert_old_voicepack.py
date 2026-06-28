@@ -12,6 +12,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import time
 import zipfile
 from pathlib import Path
 from urllib.request import urlopen
@@ -22,6 +23,9 @@ HERE = Path(__file__).resolve().parent
 MAX_RECURSION = 4
 MAX_ZIP_ENTRIES = 5000
 MAX_ZIP_UNCOMPRESSED = 512 * 1024 * 1024
+CONTAINER_SUFFIXES = {".pkg", ".zip", ".rar"}
+AUDIO_SUFFIXES = {".wav"}
+SUPPORTED_INPUT_SUFFIXES = CONTAINER_SUFFIXES | AUDIO_SUFFIXES
 OFFICIAL_DONOR_URL = (
     "https://ksyru0-fusion.fds.api.xiaomi.com/"
     "xiaomi-d109gl/audio/1104/ru.zip"
@@ -109,6 +113,74 @@ def validate_zip(archive: zipfile.ZipFile, source: Path) -> list[zipfile.ZipInfo
     return entries
 
 
+def validate_archive_member(filename: str, source: Path) -> None:
+    parts = Path(filename.replace("\\", "/")).parts
+    if filename.startswith(("/", "\\")) or ".." in parts:
+        raise RuntimeError(f"Unsafe archive entry in {source}: {filename}")
+
+
+def validate_rar(archive, source: Path) -> list:
+    entries = [info for info in archive.infolist() if not info.isdir()]
+    if len(entries) > MAX_ZIP_ENTRIES:
+        raise RuntimeError(f"Too many files in RAR: {source}")
+    if sum(info.file_size for info in entries) > MAX_ZIP_UNCOMPRESSED:
+        raise RuntimeError(f"RAR expands beyond 512 MiB: {source}")
+    for info in entries:
+        validate_archive_member(info.filename, source)
+    return entries
+
+
+def extract_rar_members(source: Path, destination: Path) -> list[Path]:
+    try:
+        import rarfile
+    except ModuleNotFoundError as error:
+        raise RuntimeError(
+            "RAR support requires the Python package 'rarfile'. "
+            "Run requirements installation from run.ps1."
+        ) from error
+
+    seven_zip = find_archive_extractor()
+    if seven_zip:
+        rarfile.SEVENZIP_TOOL = str(seven_zip)
+
+    extracted: list[Path] = []
+    destination.mkdir(parents=True, exist_ok=True)
+    try:
+        with rarfile.RarFile(source) as archive:
+            entries = validate_rar(archive, source)
+            for index, info in enumerate(entries):
+                suffix = Path(info.filename).suffix.lower()
+                if suffix not in SUPPORTED_INPUT_SUFFIXES:
+                    continue
+                target = destination / f"{index:04d}" / Path(info.filename).name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                with archive.open(info) as input_stream, target.open("wb") as output:
+                    shutil.copyfileobj(input_stream, output)
+                extracted.append(target)
+    except rarfile.RarCannotExec as error:
+        raise RuntimeError(
+            "RAR support needs an unpacker installed in PATH, for example "
+            "7-Zip/7z, unrar, unar, or bsdtar."
+        ) from error
+    except rarfile.Error as error:
+        raise RuntimeError(f"Cannot read RAR archive {source}: {error}") from error
+    return extracted
+
+
+def find_archive_extractor() -> Path | None:
+    for name in ("7z", "7za", "unrar", "unar", "bsdtar"):
+        found = shutil.which(name)
+        if found:
+            return Path(found)
+    for path in (
+        Path(os.environ.get("ProgramFiles", r"C:\Program Files")) / "7-Zip" / "7z.exe",
+        Path(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)")) / "7-Zip" / "7z.exe",
+    ):
+        if path.is_file():
+            return path
+    return None
+
+
 def copy_audio(source: Path, audio_dir: Path) -> None:
     audio_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source, audio_dir / source.name)
@@ -128,7 +200,7 @@ def collect_source(
     if source.is_dir():
         files = sorted(path for path in source.rglob("*") if path.is_file())
         for path in files:
-            if path.suffix.lower() in {".pkg", ".zip"}:
+            if path.suffix.lower() in CONTAINER_SUFFIXES:
                 collect_source(path, destination, work_root, ccrypt, depth + 1)
         for path in files:
             if path.suffix.lower() == ".wav":
@@ -145,6 +217,16 @@ def collect_source(
         pkg_work = work_root / f"pkg-{depth}-{source.stem}-{len(list(work_root.iterdir()))}"
         extract_pkg(source, destination, pkg_work, ccrypt)
         return
+    if suffix == ".rar":
+        rar_work = work_root / f"rar-{depth}-{source.stem}-{len(list(work_root.iterdir()))}"
+        extracted = extract_rar_members(source, rar_work)
+        for path in extracted:
+            if path.suffix.lower() in CONTAINER_SUFFIXES:
+                collect_source(path, destination, work_root, ccrypt, depth + 1)
+        for path in extracted:
+            if path.suffix.lower() == ".wav":
+                copy_audio(path, audio_dir)
+        return
     if suffix != ".zip":
         raise ValueError(f"Unsupported source inside container: {source.name}")
 
@@ -155,7 +237,7 @@ def collect_source(
         extracted: list[Path] = []
         for index, info in enumerate(entries):
             suffix = Path(info.filename).suffix.lower()
-            if suffix not in {".wav", ".pkg", ".zip"}:
+            if suffix not in SUPPORTED_INPUT_SUFFIXES:
                 continue
             target = zip_work / f"{index:04d}" / Path(info.filename).name
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -166,7 +248,7 @@ def collect_source(
     # Nested containers are donors. WAV files placed next to them intentionally
     # override files with the same name from the nested package.
     for path in extracted:
-        if path.suffix.lower() in {".pkg", ".zip"}:
+        if path.suffix.lower() in CONTAINER_SUFFIXES:
             collect_source(path, destination, work_root, ccrypt, depth + 1)
     for path in extracted:
         if path.suffix.lower() == ".wav":
@@ -188,6 +270,28 @@ def create_zip(source_dir: Path, output: Path) -> None:
     with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED) as archive:
         for mp3 in sorted(source_dir.glob("*.mp3"), key=lambda p: p.name):
             archive.write(mp3, mp3.name)
+
+
+def write_report(report: Path, rows: list[dict[str, str]]) -> Path:
+    fieldnames = ["old_file", "new_file", "confidence", "note", "status"]
+    report.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        with report.open("w", encoding="utf-8-sig", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
+        return report
+    except PermissionError:
+        fallback = report.with_name(f"{report.stem}_{int(time.time())}{report.suffix}")
+        with fallback.open("w", encoding="utf-8-sig", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
+        print(
+            f"WARNING: report is locked, wrote fallback report: {fallback}",
+            file=sys.stderr,
+        )
+        return fallback
 
 
 def ensure_donor(base_dir: Path) -> None:
@@ -224,11 +328,11 @@ def ensure_donor(base_dir: Path) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=(
-            "Convert an old Roborock .pkg, a ZIP containing WAV files, or a WAV "
-            "directory into a numeric Xiaomi MP3 voice pack."
+            "Convert an old Roborock .pkg, ZIP/RAR containing WAV files, or a "
+            "WAV directory into a numeric Xiaomi MP3 voice pack."
         )
     )
-    parser.add_argument("source", help="Old .pkg, .zip, or directory with WAV files")
+    parser.add_argument("source", help="Old .pkg, .zip, .rar, .wav, or directory with WAV files")
     parser.add_argument(
         "--base-dir",
         default=HERE / "resources" / "official_voice_ru",
@@ -398,14 +502,7 @@ def main() -> int:
                 )
 
         create_zip(build_dir, output)
-        report.parent.mkdir(parents=True, exist_ok=True)
-        with report.open("w", encoding="utf-8-sig", newline="") as handle:
-            writer = csv.DictWriter(
-                handle,
-                fieldnames=["old_file", "new_file", "confidence", "note", "status"],
-            )
-            writer.writeheader()
-            writer.writerows(report_rows)
+        report = write_report(report, report_rows)
 
     digest = hashlib.md5(output.read_bytes()).hexdigest()
     output.with_suffix(".md5").write_text(digest + "\n", encoding="ascii")

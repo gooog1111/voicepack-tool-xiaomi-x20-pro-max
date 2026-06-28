@@ -108,7 +108,7 @@ Tested on:
 - Consecutive session import from Chrome, Firefox, Edge, Yandex, Chromium,
   Brave, Vivaldi, Opera, Opera GX and Tor Browser.
 - Unpacking old encrypted Roborock `.pkg`.
-- Recursive processing of ZIP with WAV, `.pkg` and mixed content.
+- Recursive processing of ZIP/RAR with WAV, `.pkg` and mixed content.
 - Batch conversion of the entire `old_voicepacks` folder.
 - Manual assembly using Russian and English event tables.
 - Checking the exact set of 101 numeric MP3s.
@@ -147,16 +147,16 @@ Playwright Chromium, `ffmpeg` and, if necessary, `ccrypt`.
 ## Folder structure
 
 ```text
-old_voicepacks/             Старые .pkg, ZIP, WAV или подпапки
-ready_voicepacks/           Готовые новые пакеты
+old_voicepacks/             Old .pkg, ZIP, RAR, WAV, or subfolders
+ready_voicepacks/           Finished new packages
 custom_voicepack/
-  audio/                    Числовые MP3 для ручной замены
-  table_en.csv              Английская таблица 101 события
-  table_ru.csv              Русская таблица 101 события
-official_voicepacks/        Скачанные оригинальные пакеты
-resources/                  Таблицы, кэш донора и служебные файлы
-state/                      Локальная авторизация и состояние загрузки
-work/                       Временные файлы
+  audio/                    Numeric MP3 files for manual replacement
+  table_en.csv              English table of 101 events
+  table_ru.csv              Russian table of 101 events
+official_voicepacks/        Downloaded official packages
+resources/                  Tables, donor cache, and service files
+state/                      Local authorization and upload state
+work/                       Temporary files
 ```
 
 Authorization, finished assemblies, downloaded originals and temporary files are excluded from
@@ -164,18 +164,20 @@ Git.
 
 ## Converting old packages
 
-Place each source in `old_voicepacks` and select option 4. Supported:
+Place each source in `old_voicepacks` and select option 3. Supported:
 
 - separate encrypted `.pkg`;
-- ZIP with WAV;
-- ZIP with one or more `.pkg`;
-- ZIP containing both WAV and `.pkg`;
-- subfolders with WAV, ZIP and `.pkg`;
-- nested ZIPs up to four levels.
+- ZIP/RAR with WAV;
+- ZIP/RAR with one or more `.pkg`;
+- ZIP/RAR containing both WAV and `.pkg`;
+- subfolders with WAV, ZIP, RAR and `.pkg`;
+- nested ZIP/RAR archives up to four levels.
 
 A separate WAV takes precedence over the file of the same name from the included package.
-Insecure ZIP paths and archives larger than 512 MiB after unpacking
+Insecure ZIP/RAR paths and archives larger than 512 MiB after unpacking
 are rejected.
+RAR support needs an unpacker installed in `PATH`, for example `7z`, `unrar`,
+`unar`, or `bsdtar`; the Python package `rarfile` is installed automatically.
 
 The full old catalog contains 97 voice events. `sound.info` and
 `sound.ver` are service files and are not considered votes.
@@ -229,12 +231,18 @@ Step 1 sequentially imports the Xiaomi session from the installed browser,
 searches for devices via Mi Cloud and local network UDP 54321, saves everything
 found devices in `state/devices.json`, prompts you to select the active one
 vacuum cleaner when there are multiple matches and performs a preliminary check.
+If browser import fails, step 1 automatically starts Xiaomi QR authorization:
+open the QR image or login page, confirm the login in Xiaomi Home, and the
+session will be saved to `state/cloud_auth.json`.
 For non-interactive selection use `--device-index`, `--device-ip`,
 `--device-name` or `--did`.
 Modern Chrome
 can use application-specific encryption cookie `v20`
 (not tested). Before reading cookie, item 1 automatically closes
 found browsers so that their databases are not blocked.
+After a successful Xiaomi Cloud call, the tool creates
+`state/cloud_auth.sha256`. If `cloud_auth.json` is edited manually, the marker
+will stop matching and will be refreshed after the next successful check.
 
 Local search uses UDP 54321 with a timeout of 1.5 seconds and 3 retries.
 If the device responds slowly, increase `--scan-timeout` or
