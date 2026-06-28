@@ -134,14 +134,13 @@ Playwright Chromium, `ffmpeg` and, if necessary, `ccrypt`.
 ## Menu
 
 1. Prepare authorization and DID automatically
-2. Find DID in local network UDP 54321
-3. Preliminary check of the device
-4. Convert all old packages from the old_voicepacks folder
-5. Collect a new custom voicepack from the custom_voicepack folder
-6. Check new voice packs from the ready_voicepacks folder
-7. Install a voicepack from the ready_voicepacks list
-8. Download original d109gl/d102gl packages in all languages
-9. Exit
+2. Preliminary check of the device
+3. Convert all old packages from the old_voicepacks folder
+4. Collect a new custom voicepack from the custom_voicepack folder
+5. Check new voice packs from the ready_voicepacks folder
+6. Install a voicepack from the ready_voicepacks list
+7. Download original d109gl/d102gl packages in all languages
+8. Exit
 
 ## Folder structure
 
@@ -196,14 +195,17 @@ normalized to mono, 16 kHz, 32 kbps without ID3 and Xing.
 
 ## Authorization
 
-Step 1 imports a Xiaomi session from an installed browser, finds the DID via
-Mi Cloud or local UDP 54321 discovery, saves the detected values and runs a
-device preflight check. Modern Chrome can use application-specific encryption
-cookie `v20` (not tested). Before reading cookies, step 1 automatically closes
-detected browsers so their databases are not locked.
+Step 1 imports a Xiaomi session from an installed browser, discovers devices
+via Mi Cloud and local UDP 54321, saves all detected devices to
+`state/devices.json`, lets you choose the active vacuum when several devices
+match and runs a device preflight check. For non-interactive selection, use
+`--device-index`, `--device-ip`, `--device-name` or `--did`. Modern Chrome can use
+application-specific encryption cookie `v20` (not tested). Before reading
+cookies, step 1 automatically closes detected browsers so their databases are
+not locked.
 
-Step 2 separately discovers the vacuum over UDP 54321 with a 1.5 second timeout and
-3 attempts. If the device answers slowly, increase `--scan-timeout` or
+Local discovery uses UDP 54321 with a 1.5 second timeout and 3 attempts.
+If the device answers slowly, increase `--scan-timeout` or
 `XIAOMI_SCAN_TIMEOUT`, for example to `3`.
 
 ## # Getting device information in MiHome

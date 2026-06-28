@@ -1,4 +1,4 @@
-param(
+﻿param(
     [ValidateSet("menu", "setup", "existing-auth", "list-devices", "local-scan", "preflight", "convert-all", "build-custom", "verify-all", "install", "download-originals")]
     [string]$Command = "menu",
     [Parameter(ValueFromRemainingArguments = $true)]
@@ -267,14 +267,13 @@ function Show-Menu {
     Write-Host "Version: $CurrentVersion" -ForegroundColor DarkGray
     Write-Host ""
     Write-Host "1. Подготовить авторизацию и DID автоматически"
-    Write-Host "2. Найти DID в локальной сети UDP 54321"
-    Write-Host "3. Предварительная проверка устройства"
-    Write-Host "4. Конвертировать все старые пакеты из папки old_voicepacks"
-    Write-Host "5. Собрать новый кастомный войспак из папки custom_voicepack"
-    Write-Host "6. Проверить новые войспаки из папки ready_voicepacks"
-    Write-Host "7. Установить войспак из списка ready_voicepacks"
-    Write-Host "8. Скачать оригинальные пакеты d109gl/d102gl на всех языках"
-    Write-Host "9. Выход"
+    Write-Host "2. Предварительная проверка устройства"
+    Write-Host "3. Конвертировать все старые пакеты из папки old_voicepacks"
+    Write-Host "4. Собрать новый кастомный войспак из папки custom_voicepack"
+    Write-Host "5. Проверить новые войспаки из папки ready_voicepacks"
+    Write-Host "6. Установить войспак из списка ready_voicepacks"
+    Write-Host "7. Скачать оригинальные пакеты d109gl/d102gl на всех языках"
+    Write-Host "8. Выход"
     Write-Host ""
 }
 
@@ -290,23 +289,19 @@ if ($Command -eq "menu") {
     $choice = Read-Host "Выберите действие"
     $selectedCommand = switch ($choice) {
         "1" { "setup" }
-        "2" { "local-scan" }
-        "3" { "preflight" }
-        "4" { "convert-all" }
-        "5" { "build-custom" }
-        "6" { "verify-all" }
-        "7" { "install" }
-        "8" { "download-originals" }
-        "9" { exit 0 }
+        "2" { "preflight" }
+        "3" { "convert-all" }
+        "4" { "build-custom" }
+        "5" { "verify-all" }
+        "6" { "install" }
+        "7" { "download-originals" }
+        "8" { exit 0 }
         default {
             Write-Error "Неизвестный пункт меню: $choice"
             exit 2
         }
     }
     $Command = $selectedCommand
-    if ($choice -eq "2" -and (-not $ExtraArgs -or $ExtraArgs.Count -eq 0)) {
-        $ExtraArgs = @("--direct-scan", "--save-did")
-    }
 }
 
 Ensure-Environment
@@ -324,7 +319,7 @@ if ($Command -eq "setup") {
 
     Write-Host ""
     Write-Host "Шаг 2/2: ищу DID и проверяю доступ к устройству..." -ForegroundColor Cyan
-    $SetupArgs = @("--direct-scan", "--save-did")
+    $SetupArgs = @("--direct-scan", "--save-did", "--did", "", "--model", "", "--device-name", "", "--device-ip", "")
     if ($ExtraArgs) {
         $SetupArgs += $ExtraArgs
     }

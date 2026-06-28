@@ -433,6 +433,101 @@ def print_devices(devices: list[dict]) -> None:
         )
 
 
+def filtered_devices(devices: list[dict], args) -> list[dict]:
+    candidates = devices
+    if args.device_ip:
+        candidates = [item for item in candidates if item.get("ip") == args.device_ip]
+    if args.model:
+        model_matches = [item for item in candidates if item.get("model") == args.model]
+        if model_matches:
+            candidates = model_matches
+    if args.device_name:
+        needle = args.device_name.lower()
+        candidates = [item for item in candidates if needle in str(item.get("name", "")).lower()]
+    return candidates
+
+
+def device_label(item: dict) -> str:
+    parts = [
+        item.get("name") or "unnamed",
+        item.get("model") or "unknown-model",
+        "did=" + str(item.get("did") or ""),
+    ]
+    if item.get("ip"):
+        parts.append("ip=" + str(item["ip"]))
+    if item.get("online") not in (None, ""):
+        parts.append("online=" + str(item["online"]))
+    if item.get("source"):
+        parts.append("source=" + str(item["source"]))
+    return " | ".join(parts)
+
+
+def save_selected_device(item: dict, args) -> None:
+    if not args.save_did:
+        return
+    env_path = local_write_path(args.env_file, "env file")
+    save_env_value(env_path, "XIAOMI_DID", str(item["did"]))
+    if item.get("ip"):
+        save_env_value(env_path, "XIAOMI_DEVICE_IP", str(item["ip"]))
+    print(f"Saved device selection to {args.env_file}")
+
+
+def save_device_inventory(devices: list[dict], args, active_did: str = "") -> None:
+    if not getattr(args, "save_devices", False):
+        return
+
+    path = local_write_path(args.devices_file, "devices file")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    inventory = {
+        "updated_at": time.strftime("%Y-%m-%d %H:%M:%S %z"),
+        "active_did": active_did or "",
+        "devices": unique_devices(devices),
+    }
+    path.write_text(json.dumps(inventory, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"Saved {len(inventory['devices'])} discovered device(s) to {path}")
+
+
+def choose_device(candidates: list[dict], args, source: str, inventory_devices: list[dict] | None = None) -> dict:
+    inventory_devices = inventory_devices or candidates
+    if len(candidates) == 1:
+        item = candidates[0]
+        print(f"Auto DID from {source}: " + json.dumps(item, ensure_ascii=False))
+        save_selected_device(item, args)
+        save_device_inventory(inventory_devices, args, str(item["did"]))
+        return item
+
+    if args.device_index:
+        index = int(args.device_index)
+        if 1 <= index <= len(candidates):
+            item = candidates[index - 1]
+            print(f"Selected DID #{index} from {source}: " + json.dumps(item, ensure_ascii=False))
+            save_selected_device(item, args)
+            save_device_inventory(inventory_devices, args, str(item["did"]))
+            return item
+        raise RuntimeError(f"--device-index must be between 1 and {len(candidates)}")
+
+    print(f"Found multiple Xiaomi devices from {source}:")
+    for index, item in enumerate(candidates, start=1):
+        print(f"  {index}. {device_label(item)}")
+
+    if sys.stdin.isatty():
+        while True:
+            value = input("Выберите устройство по номеру: ").strip()
+            try:
+                index = int(value)
+            except ValueError:
+                print("Введите номер из списка.")
+                continue
+            if 1 <= index <= len(candidates):
+                item = candidates[index - 1]
+                save_selected_device(item, args)
+                save_device_inventory(inventory_devices, args, str(item["did"]))
+                return item
+            print("Нет такого номера.")
+
+    raise RuntimeError("More than one matching device was found. Use --device-index, --device-ip, --device-name or --did.")
+
+
 def resolve_did(api, args) -> str:
     if args.did and args.did != "YOUR_DEVICE_DID":
         return args.did
@@ -446,24 +541,9 @@ def resolve_did(api, args) -> str:
         if getattr(args, "debug_devices", False):
             print(f"Cloud device list failed: {type(exc).__name__}: {exc}", file=sys.stderr)
 
-    candidates = devices
-    if args.device_ip:
-        candidates = [item for item in candidates if item.get("ip") == args.device_ip]
-    if args.model:
-        model_matches = [item for item in candidates if item.get("model") == args.model]
-        if model_matches:
-            candidates = model_matches
-    if args.device_name:
-        needle = args.device_name.lower()
-        candidates = [item for item in candidates if needle in str(item.get("name", "")).lower()]
+    candidates = filtered_devices(devices, args)
 
-    if len(candidates) == 1:
-        did = candidates[0]["did"]
-        print("Auto DID from cloud: " + json.dumps(candidates[0], ensure_ascii=False))
-        if args.save_did:
-            save_env_value(local_write_path(args.env_file, "env file"), "XIAOMI_DID", did)
-            print(f"Saved XIAOMI_DID to {args.env_file}")
-        return did
+    cloud_candidate = candidates[0] if len(candidates) == 1 else None
 
     # Fallback: local miIO discovery. This does not require the local device token.
     # For deploy/preflight we must not rely on broadcast: many Xiaomi vacuums ignore
@@ -472,20 +552,18 @@ def resolve_did(api, args) -> str:
     if not getattr(args, "scan_host", "") and not getattr(args, "device_ip", ""):
         args.direct_scan = True
     local_devices = local_miio_scan(args)
-    local_candidates = local_devices
-    if args.device_ip:
-        local_candidates = [item for item in local_candidates if item.get("ip") == args.device_ip]
+    save_device_inventory(devices + local_devices, args)
+    local_candidates = filtered_devices(local_devices, args)
+
+    if cloud_candidate:
+        return choose_device([cloud_candidate], args, "cloud", devices + local_devices)["did"]
 
     if len(local_candidates) == 1:
-        did = local_candidates[0]["did"]
-        print("Auto DID from local UDP scan: " + json.dumps(local_candidates[0], ensure_ascii=False))
-        if args.save_did:
-            env_path = local_write_path(args.env_file, "env file")
-            save_env_value(env_path, "XIAOMI_DID", did)
-            if local_candidates[0].get("ip"):
-                save_env_value(env_path, "XIAOMI_DEVICE_IP", local_candidates[0]["ip"])
-            print(f"Saved XIAOMI_DID to {args.env_file}")
-        return did
+        return choose_device(local_candidates, args, "local UDP scan", devices + local_devices)["did"]
+
+    combined_candidates = filtered_devices(unique_devices(candidates + local_candidates), args)
+    if combined_candidates:
+        return choose_device(combined_candidates, args, "cloud/local discovery", devices + local_devices)["did"]
 
     if cloud_error:
         print(f"Cloud device list failed: {type(cloud_error).__name__}: {cloud_error}")
@@ -493,7 +571,7 @@ def resolve_did(api, args) -> str:
     print_local_devices(local_devices)
     if not candidates and not local_candidates:
         raise RuntimeError("DID was not set and no matching device was found. Use --device-ip, --scan-subnet, --direct-scan or --did.")
-    raise RuntimeError("DID was not set and more than one matching device was found. Use --device-ip or --did.")
+    raise RuntimeError("DID was not set and more than one matching device was found. Use --device-index, --device-ip, --device-name or --did.")
 
 def safe_extract_voice(archive: Path, destination: Path) -> None:
     destination.mkdir(parents=True, exist_ok=True)
@@ -782,6 +860,7 @@ def add_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--did", default=env("XIAOMI_DID", DEFAULT_DID))
     parser.add_argument("--device-ip", default=env("XIAOMI_DEVICE_IP", ""), help="Optional local IP used to select the device from the Mi Cloud device list")
     parser.add_argument("--device-name", default=env("XIAOMI_DEVICE_NAME", ""), help="Optional name substring used to select the device from the Mi Cloud device list")
+    parser.add_argument("--device-index", type=int, default=0, help="Select a device by number when several devices match")
     parser.add_argument("--debug-devices", action="store_true", help="Print device API probing diagnostics")
     parser.add_argument("--scan-subnet", default=env("XIAOMI_SCAN_SUBNET", ""), help="Local subnet for miIO UDP discovery, for example 192.168.1.0/24")
     parser.add_argument("--scan-host", default=env("XIAOMI_SCAN_HOST", env("XIAOMI_DEVICE_IP", "")), help="Probe one exact local IP with miIO hello")
@@ -791,8 +870,11 @@ def add_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--direct-scan", action="store_true", help="Probe every address in --scan-subnet instead of broadcast only")
     parser.add_argument("--raw-scan", action="store_true", help="Print raw UDP replies during local scan")
     parser.add_argument("--save-did", action="store_true", help="Save the auto-detected DID to .env")
+    parser.add_argument("--devices-file", default=env("XIAOMI_DEVICES_FILE", str(HERE / "state/devices.json")), help="Discovered device inventory file")
+    parser.add_argument("--no-save-devices", dest="save_devices", action="store_false", help="Do not save discovered devices to --devices-file")
+    parser.set_defaults(save_devices=True)
     parser.add_argument("--env-file", default=str(HERE / ".env"))
-    parser.add_argument("--model", default=env("XIAOMI_MODEL", "xiaomi.vacuum.d109gl"))
+    parser.add_argument("--model", default=env("XIAOMI_MODEL", ""))
     parser.add_argument(
         "--service-id", type=int, default=int(env("XIAOMI_VOICE_SIID", "15"))
     )
@@ -837,17 +919,23 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.command == "local-scan":
-        print_local_devices(local_miio_scan(args))
+        local_devices = local_miio_scan(args)
+        print_local_devices(local_devices)
+        save_device_inventory(local_devices, args)
         return 0
 
     if args.command == "list-devices":
         api = make_api(args)
+        devices = []
         try:
-            print_devices(list_cloud_devices(api, args))
+            devices = list_cloud_devices(api, args)
+            print_devices(devices)
         except Exception as exc:
             print(f"Cloud device list failed: {type(exc).__name__}: {exc}")
             print_devices([])
-        print_local_devices(local_miio_scan(args))
+        local_devices = local_miio_scan(args)
+        print_local_devices(local_devices)
+        save_device_inventory(devices + local_devices, args)
         return 0
 
     if args.command in {"preflight", "deploy", "all"}:
