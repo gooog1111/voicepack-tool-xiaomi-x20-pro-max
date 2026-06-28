@@ -13,9 +13,9 @@
 
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-28 03:51 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-28 04:23 UTC -->
 
-[![Views local](https://img.shields.io/badge/Views_local-24-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views local](https://img.shields.io/badge/Views_local-25-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Views GitHub](https://img.shields.io/badge/Views_GitHub-0-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Unique visitors](https://img.shields.io/badge/Unique-0-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Clones](https://img.shields.io/badge/Clones-0-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
@@ -48,7 +48,7 @@
 
 
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-28 03:51 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-28 04:23 UTC -->
 
 ## Issues
 
@@ -98,7 +98,7 @@ Tested on:
 
 ## And also
 
-- `the list will be updated with all the vacuum cleaners I can get my hands on`
+- `список будет пополняться всеми пылесосми, до которых смогу дотянуться`
 
 
 
@@ -112,7 +112,7 @@ Tested on:
 - Batch conversion of the entire `old_voicepacks` folder.
 - Manual assembly using Russian and English event tables.
 - Checking the exact set of 101 numeric MP3s.
-- Select and install a package from `ready_voicepacks`.
+- Selecting and installing a package from `ready_voicepacks`.
 - Download 20 official languages ​​for d109gl and d102gl.
 
 ## Quick start
@@ -177,7 +177,7 @@ Insecure ZIP paths and archives larger than 512 MiB after unpacking
 are rejected.
 
 The full old catalog contains 97 voice events. `sound.info` and
-`sound.ver` are service files and are not considered voices.
+`sound.ver` are service files and are not considered votes.
 
 ## Download old voice packs
 
@@ -187,10 +187,8 @@ https://4pda.to/forum/index.php?showtopic=881982
 
 ## Manual custom package
 
-Event numbers are in `custom_voicepack/table_en.csv` and
-`table_en.csv`. Put modified numeric MP3s, such as `130.mp3`, into
-`custo
-m_voicepack/audio` and select item 6.
+Event numbers are in `custom_voicepack/table_ru.csv` and
+`table_en.csv`. Put modified numeric MP3s, such as `130.mp3`, into`custom_voicepack/audio` and select option 6.
 
 Missing events are taken from the official Russian package, which
 automatically downloaded the first time you use it. Replaceable files
@@ -200,7 +198,7 @@ normalized to mono, 16 kHz, 32 kbps without ID3 and Xing.
 
 Step 1 sequentially checks installed browsers and stops searching
 after the first full Xiaomi session. Modern Chrome can use
-Application-specific `v20` cookie encryption (not tested).
+Application-specific encryption cookie `v20` (not tested).
 
 ## # Getting device information in MiHome
 
@@ -213,12 +211,4 @@ Installation of unofficial voicepacks is at your own risk and may void warranty 
 
 ## Acknowledgments
 
-Special thanks to [runassu](https://github.com/runassu) for the research and Chromium v20 cookie decryption methods used in this project.
-
-## License
-
-[MIT](LICENSE.md)
-
-## Support the project
-
-Support options are available in [SPONSORS.md](SPONSORS.md) and through the GitHub Sponsor button.
+Special thanks to [runassu](https://github.com/runassu) for the research and Chromium v20 cookie decryption techniques used in this project.

@@ -13,9 +13,9 @@
 
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-28 03:51 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-28 04:23 UTC -->
 
-[![Views local](https://img.shields.io/badge/Views_local-24-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views local](https://img.shields.io/badge/Views_local-25-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Views GitHub](https://img.shields.io/badge/Views_GitHub-0-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Unique visitors](https://img.shields.io/badge/Unique-0-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Clones](https://img.shields.io/badge/Clones-0-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
@@ -48,7 +48,7 @@
 
 
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-28 03:51 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-28 04:23 UTC -->
 
 ## Issues
 
@@ -213,4 +213,3 @@ https://4pda.to/forum/index.php?showtopic=881982
 ## Благодарности
 
 Отдельная благодарность [runassu](https://github.com/runassu) за исследование и методы расшифровки Chromium v20 cookie, использованные в этом проекте.
-
