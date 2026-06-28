@@ -10,6 +10,7 @@ import os
 import shutil
 import sqlite3
 import struct
+import subprocess
 import sys
 import tempfile
 import time
@@ -61,6 +62,20 @@ class BrowserSource:
     name: str
     kind: str
     root: Path
+
+
+BROWSER_PROCESSES = {
+    "brave": ("brave",),
+    "chrome": ("chrome",),
+    "chromium": ("chromium", "chrome"),
+    "edge": ("msedge",),
+    "firefox": ("firefox",),
+    "opera": ("opera",),
+    "opera gx": ("opera",),
+    "tor browser": ("firefox",),
+    "vivaldi": ("vivaldi",),
+    "yandex": ("browser", "yandex_browser", "yandexbrowser"),
+}
 
 
 @dataclass(frozen=True)
@@ -468,6 +483,91 @@ def default_sources() -> list[BrowserSource]:
     raise RuntimeError(f"unsupported platform: {sys.platform}")
 
 
+def process_names_for_source(source: BrowserSource) -> tuple[str, ...]:
+    name = source.name.lower()
+    for browser_name, process_names in BROWSER_PROCESSES.items():
+        if browser_name in name:
+            return process_names
+    if source.kind == "firefox":
+        return ("firefox",)
+    if source.kind == "chromium":
+        return ("chrome", "chromium")
+    return ()
+
+
+def powershell_array(values: set[str]) -> str:
+    return "@(" + ",".join("'" + value.replace("'", "''") + "'" for value in sorted(values)) + ")"
+
+
+def close_browser_processes(sources: list[BrowserSource]) -> None:
+    process_names = {
+        process_name
+        for source in sources
+        for process_name in process_names_for_source(source)
+        if process_name
+    }
+    if not process_names:
+        return
+
+    print("Closing browser processes: " + ", ".join(sorted(process_names)))
+    try:
+        if os.name == "nt":
+            script = (
+                "$names = " + powershell_array(process_names) + "; "
+                "$procs = Get-Process -Name $names -ErrorAction SilentlyContinue; "
+                "if ($procs) { "
+                "$procs | Where-Object { $_.MainWindowHandle -ne 0 } | ForEach-Object { [void]$_.CloseMainWindow() }; "
+                "Start-Sleep -Seconds 2; "
+                "$procs | Where-Object { -not $_.HasExited } | Stop-Process -Force; "
+                "$procs | Select-Object -ExpandProperty ProcessName -Unique "
+                "}"
+            )
+            completed = subprocess.run(
+                ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        elif sys.platform == "darwin":
+            closed = []
+            for process_name in sorted(process_names):
+                result = subprocess.run(
+                    ["pkill", "-TERM", "-x", process_name],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                if result.returncode == 0:
+                    closed.append(process_name)
+            time.sleep(2)
+            for process_name in sorted(process_names):
+                subprocess.run(["pkill", "-KILL", "-x", process_name], capture_output=True, check=False)
+            completed = subprocess.CompletedProcess([], 0, stdout="\n".join(closed), stderr="")
+        else:
+            closed = []
+            for process_name in sorted(process_names):
+                result = subprocess.run(
+                    ["pkill", "-TERM", "-x", process_name],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                if result.returncode == 0:
+                    closed.append(process_name)
+            time.sleep(2)
+            for process_name in sorted(process_names):
+                subprocess.run(["pkill", "-KILL", "-x", process_name], capture_output=True, check=False)
+            completed = subprocess.CompletedProcess([], 0, stdout="\n".join(closed), stderr="")
+
+        closed = (completed.stdout or "").strip()
+        if closed:
+            print("Closed: " + ", ".join(dict.fromkeys(closed.split())))
+    except FileNotFoundError:
+        print("  process closer is unavailable on this system")
+    except Exception as exc:
+        print(f"  failed to close browsers automatically: {type(exc).__name__}: {exc}")
+
+
 def profiles(source: BrowserSource) -> list[Path]:
     if source.kind == "firefox":
         found = []
@@ -613,6 +713,11 @@ def main() -> int:
         action="store_true",
         help="Disable Chromium v20/App-Bound key extraction and only try legacy v10/v11 cookies",
     )
+    parser.add_argument(
+        "--no-close-browsers",
+        action="store_true",
+        help="Do not close running browsers before reading cookie databases",
+    )
     args = parser.parse_args()
 
     sources = default_sources()
@@ -627,6 +732,8 @@ def main() -> int:
         raise RuntimeError("no matching browser profile was found")
 
     print("Browser search order: " + " -> ".join(source.name for source in sources))
+    if not args.no_close_browsers:
+        close_browser_processes(sources)
 
     for source in sources:
         print(f"Checking {source.name}: {source.root}")

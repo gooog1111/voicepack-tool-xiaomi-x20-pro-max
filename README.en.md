@@ -199,6 +199,8 @@ normalized to mono, 16 kHz, 32 kbps without ID3 and Xing.
 Step 1 sequentially checks installed browsers and stops searching
 after the first full Xiaomi session. Modern Chrome can use
 Application-specific encryption cookie `v20` (not tested).
+Before reading cookies, step 1 automatically closes detected browsers so
+their databases are not locked. Disable this with `--no-close-browsers`.
 
 ## # Getting device information in MiHome
 
