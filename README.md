@@ -214,26 +214,3 @@ https://4pda.to/forum/index.php?showtopic=881982
 
 Отдельная благодарность [runassu](https://github.com/runassu) за исследование и методы расшифровки Chromium v20 cookie, использованные в этом проекте.
 
-## Лицензия
-
-[MIT](LICENSE.md)
-
-## Поддержать проект
-
-Выберите удобный способ:
-
-<p align="center">
-  <a href="https://yoomoney.ru/fundraise/1IJBVM8MJMG.260624" target="_blank">
-    <img src="https://img.shields.io/badge/ЮМоnеу-Сбор средств-yellow?style=for-the-badge&logo=YooMoney&logoColor=white" alt="ЮМоnеу">
-  </a>
-  <a href="https://t.tb.ru/c2c-qr-choose-bank?requisiteNumber=+79996363556&bankCode=100000000004" target="_blank">
-    <img src="https://img.shields.io/badge/СБП-Т Банк | Sber-blue?style=for-the-badge&logo=none" alt="СБП">
-  </a>
-</p>
-
-### USDT (TON)
-
-Адрес для перевода:  
-```bash
-UQA73kPkNHudFD5yV7DuP-GuXO1ExTpqH0gNioQX8sY4fU6L
-```

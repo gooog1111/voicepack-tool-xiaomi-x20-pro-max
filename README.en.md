@@ -221,20 +221,4 @@ Special thanks to [runassu](https://github.com/runassu) for the research and Chr
 
 ## Support the project
 
-Choose a convenient method:
-
-<p align="center">
-  <a href="https://yoomoney.ru/fundraise/1IJBVM8MJMG.260624" target="_blank">
-    <img src="https://img.shields.io/badge/YooMoney-Fundraising-yellow?style=for-the-badge&logo=YooMoney&logoColor=white" alt="YooMoney">
-  </a>
-  <a href="https://t.tb.ru/c2c-qr-choose-bank?requisiteNumber=+79996363556&bankCode=100000000004" target="_blank">
-    <img src="https://img.shields.io/badge/SBP-T Bank | Sber-blue?style=for-the-badge&logo=none" alt="SBP">
-  </a>
-</p>
-
-## # USDT (TON)
-
-Address for transfer:  
-```bash
-UQA73kPkNHudFD5yV7DuP-GuXO1ExTpqH0gNioQX8sY4fU6L
-```
+Support options are available in [SPONSORS.md](SPONSORS.md) and through the GitHub Sponsor button.
