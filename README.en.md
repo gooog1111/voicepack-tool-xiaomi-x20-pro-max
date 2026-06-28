@@ -136,11 +136,12 @@ Playwright Chromium, `ffmpeg` and, if necessary, `ccrypt`.
 1. Prepare authorization and DID automatically
 2. Preliminary check of the device
 3. Convert all old packages from the old_voicepacks folder
-4. Collect a new custom voicepack from the custom_voicepack folder
-5. Check new voicepacks from the ready_voicepacks folder
-6. Install a voicepack from the ready_voicepacks list
-7. Download original d109gl/d102gl packages in all languages
-8. Exit
+4. Build a modern custom ZIP for X20/Xiaomi Cloud
+5. Build a legacy PKG for Xiaomi/Roborock v1/S5
+6. Check new ZIP voice packs from the ready_voicepacks folder
+7. Install a ZIP voicepack from the ready_voicepacks list
+8. Download original d109gl/d102gl packages in all languages
+9. Exit
 
 ## Folder structure
 
@@ -186,12 +187,30 @@ https://4pda.to/forum/index.php?showtopic=881982
 
 ## Manual custom package
 
-Event numbers are in `custom_voicepack/table_ru.csv` and
-`table_en.csv`. Put modified numeric MP3s, such as `130.mp3`, into`custom_voicepack/audio` and select option 6.
+Event numbers are in `custom_voicepack/table_ru.csv` and`table_en.csv`. Put modified numeric MP3s, such as `130.mp3`, into
+`custom_voicepack/audio` and select option 4.
 
 Missing events are taken from the official Russian package, which
 automatically downloaded the first time you use it. Replaceable files
 normalized to mono, 16 kHz, 32 kbps without ID3 and Xing.
+
+## Legacy PKG for Roborock v1/S5
+
+Option 5 builds an encrypted `.pkg` for older miIO vacuums: Xiaomi Mi Robot
+Vacuum / Mijia gen 1 (`rockrobo.vacuum.v1`) and Roborock Sweep One
+S5/S50/S51/S55/S501 (`roborock.vacuum.s5`). These packages are installed
+locally, not through Xiaomi Cloud:
+
+```bash
+pip install git+https://github.com/rytilahti/python-miio
+mirobo discover --handshake true
+mirobo --ip=192.168.8.1 --token=TOKEN install-sound ready_voicepacks/custom_roborock_v1_s5.pkg
+```
+
+The robot must be charged and docked. Firmware/sound flashing needs its IP
+and local token; `mirobo discover --handshake true` can get them after
+connecting to the `rockrobo-XXXX` network, or you can use another local-token
+method.
 
 ## Authorization
 

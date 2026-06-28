@@ -4,10 +4,13 @@ import argparse
 import csv
 import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
 import sys
+import tarfile
+import tempfile
 import zipfile
 from pathlib import Path
 
@@ -19,6 +22,7 @@ CUSTOM_AUDIO = CUSTOM_DIR / "audio"
 OFFICIAL_DIR = HERE / "official_voicepacks"
 RESOURCES = HERE / "resources"
 DONOR_DIR = RESOURCES / "official_voice_ru"
+ROBOROCK_MAPPING = RESOURCES / "roborock_to_xiaomi_mapping.csv"
 with (CUSTOM_DIR / "table_en.csv").open("r", encoding="utf-8-sig", newline="") as handle:
     EXPECTED_NAMES = {row["file"] for row in csv.DictReader(handle)}
 
@@ -42,7 +46,11 @@ def safe_name(name: str) -> str:
 
 
 def run(command: list[str | Path]) -> None:
-    result = subprocess.run([str(item) for item in command], check=False)
+    process_env = os.environ.copy()
+    process_env["CYGWIN"] = (
+        process_env.get("CYGWIN", "") + " nodosfilewarning"
+    ).strip()
+    result = subprocess.run([str(item) for item in command], check=False, env=process_env)
     if result.returncode:
         raise RuntimeError(
             f"Command failed ({result.returncode}): "
@@ -125,6 +133,92 @@ def build_custom(_args) -> int:
             output,
         ]
     )
+    return 0
+
+
+def ffmpeg_to_legacy_wav(ffmpeg: str, source: Path, output: Path, sample_rate: int) -> None:
+    output.parent.mkdir(parents=True, exist_ok=True)
+    run(
+        [
+            ffmpeg,
+            "-y",
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-i",
+            source,
+            "-ac",
+            "1",
+            "-ar",
+            str(sample_rate),
+            "-sample_fmt",
+            "s16",
+            output,
+        ]
+    )
+
+
+def build_legacy_pkg(args) -> int:
+    ensure_layout()
+    from convert_old_voicepack import PASSWORD, ensure_donor, find_program
+
+    ffmpeg = shutil.which("ffmpeg")
+    if not ffmpeg:
+        raise RuntimeError("ffmpeg is required in PATH")
+
+    ccrypt = find_program("ccrypt", args.ccrypt)
+    ensure_donor(DONOR_DIR)
+
+    output = Path(args.output).expanduser().resolve()
+    build_dir = HERE / "work" / "legacy_pkg_wav"
+    shutil.rmtree(build_dir, ignore_errors=True)
+    build_dir.mkdir(parents=True)
+
+    rows = list(csv.DictReader(ROBOROCK_MAPPING.open("r", encoding="utf-8-sig", newline="")))
+    built: list[str] = []
+    missing: list[str] = []
+    skipped_medium = 0
+    for row in rows:
+        if row.get("confidence") == "medium" and not args.include_medium:
+            skipped_medium += 1
+            continue
+        old_file = row["old_file"]
+        new_file = row["new_file"]
+        source = CUSTOM_AUDIO / new_file
+        if not source.is_file():
+            source = DONOR_DIR / new_file
+        if not source.is_file():
+            missing.append(f"{old_file} <- {new_file}")
+            continue
+        ffmpeg_to_legacy_wav(ffmpeg, source, build_dir / old_file, args.sample_rate)
+        built.append(old_file)
+
+    if not built:
+        raise RuntimeError("No legacy WAV files were built")
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="legacy-voicepack-", dir=str(HERE / "work")) as temp_name:
+        temp_dir = Path(temp_name)
+        tar_path = temp_dir / "voicepack.tar.gz"
+        with tarfile.open(tar_path, "w:gz") as archive:
+            for wav in sorted(build_dir.glob("*.wav")):
+                archive.add(wav, arcname=wav.name)
+        run([ccrypt, "-e", "-f", "-K", PASSWORD, tar_path])
+        encrypted = tar_path.with_name(tar_path.name + ".cpt")
+        if not encrypted.is_file():
+            raise RuntimeError("ccrypt did not create encrypted package")
+        shutil.copy2(encrypted, output)
+
+    digest = hashlib.md5(output.read_bytes()).hexdigest()
+    output.with_suffix(".md5").write_text(digest + "\n", encoding="ascii")
+    print(
+        f"Built legacy Roborock package: {output} "
+        f"files={len(built)} skipped_medium={skipped_medium} missing={len(missing)} md5={digest}"
+    )
+    if missing:
+        print("Missing mapped files:")
+        for item in missing:
+            print("  " + item)
     return 0
 
 
@@ -305,6 +399,13 @@ def main() -> int:
 
     build = subparsers.add_parser("build-custom")
     build.set_defaults(handler=build_custom)
+
+    legacy = subparsers.add_parser("build-legacy-pkg")
+    legacy.add_argument("--output", default=str(READY_DIR / "custom_roborock_v1_s5.pkg"))
+    legacy.add_argument("--sample-rate", type=int, default=44100)
+    legacy.add_argument("--ccrypt")
+    legacy.add_argument("--no-include-medium", dest="include_medium", action="store_false")
+    legacy.set_defaults(handler=build_legacy_pkg, include_medium=True)
 
     verify = subparsers.add_parser("verify-all")
     verify.set_defaults(handler=verify_all)

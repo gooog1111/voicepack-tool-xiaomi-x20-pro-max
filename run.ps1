@@ -1,5 +1,5 @@
 ﻿param(
-    [ValidateSet("menu", "setup", "existing-auth", "list-devices", "local-scan", "preflight", "convert-all", "build-custom", "verify-all", "install", "download-originals")]
+    [ValidateSet("menu", "setup", "existing-auth", "list-devices", "local-scan", "preflight", "convert-all", "build-custom", "build-legacy-pkg", "verify-all", "install", "download-originals")]
     [string]$Command = "menu",
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]$ExtraArgs
@@ -269,11 +269,12 @@ function Show-Menu {
     Write-Host "1. Подготовить авторизацию и DID автоматически"
     Write-Host "2. Предварительная проверка устройства"
     Write-Host "3. Конвертировать все старые пакеты из папки old_voicepacks"
-    Write-Host "4. Собрать новый кастомный войспак из папки custom_voicepack"
-    Write-Host "5. Проверить новые войспаки из папки ready_voicepacks"
-    Write-Host "6. Установить войспак из списка ready_voicepacks"
-    Write-Host "7. Скачать оригинальные пакеты d109gl/d102gl на всех языках"
-    Write-Host "8. Выход"
+    Write-Host "4. Собрать новый кастомный ZIP для X20/Xiaomi Cloud"
+    Write-Host "5. Собрать legacy PKG для Xiaomi/Roborock v1/S5"
+    Write-Host "6. Проверить новые ZIP-войспаки из папки ready_voicepacks"
+    Write-Host "7. Установить ZIP-войспак из списка ready_voicepacks"
+    Write-Host "8. Скачать оригинальные пакеты d109gl/d102gl на всех языках"
+    Write-Host "9. Выход"
     Write-Host ""
 }
 
@@ -292,10 +293,11 @@ if ($Command -eq "menu") {
         "2" { "preflight" }
         "3" { "convert-all" }
         "4" { "build-custom" }
-        "5" { "verify-all" }
-        "6" { "install" }
-        "7" { "download-originals" }
-        "8" { exit 0 }
+        "5" { "build-legacy-pkg" }
+        "6" { "verify-all" }
+        "7" { "install" }
+        "8" { "download-originals" }
+        "9" { exit 0 }
         default {
             Write-Error "Неизвестный пункт меню: $choice"
             exit 2
@@ -336,7 +338,7 @@ if ($Command -eq "existing-auth") {
     exit $code
 }
 
-if ($Command -in @("convert-all", "build-custom", "verify-all", "install", "download-originals")) {
+if ($Command -in @("convert-all", "build-custom", "build-legacy-pkg", "verify-all", "install", "download-originals")) {
     & $Python (Join-Path $Here "voicepack_manager.py") $Command @ExtraArgs
     $code = $LASTEXITCODE
     Return-ToMenu

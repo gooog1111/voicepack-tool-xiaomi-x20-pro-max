@@ -136,11 +136,12 @@ Playwright Chromium, `ffmpeg` и, при необходимости, `ccrypt`.
 1. Подготовить авторизацию и DID автоматически
 2. Предварительная проверка устройства
 3. Конвертировать все старые пакеты из папки old_voicepacks
-4. Собрать новый кастомный войспак из папки custom_voicepack
-5. Проверить новые войспаки из папки ready_voicepacks
-6. Установить войспак из списка ready_voicepacks
-7. Скачать оригинальные пакеты d109gl/d102gl на всех языках
-8. Выход
+4. Собрать новый кастомный ZIP для X20/Xiaomi Cloud
+5. Собрать legacy PKG для Xiaomi/Roborock v1/S5
+6. Проверить новые ZIP-войспаки из папки ready_voicepacks
+7. Установить ZIP-войспак из списка ready_voicepacks
+8. Скачать оригинальные пакеты d109gl/d102gl на всех языках
+9. Выход
 
 ## Структура папок
 
@@ -188,11 +189,28 @@ https://4pda.to/forum/index.php?showtopic=881982
 
 Номера событий находятся в `custom_voicepack/table_ru.csv` и
 `table_en.csv`. Положите изменённые числовые MP3, например `130.mp3`, в
-`custom_voicepack/audio` и выберите пункт 6.
+`custom_voicepack/audio` и выберите пункт 4.
 
 Отсутствующие события берутся из официального русского пакета, который
 автоматически скачивается при первом использовании. Заменяемые файлы
 нормализуются в mono, 16 kHz, 32 kbps без ID3 и Xing.
+
+## Legacy PKG для Roborock v1/S5
+
+Пункт 5 собирает зашифрованный `.pkg` для старых miIO-пылесосов:
+Xiaomi Mi Robot Vacuum / Mijia 1C gen 1 (`rockrobo.vacuum.v1`) и Roborock
+Sweep One S5/S50/S51/S55/S501 (`roborock.vacuum.s5`). Эти пакеты ставятся
+не через Xiaomi Cloud, а локально:
+
+```bash
+pip install git+https://github.com/rytilahti/python-miio
+mirobo discover --handshake true
+mirobo --ip=192.168.8.1 --token=TOKEN install-sound ready_voicepacks/custom_roborock_v1_s5.pkg
+```
+
+Робот должен быть заряжен и стоять на док-станции. Для прошивки нужен IP и
+локальный token; их можно получить через `mirobo discover --handshake true`
+после подключения к сети `rockrobo-XXXX` или другим способом из вашей сети.
 
 ## Авторизация
 
