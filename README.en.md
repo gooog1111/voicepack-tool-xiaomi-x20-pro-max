@@ -13,9 +13,9 @@
 
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-28 17:01 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-28 18:01 UTC -->
 
-[![Views local](https://img.shields.io/badge/Views_local-28-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views local](https://img.shields.io/badge/Views_local-29-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Views GitHub](https://img.shields.io/badge/Views_GitHub-33-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Unique visitors](https://img.shields.io/badge/Unique-7-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Clones](https://img.shields.io/badge/Clones-617-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
@@ -48,7 +48,7 @@
 
 
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-28 17:01 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-28 18:01 UTC -->
 
 ## Issues
 
@@ -112,7 +112,7 @@ Tested on:
 - Batch conversion of the entire `old_voicepacks` folder.
 - Manual assembly using Russian and English event tables.
 - Checking the exact set of 101 numeric MP3s.
-- Selecting and installing a package from `ready_voicepacks`.
+- Select and install a package from `ready_voicepacks`.
 - Download 20 official languages ​​for d109gl and d102gl.
 
 ## Quick start
@@ -136,11 +136,11 @@ Playwright Chromium, `ffmpeg` and, if necessary, `ccrypt`.
 1. Prepare authorization and DID automatically
 2. Preliminary check of the device
 3. Convert all old packages from the old_voicepacks folder
-4. Build a modern custom ZIP for X20/Xiaomi Cloud
-5. Build a legacy PKG for Xiaomi/Roborock v1/S5
-6. Install a legacy PKG through python-miio
-7. Check new ZIP voice packs from the ready_voicepacks folder
-8. Install a ZIP voicepack from the ready_voicepacks list
+4. Build a new custom ZIP for X20/Xiaomi Cloud
+5. Build legacy PKG for Xiaomi/Roborock v1/S5
+6. Install legacy PKG via python-miio
+7. Check new ZIP voicepacks from the ready_voicepacks folder
+8. Install the ZIP voicepack from the ready_voicepacks list
 9. Download original d109gl/d102gl packages in all languages
 10. Exit
 
@@ -186,9 +186,8 @@ https://4pda.to/forum/index.php?showtopic=881982
 
 [https://www.google.com/search](https://www.google.com/webhp) -> xiaomi voice pack download
 
-## Manual custom package
-
-Event numbers are in `custom_voicepack/table_ru.csv` and`table_en.csv`. Put modified numeric MP3s, such as `130.mp3`, into
+## Manual custom packageEvent numbers are in `custom_voicepack/table_ru.csv` and
+`table_en.csv`. Put modified numeric MP3s, such as `130.mp3`, into
 `custom_voicepack/audio` and select option 4.
 
 Missing events are taken from the official Russian package, which
@@ -197,10 +196,10 @@ normalized to mono, 16 kHz, 32 kbps without ID3 and Xing.
 
 ## Legacy PKG for Roborock v1/S5
 
-Option 5 builds an encrypted `.pkg` for older miIO vacuums: Xiaomi Mi Robot
-Vacuum / Mijia gen 1 (`rockrobo.vacuum.v1`) and Roborock Sweep One
-S5/S50/S51/S55/S501 (`roborock.vacuum.s5`). These packages are installed
-locally, not through Xiaomi Cloud:
+Point 5 collects encrypted `.pkg` for old miIO vacuum cleaners:
+Xiaomi Mi Robot Vacuum / Mijia 1C gen 1 (`rockrobo.vacuum.v1`) and Roborock
+Sweep One S5/S50/S51/S55/S501 (`roborock.vacuum.s5`). These packages are installed
+not via Xiaomi Cloud, but locally:
 
 ```bash
 pip install python-miio
@@ -208,12 +207,11 @@ mirobo discover --handshake true
 mirobo --ip=192.168.8.1 --token=TOKEN install-sound ready_voicepacks/custom_roborock_v1_s5.pkg
 ```
 
-The robot must be charged and docked. Firmware/sound flashing needs its IP
-and local token; `mirobo discover --handshake true` can get them after
-connecting to the `rockrobo-XXXX` network, or you can use another local-token
-method.
+The robot must be charged and docked. For firmware you need IP and
+local token; they can be obtained through `mirobo discover --handshake true`
+after connecting to the `rockrobo-XXXX` network or otherwise from your network.
 
-Build profiles differ by WAV catalog:
+Build profiles differ in the WAV set:
 
 ```bash
 python voicepack_manager.py build-legacy-pkg --legacy-profile gen1
@@ -221,15 +219,15 @@ python voicepack_manager.py build-legacy-pkg --legacy-profile gen2
 python install_legacy_pkg.py --discover --status-first
 ```
 
-`gen1` targets the older 72-phrase catalog, while `gen2`/`s5` targets the full
-S5 catalog. To fill missing phrases, put ready old-style Roborock `*.wav`
-files into `custom_voicepack/audio`.
+`gen1` is focused on the old catalog of 72 phrases, `gen2`/`s5` - on the full catalog
+S5. If you need missing phrases, put ready-made old `*.wav` with names
+Roborock in `custom_voicepack/audio`.
 
 ## Authorization
 
 Step 1 sequentially imports the Xiaomi session from the installed browser,
 searches for devices via Mi Cloud and local network UDP 54321, saves everything
-found devices in `state/devices.json`, prompts you to select active
+found devices in `state/devices.json`, prompts you to select the active one
 vacuum cleaner when there are multiple matches and performs a preliminary check.
 For non-interactive selection use `--device-index`, `--device-ip`,
 `--device-name` or `--did`.
@@ -240,7 +238,7 @@ found browsers so that their databases are not blocked.
 
 Local search uses UDP 54321 with a timeout of 1.5 seconds and 3 retries.
 If the device responds slowly, increase `--scan-timeout` or
-`XIAOMI_SCAN_TIMEOUT`, for example up to `3`.
+`XIAOMI_SCAN_TIMEOUT`, for example to `3`.
 
 ## Obtaining device information in MiHome
 
