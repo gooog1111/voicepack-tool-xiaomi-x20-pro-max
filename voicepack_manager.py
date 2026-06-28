@@ -23,6 +23,7 @@ OFFICIAL_DIR = HERE / "official_voicepacks"
 RESOURCES = HERE / "resources"
 DONOR_DIR = RESOURCES / "official_voice_ru"
 ROBOROCK_MAPPING = RESOURCES / "roborock_to_xiaomi_mapping.csv"
+ROBOROCK_FULL_LIST = RESOURCES / "roborock_v1_s5_full_filelist.csv"
 with (CUSTOM_DIR / "table_en.csv").open("r", encoding="utf-8-sig", newline="") as handle:
     EXPECTED_NAMES = {row["file"] for row in csv.DictReader(handle)}
 
@@ -158,6 +159,18 @@ def ffmpeg_to_legacy_wav(ffmpeg: str, source: Path, output: Path, sample_rate: i
     )
 
 
+def legacy_profile_files(profile: str) -> set[str]:
+    if profile == "universal":
+        return set()
+    rows = list(csv.DictReader(ROBOROCK_FULL_LIST.open("r", encoding="utf-8-sig", newline="")))
+    rows = [row for row in rows if row.get("kind", "voice") == "voice"]
+    if profile == "gen1":
+        return {row["filename"] for row in rows if row.get("present_in_old_72") == "True"}
+    if profile in {"gen2", "s5"}:
+        return {row["filename"] for row in rows}
+    raise ValueError(f"Unknown legacy profile: {profile}")
+
+
 def build_legacy_pkg(args) -> int:
     ensure_layout()
     from convert_old_voicepack import PASSWORD, ensure_donor, find_program
@@ -175,8 +188,13 @@ def build_legacy_pkg(args) -> int:
     build_dir.mkdir(parents=True)
 
     rows = list(csv.DictReader(ROBOROCK_MAPPING.open("r", encoding="utf-8-sig", newline="")))
+    profile_files = legacy_profile_files(args.legacy_profile)
+    if profile_files:
+        rows = [row for row in rows if row["old_file"] in profile_files]
+
     built: list[str] = []
     missing: list[str] = []
+    built_names: set[str] = set()
     skipped_medium = 0
     for row in rows:
         if row.get("confidence") == "medium" and not args.include_medium:
@@ -184,7 +202,9 @@ def build_legacy_pkg(args) -> int:
             continue
         old_file = row["old_file"]
         new_file = row["new_file"]
-        source = CUSTOM_AUDIO / new_file
+        source = CUSTOM_AUDIO / old_file
+        if not source.is_file():
+            source = CUSTOM_AUDIO / new_file
         if not source.is_file():
             source = DONOR_DIR / new_file
         if not source.is_file():
@@ -192,9 +212,21 @@ def build_legacy_pkg(args) -> int:
             continue
         ffmpeg_to_legacy_wav(ffmpeg, source, build_dir / old_file, args.sample_rate)
         built.append(old_file)
+        built_names.add(old_file)
+
+    if profile_files:
+        for source in sorted(CUSTOM_AUDIO.glob("*.wav")):
+            if source.name in profile_files and source.name not in built_names:
+                ffmpeg_to_legacy_wav(ffmpeg, source, build_dir / source.name, args.sample_rate)
+                built.append(source.name)
+                built_names.add(source.name)
+        for old_file in sorted(profile_files - built_names):
+            missing.append(old_file)
 
     if not built:
         raise RuntimeError("No legacy WAV files were built")
+    if missing and args.strict_profile:
+        raise RuntimeError("Legacy profile is incomplete: " + ", ".join(missing))
 
     output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="legacy-voicepack-", dir=str(HERE / "work")) as temp_name:
@@ -213,7 +245,8 @@ def build_legacy_pkg(args) -> int:
     output.with_suffix(".md5").write_text(digest + "\n", encoding="ascii")
     print(
         f"Built legacy Roborock package: {output} "
-        f"files={len(built)} skipped_medium={skipped_medium} missing={len(missing)} md5={digest}"
+        f"profile={args.legacy_profile} files={len(built)} "
+        f"skipped_medium={skipped_medium} missing={len(missing)} md5={digest}"
     )
     if missing:
         print("Missing mapped files:")
@@ -402,8 +435,10 @@ def main() -> int:
 
     legacy = subparsers.add_parser("build-legacy-pkg")
     legacy.add_argument("--output", default=str(READY_DIR / "custom_roborock_v1_s5.pkg"))
+    legacy.add_argument("--legacy-profile", choices=("universal", "gen1", "gen2", "s5"), default="universal")
     legacy.add_argument("--sample-rate", type=int, default=44100)
     legacy.add_argument("--ccrypt")
+    legacy.add_argument("--strict-profile", action="store_true")
     legacy.add_argument("--no-include-medium", dest="include_medium", action="store_false")
     legacy.set_defaults(handler=build_legacy_pkg, include_medium=True)
 

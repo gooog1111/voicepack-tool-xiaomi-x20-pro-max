@@ -138,10 +138,11 @@ Playwright Chromium, `ffmpeg` и, при необходимости, `ccrypt`.
 3. Конвертировать все старые пакеты из папки old_voicepacks
 4. Собрать новый кастомный ZIP для X20/Xiaomi Cloud
 5. Собрать legacy PKG для Xiaomi/Roborock v1/S5
-6. Проверить новые ZIP-войспаки из папки ready_voicepacks
-7. Установить ZIP-войспак из списка ready_voicepacks
-8. Скачать оригинальные пакеты d109gl/d102gl на всех языках
-9. Выход
+6. Установить legacy PKG через python-miio
+7. Проверить новые ZIP-войспаки из папки ready_voicepacks
+8. Установить ZIP-войспак из списка ready_voicepacks
+9. Скачать оригинальные пакеты d109gl/d102gl на всех языках
+10. Выход
 
 ## Структура папок
 
@@ -203,7 +204,7 @@ Sweep One S5/S50/S51/S55/S501 (`roborock.vacuum.s5`). Эти пакеты ста
 не через Xiaomi Cloud, а локально:
 
 ```bash
-pip install git+https://github.com/rytilahti/python-miio
+pip install python-miio
 mirobo discover --handshake true
 mirobo --ip=192.168.8.1 --token=TOKEN install-sound ready_voicepacks/custom_roborock_v1_s5.pkg
 ```
@@ -211,6 +212,18 @@ mirobo --ip=192.168.8.1 --token=TOKEN install-sound ready_voicepacks/custom_robo
 Робот должен быть заряжен и стоять на док-станции. Для прошивки нужен IP и
 локальный token; их можно получить через `mirobo discover --handshake true`
 после подключения к сети `rockrobo-XXXX` или другим способом из вашей сети.
+
+Профили сборки отличаются набором WAV:
+
+```bash
+python voicepack_manager.py build-legacy-pkg --legacy-profile gen1
+python voicepack_manager.py build-legacy-pkg --legacy-profile gen2
+python install_legacy_pkg.py --discover --status-first
+```
+
+`gen1` ориентирован на старый каталог 72 фраз, `gen2`/`s5` - на полный каталог
+S5. Если нужны отсутствующие фразы, положите готовые старые `*.wav` с именами
+Roborock в `custom_voicepack/audio`.
 
 ## Авторизация
 

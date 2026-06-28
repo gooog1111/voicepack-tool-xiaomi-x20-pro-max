@@ -138,10 +138,11 @@ Playwright Chromium, `ffmpeg` and, if necessary, `ccrypt`.
 3. Convert all old packages from the old_voicepacks folder
 4. Build a modern custom ZIP for X20/Xiaomi Cloud
 5. Build a legacy PKG for Xiaomi/Roborock v1/S5
-6. Check new ZIP voice packs from the ready_voicepacks folder
-7. Install a ZIP voicepack from the ready_voicepacks list
-8. Download original d109gl/d102gl packages in all languages
-9. Exit
+6. Install a legacy PKG through python-miio
+7. Check new ZIP voice packs from the ready_voicepacks folder
+8. Install a ZIP voicepack from the ready_voicepacks list
+9. Download original d109gl/d102gl packages in all languages
+10. Exit
 
 ## Folder structure
 
@@ -202,7 +203,7 @@ S5/S50/S51/S55/S501 (`roborock.vacuum.s5`). These packages are installed
 locally, not through Xiaomi Cloud:
 
 ```bash
-pip install git+https://github.com/rytilahti/python-miio
+pip install python-miio
 mirobo discover --handshake true
 mirobo --ip=192.168.8.1 --token=TOKEN install-sound ready_voicepacks/custom_roborock_v1_s5.pkg
 ```
@@ -211,6 +212,18 @@ The robot must be charged and docked. Firmware/sound flashing needs its IP
 and local token; `mirobo discover --handshake true` can get them after
 connecting to the `rockrobo-XXXX` network, or you can use another local-token
 method.
+
+Build profiles differ by WAV catalog:
+
+```bash
+python voicepack_manager.py build-legacy-pkg --legacy-profile gen1
+python voicepack_manager.py build-legacy-pkg --legacy-profile gen2
+python install_legacy_pkg.py --discover --status-first
+```
+
+`gen1` targets the older 72-phrase catalog, while `gen2`/`s5` targets the full
+S5 catalog. To fill missing phrases, put ready old-style Roborock `*.wav`
+files into `custom_voicepack/audio`.
 
 ## Authorization
 
