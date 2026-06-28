@@ -13,16 +13,16 @@
 
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-28 20:01 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-28 21:01 UTC -->
 
-[![Views local](https://img.shields.io/badge/Views_local-31-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views local](https://img.shields.io/badge/Views_local-32-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Views GitHub](https://img.shields.io/badge/Views_GitHub-33-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Unique visitors](https://img.shields.io/badge/Unique-7-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Clones](https://img.shields.io/badge/Clones-617-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Stars](https://img.shields.io/badge/Stars-0-yellow?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/stargazers)
 [![Forks](https://img.shields.io/badge/Forks-0-green?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/network/members)
 [![Downloads latest release](https://img.shields.io/badge/Downloads_latest_release-0-brightgreen?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases/latest)
-[![Downloads total assets](https://img.shields.io/badge/Downloads_total_assets-3-brightgreen?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases)
+[![Downloads total assets](https://img.shields.io/badge/Downloads_total_assets-4-brightgreen?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases)
 
 <!-- STATS_END -->
 
@@ -48,7 +48,7 @@
 
 
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-28 20:01 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-28 21:01 UTC -->
 
 ## Issues
 
@@ -147,16 +147,16 @@ Playwright Chromium, `ffmpeg` and, if necessary, `ccrypt`.
 ## Folder structure
 
 ```text
-old_voicepacks/             Old .pkg, ZIP, RAR, WAV, or subfolders
-ready_voicepacks/           Finished new packages
+old_voicepacks/             Старые .pkg, ZIP, RAR, WAV или подпапки
+ready_voicepacks/           Готовые новые пакеты
 custom_voicepack/
-  audio/                    Numeric MP3 files for manual replacement
-  table_en.csv              English table of 101 events
-  table_ru.csv              Russian table of 101 events
-official_voicepacks/        Downloaded official packages
-resources/                  Tables, donor cache, and service files
-state/                      Local authorization and upload state
-work/                       Temporary files
+  audio/                    Числовые MP3 для ручной замены
+  table_en.csv              Английская таблица 101 события
+  table_ru.csv              Русская таблица 101 события
+official_voicepacks/        Скачанные оригинальные пакеты
+resources/                  Таблицы, кэш донора и служебные файлы
+state/                      Локальная авторизация и состояние загрузки
+work/                       Временные файлы
 ```
 
 Authorization, finished assemblies, downloaded originals and temporary files are excluded from
@@ -171,16 +171,15 @@ Place each source in `old_voicepacks` and select option 3. Supported:
 - ZIP/RAR with one or more `.pkg`;
 - ZIP/RAR containing both WAV and `.pkg`;
 - subfolders with WAV, ZIP, RAR and `.pkg`;
-- nested ZIP/RAR archives up to four levels.
+- nested ZIP/RAR up to four levels.
 
 A separate WAV takes precedence over the file of the same name from the included package.
-Insecure ZIP/RAR paths and archives larger than 512 MiB after unpacking
+Unsafe ZIP/RAR paths and archives larger than 512 MiB after unpacking
 are rejected.
-RAR support needs an unpacker installed in `PATH`, for example `7z`, `unrar`,
-`unar`, or `bsdtar`; the Python package `rarfile` is installed automatically.
+RAR needs an installed unpacker in `PATH`, for example `7z`, `unrar`,
+`unar` or `bsdtar`; The Python package `rarfile` is installed automatically.
 
-The full old catalog contains 97 voice events. `sound.info` and
-`sound.ver` are service files and are not considered votes.
+The full old catalog contains 97 voice events. `sound.info` and`sound.ver` are service files and are not considered votes.
 
 ## Download old voice packs
 
@@ -188,7 +187,9 @@ https://4pda.to/forum/index.php?showtopic=881982
 
 [https://www.google.com/search](https://www.google.com/webhp) -> xiaomi voice pack download
 
-## Manual custom packageEvent numbers are in `custom_voicepack/table_ru.csv` and
+## Manual custom package
+
+Event numbers are in `custom_voicepack/table_ru.csv` and
 `table_en.csv`. Put modified numeric MP3s, such as `130.mp3`, into
 `custom_voicepack/audio` and select option 4.
 
@@ -229,28 +230,26 @@ Roborock in `custom_voicepack/audio`.
 
 Step 1 sequentially imports the Xiaomi session from the installed browser,
 searches for devices via Mi Cloud and local network UDP 54321, saves everything
-found devices in `state/devices.json`, prompts you to select the active one
+found devices in `state/devices.json`, prompts you to select active
 vacuum cleaner when there are multiple matches and performs a preliminary check.
-If browser import fails, step 1 automatically starts Xiaomi QR authorization:
-open the QR image or login page, confirm the login in Xiaomi Home, and the
-session will be saved to `state/cloud_auth.json`.
+If import from the browser fails, step 1 automatically starts
+Xiaomi QR authorization: open the QR image or login page, confirm
+Login to Xiaomi Home, after which the session will be saved in `state/cloud_auth.json`.
 For non-interactive selection use `--device-index`, `--device-ip`,
 `--device-name` or `--did`.
 Modern Chrome
 can use application-specific encryption cookie `v20`
 (not tested). Before reading cookie, item 1 automatically closes
 found browsers so that their databases are not blocked.
-After a successful Xiaomi Cloud call, the tool creates
-`state/cloud_auth.sha256`. If `cloud_auth.json` is edited manually, the marker
-will stop matching and will be refreshed after the next successful check.
+After successfully accessing Xiaomi Cloud, a token is created
+`state/cloud_auth.sha256`. If `cloud_auth.json` was changed manually, the token
+will no longer match and will be updated after the next successful check.
 
 Local search uses UDP 54321 with a timeout of 1.5 seconds and 3 retries.
 If the device responds slowly, increase `--scan-timeout` or
 `XIAOMI_SCAN_TIMEOUT`, for example to `3`.
 
-## Obtaining device information in MiHome
-
-Go to MiHome -> vacuum cleaner -> ⋮ -> Cleaning history -> quickly press with three fingers -> total duration, total cleanings, total number of times
+## Obtaining device information in MiHomeGo to MiHome -> vacuum cleaner -> ⋮ -> Cleaning history -> quickly press with three fingers -> total duration, total cleanings, total number of times
 
 ## Disclaimer
 
