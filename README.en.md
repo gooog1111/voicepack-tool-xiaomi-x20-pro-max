@@ -13,9 +13,9 @@
 
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-28 16:02 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-28 17:01 UTC -->
 
-[![Views local](https://img.shields.io/badge/Views_local-27-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views local](https://img.shields.io/badge/Views_local-28-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Views GitHub](https://img.shields.io/badge/Views_GitHub-33-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Unique visitors](https://img.shields.io/badge/Unique-7-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Clones](https://img.shields.io/badge/Clones-617-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
@@ -48,7 +48,7 @@
 
 
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-28 16:02 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-28 17:01 UTC -->
 
 ## Issues
 
@@ -137,7 +137,7 @@ Playwright Chromium, `ffmpeg` and, if necessary, `ccrypt`.
 2. Preliminary check of the device
 3. Convert all old packages from the old_voicepacks folder
 4. Collect a new custom voicepack from the custom_voicepack folder
-5. Check new voice packs from the ready_voicepacks folder
+5. Check new voicepacks from the ready_voicepacks folder
 6. Install a voicepack from the ready_voicepacks list
 7. Download original d109gl/d102gl packages in all languages
 8. Exit
@@ -186,8 +186,8 @@ https://4pda.to/forum/index.php?showtopic=881982
 
 ## Manual custom package
 
-Event numbers are in `custom_voicepack/table_ru.csv` and`table_en.csv`. Put modified numeric MP3s, such as `130.mp3`, into
-`custom_voicepack/audio` and select option 6.
+Event numbers are in `custom_voicepack/table_ru.csv` and
+`table_en.csv`. Put modified numeric MP3s, such as `130.mp3`, into`custom_voicepack/audio` and select option 6.
 
 Missing events are taken from the official Russian package, which
 automatically downloaded the first time you use it. Replaceable files
@@ -195,20 +195,22 @@ normalized to mono, 16 kHz, 32 kbps without ID3 and Xing.
 
 ## Authorization
 
-Step 1 imports a Xiaomi session from an installed browser, discovers devices
-via Mi Cloud and local UDP 54321, saves all detected devices to
-`state/devices.json`, lets you choose the active vacuum when several devices
-match and runs a device preflight check. For non-interactive selection, use
-`--device-index`, `--device-ip`, `--device-name` or `--did`. Modern Chrome can use
-application-specific encryption cookie `v20` (not tested). Before reading
-cookies, step 1 automatically closes detected browsers so their databases are
-not locked.
+Step 1 sequentially imports the Xiaomi session from the installed browser,
+searches for devices via Mi Cloud and local network UDP 54321, saves everything
+found devices in `state/devices.json`, prompts you to select active
+vacuum cleaner when there are multiple matches and performs a preliminary check.
+For non-interactive selection use `--device-index`, `--device-ip`,
+`--device-name` or `--did`.
+Modern Chrome
+can use application-specific encryption cookie `v20`
+(not tested). Before reading cookie, item 1 automatically closes
+found browsers so that their databases are not blocked.
 
-Local discovery uses UDP 54321 with a 1.5 second timeout and 3 attempts.
-If the device answers slowly, increase `--scan-timeout` or
-`XIAOMI_SCAN_TIMEOUT`, for example to `3`.
+Local search uses UDP 54321 with a timeout of 1.5 seconds and 3 retries.
+If the device responds slowly, increase `--scan-timeout` or
+`XIAOMI_SCAN_TIMEOUT`, for example up to `3`.
 
-## # Getting device information in MiHome
+## Obtaining device information in MiHome
 
 Go to MiHome -> vacuum cleaner -> ⋮ -> Cleaning history -> quickly press with three fingers -> total duration, total cleanings, total number of times
 
