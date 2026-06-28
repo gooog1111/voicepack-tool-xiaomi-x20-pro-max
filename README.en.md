@@ -202,6 +202,10 @@ Application-specific encryption cookie `v20` (not tested).
 Before reading cookies, step 1 automatically closes detected browsers so
 their databases are not locked. Disable this with `--no-close-browsers`.
 
+Step 2 discovers the vacuum over UDP 54321 with a 1.5 second timeout and
+3 attempts. If the device answers slowly, increase `--scan-timeout` or
+`XIAOMI_SCAN_TIMEOUT`, for example to `3`.
+
 ## # Getting device information in MiHome
 
 Go to MiHome -> vacuum cleaner -> ⋮ -> Cleaning history -> quickly press with three fingers -> total duration, total cleanings, total number of times

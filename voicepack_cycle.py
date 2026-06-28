@@ -167,19 +167,21 @@ def parse_miio_hello_response(data: bytes, ip: str) -> dict | None:
     }
 
 
-def probe_miio_host(host: str, timeout: float, raw: bool = False) -> dict | None:
+def probe_miio_host(host: str, timeout: float, raw: bool = False, retries: int = 1) -> dict | None:
     """Send a Xiaomi miIO hello packet to one host and parse the response."""
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.settimeout(timeout)
     try:
-        sock.sendto(MIIO_HELLO, (host, MIIO_PORT))
-        try:
-            data, address = sock.recvfrom(1024)
-        except socket.timeout:
-            return None
-        if raw:
-            print(f"RAW {address[0]}:{address[1]} len={len(data)} hex={data.hex()}")
-        return parse_miio_hello_response(data, address[0])
+        for _ in range(max(1, retries)):
+            sock.sendto(MIIO_HELLO, (host, MIIO_PORT))
+            try:
+                data, address = sock.recvfrom(1024)
+            except socket.timeout:
+                continue
+            if raw:
+                print(f"RAW {address[0]}:{address[1]} len={len(data)} hex={data.hex()}")
+            return parse_miio_hello_response(data, address[0])
+        return None
     except OSError:
         return None
     finally:
@@ -189,6 +191,7 @@ def probe_miio_host(host: str, timeout: float, raw: bool = False) -> dict | None
 def local_miio_scan(args) -> list[dict]:
     subnet = args.scan_subnet or guess_local_subnet()
     timeout = float(args.scan_timeout)
+    retries = max(1, int(getattr(args, "scan_retries", 1)))
     devices: list[dict] = []
     seen: set[tuple[str, str]] = set()
 
@@ -203,8 +206,8 @@ def local_miio_scan(args) -> list[dict]:
     # Exact host mode. Useful when nmap/router already showed the vacuum IP.
     scan_host = getattr(args, "scan_host", "") or ""
     if scan_host:
-        print(f"Подождите, отправляю miIO hello на {scan_host}:{MIIO_PORT}...")
-        add_device(probe_miio_host(scan_host, timeout, raw=getattr(args, "raw_scan", False)))
+        print(f"Подождите, отправляю miIO hello на {scan_host}:{MIIO_PORT}, timeout {timeout}s, попыток {retries}...")
+        add_device(probe_miio_host(scan_host, timeout, raw=getattr(args, "raw_scan", False), retries=retries))
         return devices
 
     # Broadcast mode is fast, but many routers/devices drop it. Keep it optional.
@@ -214,22 +217,23 @@ def local_miio_scan(args) -> list[dict]:
             broadcast = str(network.broadcast_address)
         except ValueError:
             broadcast = "255.255.255.255"
-        print(f"Локальный быстрый поиск miIO: broadcast UDP {MIIO_PORT}, timeout {timeout}s")
+        print(f"Локальный быстрый поиск miIO: broadcast UDP {MIIO_PORT}, timeout {timeout}s, попыток {retries}")
         print(f"Broadcast probe: {broadcast}:{MIIO_PORT}")
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.settimeout(timeout)
         try:
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-            sock.sendto(MIIO_HELLO, (broadcast, MIIO_PORT))
-            deadline = time.time() + timeout
-            while time.time() < deadline:
-                try:
-                    data, address = sock.recvfrom(1024)
-                except socket.timeout:
-                    break
-                if getattr(args, "raw_scan", False):
-                    print(f"RAW {address[0]}:{address[1]} len={len(data)} hex={data.hex()}")
-                add_device(parse_miio_hello_response(data, address[0]))
+            for _ in range(retries):
+                sock.sendto(MIIO_HELLO, (broadcast, MIIO_PORT))
+                deadline = time.time() + timeout
+                while time.time() < deadline:
+                    try:
+                        data, address = sock.recvfrom(1024)
+                    except socket.timeout:
+                        break
+                    if getattr(args, "raw_scan", False):
+                        print(f"RAW {address[0]}:{address[1]} len={len(data)} hex={data.hex()}")
+                    add_device(parse_miio_hello_response(data, address[0]))
         finally:
             sock.close()
         return devices
@@ -243,12 +247,12 @@ def local_miio_scan(args) -> list[dict]:
     workers = max(1, int(getattr(args, "scan_workers", 96)))
     total = len(hosts)
     print(f"Подождите, идёт сканирование сети {subnet} по UDP {MIIO_PORT}...")
-    print(f"На каждый найденный/доступный адрес отправляется miIO hello. Адресов: {total}, потоков: {workers}, timeout: {timeout}s")
+    print(f"На каждый найденный/доступный адрес отправляется miIO hello. Адресов: {total}, потоков: {workers}, timeout: {timeout}s, попыток: {retries}")
 
     done = 0
     next_report = 0
     with ThreadPoolExecutor(max_workers=workers) as executor:
-        futures = {executor.submit(probe_miio_host, host, timeout, getattr(args, "raw_scan", False)): host for host in hosts}
+        futures = {executor.submit(probe_miio_host, host, timeout, getattr(args, "raw_scan", False), retries): host for host in hosts}
         for future in as_completed(futures):
             done += 1
             item = None
@@ -781,7 +785,8 @@ def add_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--debug-devices", action="store_true", help="Print device API probing diagnostics")
     parser.add_argument("--scan-subnet", default=env("XIAOMI_SCAN_SUBNET", ""), help="Local subnet for miIO UDP discovery, for example 192.168.1.0/24")
     parser.add_argument("--scan-host", default=env("XIAOMI_SCAN_HOST", env("XIAOMI_DEVICE_IP", "")), help="Probe one exact local IP with miIO hello")
-    parser.add_argument("--scan-timeout", type=float, default=float(env("XIAOMI_SCAN_TIMEOUT", "0.35")), help="UDP discovery timeout per host in seconds")
+    parser.add_argument("--scan-timeout", type=float, default=float(env("XIAOMI_SCAN_TIMEOUT", "1.5")), help="UDP discovery timeout per host in seconds")
+    parser.add_argument("--scan-retries", type=int, default=int(env("XIAOMI_SCAN_RETRIES", "3")), help="UDP discovery attempts per host")
     parser.add_argument("--scan-workers", type=int, default=int(env("XIAOMI_SCAN_WORKERS", "96")), help="Parallel workers for directed subnet scan")
     parser.add_argument("--direct-scan", action="store_true", help="Probe every address in --scan-subnet instead of broadcast only")
     parser.add_argument("--raw-scan", action="store_true", help="Print raw UDP replies during local scan")
