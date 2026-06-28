@@ -25,9 +25,7 @@ $RequirementsFile = Join-Path $Here "requirements.txt"
 $RequirementsHashFile = Join-Path $Venv ".requirements.sha256"
 $PlaywrightMarkerFile = Join-Path $Venv ".playwright.chromium.installed"
 
-# Версия текущего пакета. Меняй при выпуске нового релиза.
-# Значение должно совпадать с тегом GitHub Release, например: v1.0.0
-$CurrentVersion = "v1.0.1-2"
+$CurrentVersion = "v1.0.2"
 $RepoUrl = "https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max"
 $GitHubApiLatestRelease = "https://api.github.com/repos/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases/latest"
 
