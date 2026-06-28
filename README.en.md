@@ -13,12 +13,12 @@
 
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-28 04:23 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-28 13:59 UTC -->
 
 [![Views local](https://img.shields.io/badge/Views_local-25-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
-[![Views GitHub](https://img.shields.io/badge/Views_GitHub-0-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
-[![Unique visitors](https://img.shields.io/badge/Unique-0-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
-[![Clones](https://img.shields.io/badge/Clones-0-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views GitHub](https://img.shields.io/badge/Views_GitHub-33-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Unique visitors](https://img.shields.io/badge/Unique-7-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Clones](https://img.shields.io/badge/Clones-617-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Stars](https://img.shields.io/badge/Stars-0-yellow?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/stargazers)
 [![Forks](https://img.shields.io/badge/Forks-0-green?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/network/members)
 [![Downloads latest release](https://img.shields.io/badge/Downloads_latest_release-0-brightgreen?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases/latest)
@@ -48,7 +48,7 @@
 
 
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-28 04:23 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-28 13:59 UTC -->
 
 ## Issues
 
@@ -98,7 +98,7 @@ Tested on:
 
 ## And also
 
-- `список будет пополняться всеми пылесосми, до которых смогу дотянуться`
+- the list will be updated with all the vacuum cleaners I can get my hands on
 
 
 
@@ -187,8 +187,8 @@ https://4pda.to/forum/index.php?showtopic=881982
 
 ## Manual custom package
 
-Event numbers are in `custom_voicepack/table_ru.csv` and
-`table_en.csv`. Put modified numeric MP3s, such as `130.mp3`, into`custom_voicepack/audio` and select option 6.
+Event numbers are in `custom_voicepack/table_ru.csv` and`table_en.csv`. Put modified numeric MP3s, such as `130.mp3`, into
+`custom_voicepack/audio` and select option 6.
 
 Missing events are taken from the official Russian package, which
 automatically downloaded the first time you use it. Replaceable files
