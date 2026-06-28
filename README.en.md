@@ -133,7 +133,7 @@ Playwright Chromium, `ffmpeg` and, if necessary, `ccrypt`.
 
 ## Menu
 
-1. Importing a valid Xiaomi session from an installed browser
+1. Prepare authorization and DID automatically
 2. Find DID in local network UDP 54321
 3. Preliminary check of the device
 4. Convert all old packages from the old_voicepacks folder
@@ -196,13 +196,13 @@ normalized to mono, 16 kHz, 32 kbps without ID3 and Xing.
 
 ## Authorization
 
-Step 1 sequentially checks installed browsers and stops searching
-after the first full Xiaomi session. Modern Chrome can use
-Application-specific encryption cookie `v20` (not tested).
-Before reading cookies, step 1 automatically closes detected browsers so
-their databases are not locked. Disable this with `--no-close-browsers`.
+Step 1 imports a Xiaomi session from an installed browser, finds the DID via
+Mi Cloud or local UDP 54321 discovery, saves the detected values and runs a
+device preflight check. Modern Chrome can use application-specific encryption
+cookie `v20` (not tested). Before reading cookies, step 1 automatically closes
+detected browsers so their databases are not locked.
 
-Step 2 discovers the vacuum over UDP 54321 with a 1.5 second timeout and
+Step 2 separately discovers the vacuum over UDP 54321 with a 1.5 second timeout and
 3 attempts. If the device answers slowly, increase `--scan-timeout` or
 `XIAOMI_SCAN_TIMEOUT`, for example to `3`.
 

@@ -1,5 +1,5 @@
 param(
-    [ValidateSet("menu", "existing-auth", "list-devices", "local-scan", "preflight", "convert-all", "build-custom", "verify-all", "install", "download-originals")]
+    [ValidateSet("menu", "setup", "existing-auth", "list-devices", "local-scan", "preflight", "convert-all", "build-custom", "verify-all", "install", "download-originals")]
     [string]$Command = "menu",
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]$ExtraArgs
@@ -266,7 +266,7 @@ function Show-Menu {
     Write-Host "=================" -ForegroundColor Cyan
     Write-Host "Version: $CurrentVersion" -ForegroundColor DarkGray
     Write-Host ""
-    Write-Host "1. Импорт действующей Xiaomi-сессии из установленного браузера"
+    Write-Host "1. Подготовить авторизацию и DID автоматически"
     Write-Host "2. Найти DID в локальной сети UDP 54321"
     Write-Host "3. Предварительная проверка устройства"
     Write-Host "4. Конвертировать все старые пакеты из папки old_voicepacks"
@@ -289,7 +289,7 @@ if ($Command -eq "menu") {
     Show-Menu
     $choice = Read-Host "Выберите действие"
     $selectedCommand = switch ($choice) {
-        "1" { "existing-auth" }
+        "1" { "setup" }
         "2" { "local-scan" }
         "3" { "preflight" }
         "4" { "convert-all" }
@@ -310,6 +310,29 @@ if ($Command -eq "menu") {
 }
 
 Ensure-Environment
+
+if ($Command -eq "setup") {
+    $CloudAuthFile = Join-Path $Here "state\cloud_auth.json"
+    Write-Host ""
+    Write-Host "Шаг 1/2: импортирую Xiaomi-сессию из браузера..." -ForegroundColor Cyan
+    & $Python (Join-Path $Here "import-browser-session.py") --output $CloudAuthFile
+    $code = $LASTEXITCODE
+    if ($code -ne 0) {
+        Return-ToMenu
+        exit $code
+    }
+
+    Write-Host ""
+    Write-Host "Шаг 2/2: ищу DID и проверяю доступ к устройству..." -ForegroundColor Cyan
+    $SetupArgs = @("--direct-scan", "--save-did")
+    if ($ExtraArgs) {
+        $SetupArgs += $ExtraArgs
+    }
+    & $Python (Join-Path $Here "voicepack_cycle.py") preflight @SetupArgs
+    $code = $LASTEXITCODE
+    Return-ToMenu
+    exit $code
+}
 
 if ($Command -eq "existing-auth") {
     & $Python (Join-Path $Here "import-browser-session.py") @ExtraArgs
