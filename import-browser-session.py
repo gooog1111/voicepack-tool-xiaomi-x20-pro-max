@@ -514,13 +514,19 @@ def close_browser_processes(sources: list[BrowserSource]) -> None:
         if os.name == "nt":
             script = (
                 "$names = " + powershell_array(process_names) + "; "
+                "$closed = [System.Collections.Generic.HashSet[string]]::new(); "
+                "for ($i = 0; $i -lt 4; $i++) { "
                 "$procs = Get-Process -Name $names -ErrorAction SilentlyContinue; "
-                "if ($procs) { "
-                "$procs | Where-Object { $_.MainWindowHandle -ne 0 } | ForEach-Object { [void]$_.CloseMainWindow() }; "
-                "Start-Sleep -Seconds 2; "
-                "$procs | Where-Object { -not $_.HasExited } | Stop-Process -Force; "
-                "$procs | Select-Object -ExpandProperty ProcessName -Unique "
-                "}"
+                "if (-not $procs) { break }; "
+                "$procs | ForEach-Object { [void]$closed.Add($_.ProcessName) }; "
+                "$windowed = $procs | Where-Object { $_.MainWindowHandle -ne 0 }; "
+                "$windowed | ForEach-Object { [void]$_.CloseMainWindow() }; "
+                "Start-Sleep -Milliseconds 900; "
+                "$procs = Get-Process -Name $names -ErrorAction SilentlyContinue; "
+                "if ($procs) { $procs | Stop-Process -Force -ErrorAction SilentlyContinue }; "
+                "Start-Sleep -Milliseconds 500 "
+                "}; "
+                "$closed"
             )
             completed = subprocess.run(
                 ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script],
