@@ -13,9 +13,9 @@
 
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-30 14:01 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-30 15:01 UTC -->
 
-[![Views local](https://img.shields.io/badge/Views_local-73-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views local](https://img.shields.io/badge/Views_local-74-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Views GitHub](https://img.shields.io/badge/Views_GitHub-82-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Unique visitors](https://img.shields.io/badge/Unique-28-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Clones](https://img.shields.io/badge/Clones-1019-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
@@ -48,7 +48,7 @@
 
 
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-06-30 14:01 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-06-30 15:01 UTC -->
 
 ## Issues
 
@@ -228,7 +228,7 @@ Roborock in `custom_voicepack/audio`.
 
 ## Authorization
 
-Пункт 1 последовательно импортирует Xiaomi-сессию из установленного браузера,
+Step 1 sequentially imports the Xiaomi session from the installed browser,
 searches for devices via Mi Cloud and local network UDP 54321, saves everything
 found devices in `state/devices.json`, prompts you to select active
 vacuum cleaner when there are multiple matches and performs a preliminary check.
@@ -253,7 +253,7 @@ If the device responds slowly, increase `--scan-timeout` or
 
 ## Disclaimer
 
-Это независимый проект, не связанный с Xiaomi или Roborock.
+This is an independent project not associated with Xiaomi or Roborock.
 Installation of unofficial voicepacks is at your own risk and may void warranty service.
 
 ## Acknowledgments
