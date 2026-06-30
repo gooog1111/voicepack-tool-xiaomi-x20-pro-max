@@ -476,12 +476,56 @@ def filtered_devices(devices: list[dict], args) -> list[dict]:
     return candidates
 
 
+def map_local_to_cloud_devices(cloud_devices: list[dict], local_devices: list[dict]) -> list[dict]:
+    """
+    Prefer the Mi Cloud DID for devices that were also found locally.
+    miIO UDP hello can expose a local DID-like value which is not always the
+    identifier accepted by cloud MiOT actions.
+    """
+    cloud_by_ip = {
+        str(item.get("ip")): item
+        for item in cloud_devices
+        if item.get("ip")
+    }
+    cloud_by_mac = {
+        str(item.get("mac")).lower(): item
+        for item in cloud_devices
+        if item.get("mac")
+    }
+    mapped: list[dict] = []
+
+    for local in local_devices:
+        cloud = None
+        if local.get("ip"):
+            cloud = cloud_by_ip.get(str(local["ip"]))
+        if not cloud and local.get("mac"):
+            cloud = cloud_by_mac.get(str(local["mac"]).lower())
+
+        if cloud:
+            item = dict(cloud)
+            for key in ("ip", "mac", "online"):
+                if local.get(key) and not item.get(key):
+                    item[key] = local[key]
+            if local.get("did") and str(local["did"]) != str(item.get("did") or ""):
+                item["local_did"] = str(local["did"])
+            sources = [str(item.get("source") or ""), str(local.get("source") or "")]
+            item["source"] = ",".join(part for part in sources if part)
+            mapped.append(item)
+            continue
+
+        mapped.append(local)
+
+    return unique_devices(mapped)
+
+
 def device_label(item: dict) -> str:
     parts = [
         item.get("name") or "unnamed",
         item.get("model") or "unknown-model",
         "did=" + str(item.get("did") or ""),
     ]
+    if item.get("local_did"):
+        parts.append("local_did=" + str(item["local_did"]))
     if item.get("ip"):
         parts.append("ip=" + str(item["ip"]))
     if item.get("online") not in (None, ""):
@@ -582,7 +626,8 @@ def resolve_did(api, args) -> str:
         args.direct_scan = True
     local_devices = local_miio_scan(args)
     save_device_inventory(devices + local_devices, args)
-    local_candidates = filtered_devices(local_devices, args)
+    mapped_local_devices = map_local_to_cloud_devices(devices, local_devices)
+    local_candidates = filtered_devices(mapped_local_devices, args)
 
     if cloud_candidate:
         return choose_device([cloud_candidate], args, "cloud", devices + local_devices)["did"]
