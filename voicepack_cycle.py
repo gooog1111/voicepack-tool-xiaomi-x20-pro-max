@@ -14,10 +14,12 @@ import zipfile
 from pathlib import Path
 import ipaddress
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import parse_qs
 
 import requests
 from micloud import MiCloud, miutils
+from providers.xiaomi import inventory as xiaomi_inventory
+from providers.xiaomi import voice_modern_cloud
 
 
 HERE = Path(__file__).resolve().parent
@@ -309,16 +311,6 @@ def print_local_devices(devices: list[dict]) -> None:
 
 
 
-def request_json_any(api, paths: list[str], country: str, payload: dict) -> tuple[str, dict]:
-    errors: list[str] = []
-    for path in paths:
-        try:
-            return path, request_json(api, path, country, payload)
-        except Exception as exc:
-            errors.append(f"{path}: {type(exc).__name__}: {exc}")
-    raise RuntimeError("all Xiaomi API paths failed: " + " | ".join(errors))
-
-
 def load_env_lines(path: Path) -> list[str]:
     if not path.exists():
         return []
@@ -341,43 +333,6 @@ def save_env_value(path: Path, name: str, value: str) -> None:
     path.write_text("\n".join(output).rstrip() + "\n", encoding="utf-8")
 
 
-def first_present(raw: dict, names: tuple[str, ...], default=""):
-    for name in names:
-        value = raw.get(name)
-        if value not in (None, ""):
-            return value
-    return default
-
-
-def normalize_device(raw: dict, source: str = "") -> dict:
-    did = str(first_present(raw, ("did", "deviceID", "device_id", "id"), ""))
-    return {
-        "name": first_present(raw, ("name", "desc", "device_name", "nickname", "model"), ""),
-        "did": did,
-        "model": first_present(raw, ("model", "product_model", "modelName"), ""),
-        "ip": first_present(raw, ("localip", "localIp", "ip", "ip_address"), ""),
-        "mac": first_present(raw, ("mac", "bssid"), ""),
-        "online": raw.get("isOnline", raw.get("online", raw.get("is_online"))),
-        "source": source,
-    }
-
-
-def walk_devices(value, source: str) -> list[dict]:
-    """Collect device-like dicts from Xiaomi cloud responses with varying layouts."""
-    found: list[dict] = []
-    if isinstance(value, dict):
-        if any(key in value for key in ("did", "deviceID", "device_id")):
-            item = normalize_device(value, source)
-            if item["did"]:
-                found.append(item)
-        for child in value.values():
-            found.extend(walk_devices(child, source))
-    elif isinstance(value, list):
-        for child in value:
-            found.extend(walk_devices(child, source))
-    return found
-
-
 def unique_devices(devices: list[dict]) -> list[dict]:
     result: list[dict] = []
     by_did: dict[str, dict] = {}
@@ -390,7 +345,7 @@ def unique_devices(devices: list[dict]) -> list[dict]:
             by_did[did] = item
             result.append(item)
             continue
-        for key in ("name", "model", "ip", "mac", "online"):
+        for key in ("name", "model", "ip", "mac", "online", "permit_level", "provider", "vendor", "family", "display_model", "voice_install_method", "voice_pack_format", "capabilities", "supported", "fds", "fds_error", "home_id", "home_name", "home_source", "home_shareflag", "home_permit_level", "home_uid", "room_id", "room_name"):
             if not existing.get(key) and item.get(key):
                 existing[key] = item[key]
         if item.get("source") and item["source"] not in existing.get("source", ""):
@@ -398,44 +353,18 @@ def unique_devices(devices: list[dict]) -> list[dict]:
     return result
 
 
-def request_json_any(api, paths: list[str], country: str, payload: dict) -> tuple[str, dict]:
-    errors = []
-    for path in paths:
-        try:
-            return path, request_json(api, path, country, payload)
-        except Exception as exc:
-            errors.append(f"{path}: {type(exc).__name__}: {exc}")
-    raise RuntimeError("; ".join(errors))
-
-
 def list_cloud_devices(api, args) -> list[dict]:
     """
-    Xiaomi has several cloud layouts. Some accounts return an empty
-    /device_list but still expose devices through homeroom/home-list APIs.
+    Return a flat device list from the home-centric inventory.
+    Xiaomi has several cloud layouts: owned homes, shared homes, and room-only
+    DID references. The Xiaomi inventory provider normalizes those first.
     """
-    attempts: list[tuple[list[str], dict]] = [
-        (["/v2/home/device_list", "/home/device_list"], {"getVirtualModel": False, "getHuamiDevices": 0}),
-        (["/v2/home/device_list", "/home/device_list"], {}),
-        (["/v2/home/device_list_page", "/home/device_list_page"], {"getVirtualModel": False, "getHuamiDevices": 0, "limit": 300}),
-        (["/v2/homeroom/gethome", "/homeroom/gethome"], {"fetch_share": True, "fetch_share_dev": True, "limit": 300}),
-        (["/v2/homeroom/gethome", "/homeroom/gethome"], {"fetch_share": 1, "fetch_share_dev": 1, "limit": 300}),
-    ]
-    all_devices: list[dict] = []
-    errors: list[str] = []
-    for paths, payload in attempts:
-        try:
-            path, response = request_json_any(api, paths, args.country, payload)
-            devices = walk_devices(response.get("result") or response, path)
-            if devices:
-                all_devices.extend(devices)
-            if getattr(args, "debug_devices", False):
-                print(f"DEBUG {path}: devices={len(devices)}")
-        except Exception as exc:
-            errors.append(f"{paths[0]}: {type(exc).__name__}: {exc}")
-            if getattr(args, "debug_devices", False):
-                print(f"DEBUG {paths[0]} failed: {type(exc).__name__}: {exc}", file=sys.stderr)
-    devices = unique_devices(all_devices)
-    if devices or errors:
+    homes_map = xiaomi_inventory.build_homes_map(api, args)
+    if getattr(args, "resolve_fds", True):
+        voice_modern_cloud.enrich_homes_map_fds(api, args, homes_map)
+    xiaomi_inventory.save_homes_map(homes_map, args)
+    devices = xiaomi_inventory.flatten_homes_map_devices(homes_map)
+    if devices or homes_map.get("errors"):
         return devices
     raise RuntimeError("cannot get Xiaomi device list")
 
@@ -454,6 +383,13 @@ def print_devices(devices: list[dict]) -> None:
                     "did": item.get("did", ""),
                     "model": item.get("model", ""),
                     "ip": item.get("ip", ""),
+                    "home": item.get("home_name", ""),
+                    "room": item.get("room_name", ""),
+                    "family": item.get("family", ""),
+                    "voice_install_method": item.get("voice_install_method", ""),
+                    "fds_host": (item.get("fds") or {}).get("upload_host", ""),
+                    "supported": item.get("supported"),
+                    "permit_level": item.get("permit_level"),
                     "online": item.get("online"),
                     "source": item.get("source", ""),
                 },
@@ -783,150 +719,26 @@ def verify_pack(args, archive: Path | None = None) -> dict:
 
 
 def generate_upload(api, args, archive: Path) -> tuple[str, str]:
-    suffix = args.suffix
-    response = request_json(
-        api,
-        "/v2/home/genpresignedurl_v3",
-        args.country,
-        {"did": args.did, "suffix": suffix},
-    )
-    entry = response["result"][suffix]
-    put_url = entry["url"]
-    obj_name = entry["obj_name"]
-    with archive.open("rb") as source:
-        upload = requests.put(
-            put_url,
-            data=source,
-            headers={"Content-Type": "application/octet-stream"},
-            timeout=180,
-        )
-    upload.raise_for_status()
-    print(f"Uploaded: obj_name={obj_name} status={upload.status_code}")
-    get_response = request_json(
-        api,
-        "/v2/home/getfileurl_v3",
-        args.country,
-        {"obj_name": obj_name},
-    )
-    get_url = get_response["result"]["url"]
-    md5, size = file_info(archive)
-    with requests.get(get_url, stream=True, timeout=60) as response:
-        response.raise_for_status()
-        digest = hashlib.md5()
-        downloaded = 0
-        for chunk in response.iter_content(256 * 1024):
-            digest.update(chunk)
-            downloaded += len(chunk)
-    if digest.hexdigest() != md5 or downloaded != size:
-        raise RuntimeError("signed GET content does not match uploaded archive")
-    state = {
-        "obj_name": obj_name,
-        "md5": md5,
-        "size": size,
-        "get_url": get_url,
-    }
-    state_path = local_write_path(args.state_file, "upload state")
-    state_path.parent.mkdir(parents=True, exist_ok=True)
-    state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"Signed GET verified; state saved to {state_path}")
-    return obj_name, get_url
+    return voice_modern_cloud.generate_upload(api, args, archive, file_info, local_write_path)
 
 
 def send_action(api, args, language: str, url: str, md5: str, size: int) -> dict:
-    meta = json.dumps({"md5": md5, "size": size}, separators=(",", ":"))
-    payload = {
-        "params": {
-            "did": args.did,
-            "siid": args.service_id,
-            "aiid": args.install_action_id,
-            "in": [language, url, meta],
-        }
-    }
-    response = request_json(api, "/miotspec/action", args.country, payload)
-    if response.get("result", {}).get("code") != 0:
-        raise RuntimeError("device rejected voice action: " + json.dumps(response))
-    return response
+    return voice_modern_cloud.send_action(api, args, language, url, md5, size)
 
 
-class VoiceStatusUnavailable(RuntimeError):
-    pass
+VoiceStatusUnavailable = voice_modern_cloud.VoiceStatusUnavailable
 
 
 def voice_status(api, args) -> dict:
-    payload = {
-        "params": {
-            "did": args.did,
-            "siid": args.service_id,
-            "aiid": args.status_action_id,
-            "in": [],
-        }
-    }
-    response = request_json(api, "/miotspec/action", args.country, payload)
-    result = response.get("result") or {}
-    out = result.get("out")
-    if not isinstance(out, list) or len(out) < 4:
-        raise VoiceStatusUnavailable(
-            "voice status response has no usable result.out: "
-            + json.dumps(response, ensure_ascii=False)
-        )
-    return {
-        "target": out[0],
-        "current": out[1],
-        "status": out[2],
-        "progress": out[3],
-    }
+    return voice_modern_cloud.voice_status(api, args)
 
 
 def wait_voice(api, args, target: str, timeout: int = 180) -> dict:
-    deadline = time.time() + timeout
-    last = None
-    status_errors = 0
-    while time.time() < deadline:
-        try:
-            current = voice_status(api, args)
-        except VoiceStatusUnavailable as error:
-            status_errors += 1
-            if status_errors <= 3:
-                print(f"Voice status temporarily unavailable, retrying: {error}")
-            if last and last.get("current") == target and last.get("status") in (0, 4):
-                return last
-            time.sleep(2)
-            continue
-
-        status_errors = 0
-        if current != last:
-            print("Voice status: " + json.dumps(current, ensure_ascii=False))
-            last = current
-        if current["current"] == target and current["status"] in (0, 4):
-            return current
-        if current["status"] in (3, 5):
-            raise RuntimeError("voice install failed: " + json.dumps(current, ensure_ascii=False))
-        time.sleep(2)
-    if last:
-        print("Last voice status before timeout: " + json.dumps(last, ensure_ascii=False))
-    raise TimeoutError(f"voice install did not finish in {timeout}s")
+    return voice_modern_cloud.wait_voice(api, args, target, timeout)
 
 
 def install_pack(api, args, archive: Path, get_url: str) -> None:
-    current = voice_status(api, args)
-    if current["current"] == args.target_language and args.reset_language:
-        print(f"Resetting voice to {args.reset_language} before custom install")
-        send_action(
-            api,
-            args,
-            args.reset_language,
-            args.reset_url,
-            args.reset_md5,
-            0,
-        )
-        wait_voice(api, args, args.reset_language)
-
-    split = urlsplit(get_url)
-    relative = split.path + ("?" + split.query if split.query else "") + "#/ru.zip"
-    md5, size = file_info(archive)
-    print("Installing custom pack with relative signed GET and #/ru.zip")
-    send_action(api, args, args.target_language, relative, md5, size)
-    wait_voice(api, args, args.target_language)
+    voice_modern_cloud.install_pack(api, args, archive, get_url, file_info)
 
 
 def add_common(parser: argparse.ArgumentParser) -> None:
@@ -945,8 +757,11 @@ def add_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--raw-scan", action="store_true", help="Print raw UDP replies during local scan")
     parser.add_argument("--save-did", action="store_true", help="Save the auto-detected DID to .env")
     parser.add_argument("--devices-file", default=env("XIAOMI_DEVICES_FILE", str(HERE / "state/devices.json")), help="Discovered device inventory file")
+    parser.add_argument("--homes-map-file", default=env("XIAOMI_HOMES_MAP_FILE", str(HERE / "state/homes_map.json")), help="Discovered homes/devices map file")
     parser.add_argument("--no-save-devices", dest="save_devices", action="store_false", help="Do not save discovered devices to --devices-file")
+    parser.add_argument("--no-resolve-fds", dest="resolve_fds", action="store_false", help="Do not resolve regional Xiaomi FDS endpoint for cloud voice devices")
     parser.set_defaults(save_devices=True)
+    parser.set_defaults(resolve_fds=True)
     parser.add_argument("--env-file", default=str(HERE / ".env"))
     parser.add_argument("--model", default=env("XIAOMI_MODEL", ""))
     parser.add_argument(

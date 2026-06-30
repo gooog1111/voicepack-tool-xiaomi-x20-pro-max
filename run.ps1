@@ -1,5 +1,5 @@
 ﻿param(
-    [ValidateSet("menu", "setup", "existing-auth", "list-devices", "local-scan", "preflight", "convert-all", "build-custom", "build-legacy-pkg", "install-legacy-pkg", "verify-all", "install", "download-originals")]
+    [ValidateSet("menu", "setup", "existing-auth", "search-homes-devices", "compatible-models", "list-devices", "local-scan", "preflight", "convert-all", "build-custom", "build-legacy-pkg", "install-legacy-pkg", "verify-all", "install", "download-originals")]
     [string]$Command = "menu",
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]$ExtraArgs
@@ -25,7 +25,7 @@ $RequirementsFile = Join-Path $Here "requirements.txt"
 $RequirementsHashFile = Join-Path $Venv ".requirements.sha256"
 $PlaywrightMarkerFile = Join-Path $Venv ".playwright.chromium.installed"
 
-$CurrentVersion = "v1.0.2"
+$CurrentVersion = "v1.0.3"
 $RepoUrl = "https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max"
 $GitHubApiLatestRelease = "https://api.github.com/repos/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases/latest"
 
@@ -295,15 +295,17 @@ function Show-Menu {
     Write-Host "Version: $CurrentVersion" -ForegroundColor DarkGray
     Write-Host ""
     Write-Host "1. Подготовить авторизацию и DID автоматически"
-    Write-Host "2. Предварительная проверка устройства"
-    Write-Host "3. Конвертировать все старые пакеты из папки old_voicepacks"
-    Write-Host "4. Собрать новый кастомный ZIP для X20/Xiaomi Cloud"
-    Write-Host "5. Собрать legacy PKG для Xiaomi/Roborock v1/S5"
-    Write-Host "6. Установить legacy PKG через python-miio"
-    Write-Host "7. Проверить новые ZIP-войспаки из папки ready_voicepacks"
-    Write-Host "8. Установить ZIP-войспак из списка ready_voicepacks"
-    Write-Host "9. Скачать оригинальные пакеты d109gl/d102gl на всех языках"
-    Write-Host "10. Выход"
+    Write-Host "2. Построить карту домов и устройств"
+    Write-Host "3. Показать совместимые модели Xiaomi"
+    Write-Host "4. Предварительная проверка устройства"
+    Write-Host "5. Конвертировать все старые пакеты из папки old_voicepacks"
+    Write-Host "6. Собрать новый кастомный ZIP для X20/Xiaomi Cloud"
+    Write-Host "7. Собрать legacy PKG для Xiaomi/Roborock v1/S5"
+    Write-Host "8. Установить legacy PKG через python-miio"
+    Write-Host "9. Проверить новые ZIP-войспаки из папки ready_voicepacks"
+    Write-Host "10. Установить ZIP-войспак из списка ready_voicepacks"
+    Write-Host "11. Скачать оригинальные пакеты d109gl/d102gl на всех языках"
+    Write-Host "12. Выход"
     Write-Host ""
 }
 
@@ -319,15 +321,17 @@ if ($Command -eq "menu") {
     $choice = Read-Host "Выберите действие"
     $selectedCommand = switch ($choice) {
         "1" { "setup" }
-        "2" { "preflight" }
-        "3" { "convert-all" }
-        "4" { "build-custom" }
-        "5" { "build-legacy-pkg" }
-        "6" { "install-legacy-pkg" }
-        "7" { "verify-all" }
-        "8" { "install" }
-        "9" { "download-originals" }
-        "10" { exit 0 }
+        "2" { "search-homes-devices" }
+        "3" { "compatible-models" }
+        "4" { "preflight" }
+        "5" { "convert-all" }
+        "6" { "build-custom" }
+        "7" { "build-legacy-pkg" }
+        "8" { "install-legacy-pkg" }
+        "9" { "verify-all" }
+        "10" { "install" }
+        "11" { "download-originals" }
+        "12" { exit 0 }
         default {
             Write-Error "Неизвестный пункт меню: $choice"
             exit 2
@@ -341,7 +345,7 @@ Ensure-Environment
 if ($Command -eq "setup") {
     $CloudAuthFile = Join-Path $Here "state\cloud_auth.json"
     Write-Host ""
-    Write-Host "Шаг 1/2: импортирую Xiaomi-сессию из браузера..." -ForegroundColor Cyan
+    Write-Host "Шаг 1/3: импортирую Xiaomi-сессию из браузера..." -ForegroundColor Cyan
     & $Python (Join-Path $Here "import-browser-session.py") --output $CloudAuthFile
     $code = $LASTEXITCODE
     if ($code -ne 0) {
@@ -356,12 +360,35 @@ if ($Command -eq "setup") {
     }
 
     Write-Host ""
-    Write-Host "Шаг 2/2: ищу DID и проверяю доступ к устройству..." -ForegroundColor Cyan
-    $SetupArgs = @("--direct-scan", "--save-did", "--did", "", "--model", "", "--device-name", "", "--device-ip", "")
+    Write-Host "Шаг 2/3: строю карту домов и устройств..." -ForegroundColor Cyan
+    & $Python (Join-Path $Here "search-homes-devices.py") @ExtraArgs
+    $code = $LASTEXITCODE
+    if ($code -ne 0) {
+        Return-ToMenu
+        exit $code
+    }
+
+    Write-Host ""
+    Write-Host "Шаг 3/3: выбираю DID и проверяю доступ к устройству..." -ForegroundColor Cyan
+    $SetupArgs = @("--direct-scan", "--save-did", "--did=", "--model=", "--device-name=", "--device-ip=")
     if ($ExtraArgs) {
         $SetupArgs += $ExtraArgs
     }
     & $Python (Join-Path $Here "voicepack_cycle.py") preflight @SetupArgs
+    $code = $LASTEXITCODE
+    Return-ToMenu
+    exit $code
+}
+
+if ($Command -eq "search-homes-devices") {
+    & $Python (Join-Path $Here "search-homes-devices.py") @ExtraArgs
+    $code = $LASTEXITCODE
+    Return-ToMenu
+    exit $code
+}
+
+if ($Command -eq "compatible-models") {
+    & $Python (Join-Path $Here "search-homes-devices.py") --compatible-models @ExtraArgs
     $code = $LASTEXITCODE
     Return-ToMenu
     exit $code
