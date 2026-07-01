@@ -13,9 +13,9 @@
 
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-07-01 12:01 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-07-01 13:01 UTC -->
 
-[![Views local](https://img.shields.io/badge/Views_local-95-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views local](https://img.shields.io/badge/Views_local-96-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Views GitHub](https://img.shields.io/badge/Views_GitHub-152-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Unique visitors](https://img.shields.io/badge/Unique-28-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Clones](https://img.shields.io/badge/Clones-1191-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
@@ -48,7 +48,7 @@
 
 
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-07-01 12:01 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-07-01 13:01 UTC -->
 
 ## Issues
 
@@ -129,7 +129,7 @@ Tested on:
 - Batch conversion of the entire `old_voicepacks` folder.
 - Manual assembly using Russian and English event tables.
 - Checking the exact set of 101 numeric MP3s.
-- Selecting and installing a package from `ready_voicepacks`.
+- Select and install a package from `ready_voicepacks`.
 - Download 20 official languages ​​for d109gl and d102gl.
 
 ## Quick start
@@ -143,6 +143,13 @@ Windows:
 
 ```powershell
 .\run.ps1
+```
+
+Linux/macOS:
+
+```bash
+chmod +x run.sh
+./run.sh
 ```
 
 When you run it for the first time, select option 1. It will install the Python dependencies,
@@ -270,12 +277,49 @@ via `genpresignedurl_v3`; This is a cloud request and it does not send a command
 robot Only the cleared host/base URL is saved in the state, without the signed URL
 and query signatures. You can disable it using the `--no-resolve-fds` flag.
 
+If the region is not specified, the tool tries Xiaomi Cloud endpoints automatically.
+European countries, such as `cz`, `sk`, `pl`, `fr`, `it` or `eu`, for
+old `api.io.mi.com` are converted to endpoint `de`. If in the old `.env`
+the invalid `XIAOMI_COUNTRY=ru` is already written, temporarily override it:
+
+```bash
+./run.sh search-homes-devices --country auto
+./run.sh search-homes-devices --country cz
+```
+
 For non-interactive selection use `--device-index`, `--device-ip`,
 `--device-name` or `--did`.
+
+Modern voice ZIP installation is done remotely via Xiaomi Cloud:
+the archive is uploaded to Xiaomi FDS, then the MiOT action is sent to the robot
+signed URL, md5 and size. These steps can be divided:
+
+```bash
+python voicepack_cycle.py upload --country de --did 1140953532
+python voicepack_cycle.py remote-install --country de --did 1140953532
+```
+
+`upload` stores `state/latest_upload.json` and `remote-install` reads it and
+sends a command to the robot without re-downloading the archive locally. You can also
+pass the finished remote link manually:
+
+```bash
+python voicepack_cycle.py remote-install --remote-url URL --remote-md5 MD5 --remote-size SIZE
+```
+
+Through the Linux/macOS wrapper the same thing:
+
+```bash
+./run.sh upload --country de --did 1140953532
+./run.sh remote-install --country de --did 1140953532
+```
+
 Modern Chrome
 can use application-specific encryption cookie `v20`
-(not tested). Before reading cookie, item 1 automatically closes
-found browsers so that their databases are not blocked.
+(not tested). Before reading the cookie, point 1 makes a temporary copy
+browser cookie and does not close browsers. If on a specific system
+a copy of the blocked database is not readable, you can run the import with an explicit
+flag `--close-browsers`.
 After successfully accessing Xiaomi Cloud, a token is created
 `state/cloud_auth.sha256`. If `cloud_auth.json` was changed manually, the token
 will no longer match and will be updated after the next successful check.
@@ -290,7 +334,7 @@ python search-homes-devices.py --compatible-models --family legacy_miio
 
 Local search uses UDP 54321 with a timeout of 1.5 seconds and 3 retries.
 If the device responds slowly, increase `--scan-timeout` or
-`XIAOMI_SCAN_TIMEOUT`, for example to `3`.
+`XIAOMI_SCAN_TIMEOUT`, for example before `3`.
 
 ## Obtaining device information in MiHome
 
@@ -298,8 +342,7 @@ Go to MiHome -> vacuum cleaner -> ⋮ -> Cleaning history -> quickly press with 
 
 ## Disclaimer
 
-This is an independent project not associated with Xiaomi or Roborock.
-Installation of unofficial voicepacks is at your own risk and may void warranty service.
+This is an independent project not associated with Xiaomi or Roborock.Installation of unofficial voicepacks is at your own risk and may void warranty service.
 
 ## Acknowledgments
 
