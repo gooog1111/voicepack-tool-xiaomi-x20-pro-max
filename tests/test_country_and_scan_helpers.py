@@ -1,6 +1,7 @@
 import unittest
 
 import voicepack_cycle
+from providers.xiaomi import voice_modern_cloud
 
 
 class CountryAndScanHelpersTest(unittest.TestCase):
@@ -18,3 +19,13 @@ class CountryAndScanHelpersTest(unittest.TestCase):
         subnets = voicepack_cycle.build_scan_subnets("", "192.168.31.55", include_common=True)
         self.assertIn("192.168.0.0/24", subnets)
         self.assertIn("192.168.1.0/24", subnets)
+
+    def test_relative_voice_url_keeps_relative_and_converts_absolute(self) -> None:
+        self.assertEqual(
+            voice_modern_cloud.relative_voice_url("https://host.example/a/b.zip?sig=1", "ru.zip"),
+            "/a/b.zip?sig=1#/ru.zip",
+        )
+        self.assertEqual(
+            voice_modern_cloud.relative_voice_url("/xiaomi-d109gl/audio/it.zip", ""),
+            "/xiaomi-d109gl/audio/it.zip#/ru.zip",
+        )

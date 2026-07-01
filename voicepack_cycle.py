@@ -947,6 +947,36 @@ def install_pack(api, args, archive: Path, get_url: str) -> None:
     voice_modern_cloud.install_pack(api, args, archive, get_url, file_info)
 
 
+def install_remote_pack(api, args, get_url: str, md5: str, size: int) -> None:
+    voice_modern_cloud.install_remote_pack(api, args, get_url, md5, size)
+
+
+def load_remote_install_state(args) -> tuple[str, str, int]:
+    get_url = str(getattr(args, "remote_url", "") or "")
+    md5 = str(getattr(args, "remote_md5", "") or "")
+    size_value = str(getattr(args, "remote_size", "") or "")
+
+    if not (get_url and md5 and size_value):
+        state_path = local_write_path(args.state_file, "upload state")
+        if state_path.is_file():
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            get_url = get_url or str(state.get("get_url") or "")
+            md5 = md5 or str(state.get("md5") or "")
+            size_value = size_value or str(state.get("size") or "")
+
+    if not get_url:
+        raise RuntimeError("Remote install needs --remote-url or a saved upload state")
+    if not md5:
+        raise RuntimeError("Remote install needs --remote-md5 or a saved upload state")
+    try:
+        size = int(size_value)
+    except (TypeError, ValueError) as exc:
+        raise RuntimeError("Remote install needs --remote-size or a saved upload state") from exc
+    if size <= 0:
+        raise RuntimeError("Remote install size must be greater than zero")
+    return get_url, md5, size
+
+
 def add_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--country", default=env("XIAOMI_COUNTRY", DEFAULT_COUNTRY))
     parser.add_argument("--did", default=env("XIAOMI_DID", DEFAULT_DID))
@@ -1000,6 +1030,10 @@ def add_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--original-archive", default=str(HERE / "cache/official_ru.zip"))
     parser.add_argument("--suffix", default="ru.zip")
     parser.add_argument("--state-file", default=str(HERE / "state/latest_upload.json"))
+    parser.add_argument("--remote-url", default=env("XIAOMI_REMOTE_VOICE_URL", ""), help="Remote signed/public voice ZIP URL for remote-install")
+    parser.add_argument("--remote-md5", default=env("XIAOMI_REMOTE_VOICE_MD5", ""), help="MD5 for --remote-url")
+    parser.add_argument("--remote-size", default=env("XIAOMI_REMOTE_VOICE_SIZE", ""), help="Size in bytes for --remote-url")
+    parser.add_argument("--remote-archive-name", default=env("XIAOMI_REMOTE_ARCHIVE_NAME", "ru.zip"), help="Archive name appended as URL fragment for Xiaomi voice install")
     parser.add_argument("--target-language", default="ru")
     parser.add_argument("--reset-language", default="it")
     parser.add_argument("--reset-url", default="/xiaomi-d109gl/audio/it.zip")
@@ -1011,7 +1045,7 @@ def main() -> int:
     add_common(parser)
     parser.add_argument(
         "command",
-        choices=("list-devices", "local-scan", "preflight", "download", "build", "verify", "deploy", "all"),
+        choices=("list-devices", "local-scan", "preflight", "download", "build", "verify", "upload", "remote-install", "deploy", "all"),
     )
     parser.add_argument("--refresh-original", action="store_true")
     args = parser.parse_args()
@@ -1038,7 +1072,7 @@ def main() -> int:
         save_device_inventory(devices + local_devices, args)
         return 0
 
-    if args.command in {"preflight", "deploy", "all"}:
+    if args.command in {"preflight", "upload", "remote-install", "deploy", "all"}:
         api = make_api(args)
         # When a DID is discovered during install/preflight, persist it so the next run
         # does not need to rescan the LAN.
@@ -1077,6 +1111,13 @@ def main() -> int:
         verify_pack(args)
         return 0
 
+    if args.command == "remote-install":
+        get_url, md5, size = load_remote_install_state(args)
+        install_remote_pack(api, args, get_url, md5, size)
+        mark_auth_verified(args.cloud_auth_file)
+        print("Remote voice install completed successfully")
+        return 0
+
     if args.command == "all":
         base = Path(args.base_dir)
         if args.refresh_original or not base.is_dir() or not list(base.glob("*.mp3")):
@@ -1091,6 +1132,10 @@ def main() -> int:
         api = make_api(args)
         args.did = resolve_did(api, args)
     _, get_url = generate_upload(api, args, archive)
+    if args.command == "upload":
+        mark_auth_verified(args.cloud_auth_file)
+        print("Upload completed successfully; run remote-install to send it to the robot")
+        return 0
     install_pack(api, args, archive, get_url)
     mark_auth_verified(args.cloud_auth_file)
     print("Custom voice cycle completed successfully")

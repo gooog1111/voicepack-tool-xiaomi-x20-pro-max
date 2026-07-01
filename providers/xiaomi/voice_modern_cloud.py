@@ -154,6 +154,18 @@ def send_action(api, args, language: str, url: str, md5: str, size: int) -> dict
     return response
 
 
+def relative_voice_url(url: str, archive_name: str = "ru.zip") -> str:
+    split = urlsplit(url)
+    if split.scheme and split.netloc:
+        value = split.path + ("?" + split.query if split.query else "")
+    else:
+        value = url
+    archive_name = archive_name or "ru.zip"
+    if "#" not in value:
+        value += f"#/{archive_name}"
+    return value
+
+
 def voice_status(api, args) -> dict:
     payload = {
         "params": {
@@ -210,6 +222,11 @@ def wait_voice(api, args, target: str, timeout: int = 180) -> dict:
 
 
 def install_pack(api, args, archive: Path, get_url: str, file_info) -> None:
+    md5, size = file_info(archive)
+    install_remote_pack(api, args, get_url, md5, size)
+
+
+def install_remote_pack(api, args, get_url: str, md5: str, size: int) -> None:
     current = voice_status(api, args)
     if current["current"] == args.target_language and args.reset_language:
         print(f"Resetting voice to {args.reset_language} before custom install")
@@ -223,9 +240,10 @@ def install_pack(api, args, archive: Path, get_url: str, file_info) -> None:
         )
         wait_voice(api, args, args.reset_language)
 
-    split = urlsplit(get_url)
-    relative = split.path + ("?" + split.query if split.query else "") + "#/ru.zip"
-    md5, size = file_info(archive)
-    print("Installing custom pack with relative signed GET and #/ru.zip")
+    archive_name = getattr(args, "remote_archive_name", "ru.zip")
+    relative = relative_voice_url(get_url, archive_name)
+    print("Installing custom pack remotely with Xiaomi Cloud MiOT action")
+    if getattr(args, "debug_devices", False):
+        print("Voice install URL: " + relative)
     send_action(api, args, args.target_language, relative, md5, size)
     wait_voice(api, args, args.target_language)
