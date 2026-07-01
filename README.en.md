@@ -13,9 +13,9 @@
 
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-07-01 03:01 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-07-01 04:01 UTC -->
 
-[![Views local](https://img.shields.io/badge/Views_local-86-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views local](https://img.shields.io/badge/Views_local-87-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Views GitHub](https://img.shields.io/badge/Views_GitHub-82-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Unique visitors](https://img.shields.io/badge/Unique-28-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Clones](https://img.shields.io/badge/Clones-1019-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
@@ -48,7 +48,7 @@
 
 
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-07-01 03:01 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-07-01 04:01 UTC -->
 
 ## Issues
 
@@ -264,7 +264,7 @@ Login to Xiaomi Home, after which the session will be saved in `state/cloud_auth
 
 Point 2 can be run separately. It builds `state/homes_map.json` and
 `state/devices.json` via Xiaomi Cloud. Regular houses are supported,
-shared homes and devices located only in the rooms of a shared home. For
+shared homes and devices located only in the rooms of a shared house. For
 modern cloud devices are additionally determined by the regional FDS endpoint
 via `genpresignedurl_v3`; This is a cloud request and it does not send a command to
 robot Only the cleared host/base URL is saved in the state, without the signed URL
