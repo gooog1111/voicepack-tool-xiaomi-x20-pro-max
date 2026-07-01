@@ -34,6 +34,9 @@ def add_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--scan-retries", type=int, default=int(cycle.env("XIAOMI_SCAN_RETRIES", "3")))
     parser.add_argument("--scan-workers", type=int, default=int(cycle.env("XIAOMI_SCAN_WORKERS", "96")))
     parser.add_argument("--direct-scan", action="store_true")
+    parser.add_argument("--scan-common-subnets", action="store_true", help="Also try common private /24 subnets during local miIO scan")
+    parser.add_argument("--mdns-scan", action="store_true", help="Also discover devices advertising _miio._udp.local via mDNS")
+    parser.add_argument("--mdns-timeout", type=float, default=float(cycle.env("XIAOMI_MDNS_TIMEOUT", "5")))
     parser.add_argument("--raw-scan", action="store_true")
     parser.add_argument("--compatible-models", action="store_true", help="Print known Xiaomi voicepack-compatible models and exit")
     parser.add_argument("--family", default="", choices=("", "modern_cloud", "legacy_miio"), help="Filter --compatible-models by device family")
@@ -43,47 +46,59 @@ def add_args(parser: argparse.ArgumentParser) -> None:
 
 def print_homes_summary(homes_map: dict) -> None:
     print("Xiaomi homes map:")
-    for home in homes_map.get("homes", []):
-        home_devices = len(home.get("devices") or [])
-        rooms = home.get("rooms") or []
+    for region in xiaomi_inventory.iter_region_nodes(homes_map):
         print(
             "  "
             + json.dumps(
                 {
-                    "id": home.get("id", ""),
-                    "name": home.get("name", ""),
-                    "source": home.get("source", ""),
-                    "shareflag": home.get("shareflag"),
-                    "permit_level": home.get("permit_level"),
-                    "devices": home_devices,
-                    "rooms": len(rooms),
+                    "region": region.get("country", ""),
+                    "homes": len(region.get("homes") or []),
+                    "unassigned_devices": len(region.get("unassigned_devices") or []),
                 },
                 ensure_ascii=False,
             )
         )
-        for room in rooms:
-            room_devices = room.get("devices") or []
+        for home in region.get("homes", []):
+            home_devices = len(home.get("devices") or [])
+            rooms = home.get("rooms") or []
             print(
                 "    "
                 + json.dumps(
                     {
-                        "room_id": room.get("id", ""),
-                        "room": room.get("name", ""),
-                        "devices": [
-                            {
-                                "name": item.get("name", ""),
-                                "did": item.get("did", ""),
-                                "model": item.get("model", ""),
-                                "ip": item.get("ip", ""),
-                                "fds_host": (item.get("fds") or {}).get("upload_host", ""),
-                                "online": item.get("online"),
-                            }
-                            for item in room_devices
-                        ],
+                        "id": home.get("id", ""),
+                        "name": home.get("name", ""),
+                        "source": home.get("source", ""),
+                        "shareflag": home.get("shareflag"),
+                        "permit_level": home.get("permit_level"),
+                        "devices": home_devices,
+                        "rooms": len(rooms),
                     },
                     ensure_ascii=False,
                 )
             )
+            for room in rooms:
+                room_devices = room.get("devices") or []
+                print(
+                    "      "
+                    + json.dumps(
+                        {
+                            "room_id": room.get("id", ""),
+                            "room": room.get("name", ""),
+                            "devices": [
+                                {
+                                    "name": item.get("name", ""),
+                                    "did": item.get("did", ""),
+                                    "model": item.get("model", ""),
+                                    "ip": item.get("ip", ""),
+                                    "fds_host": (item.get("fds") or {}).get("upload_host", ""),
+                                    "online": item.get("online"),
+                                }
+                                for item in room_devices
+                            ],
+                        },
+                        ensure_ascii=False,
+                    )
+                )
 
 
 def main() -> int:
@@ -103,9 +118,8 @@ def main() -> int:
     local_devices = []
 
     if args.with_local_scan:
-        if not getattr(args, "scan_host", ""):
-            args.direct_scan = True
-        local_devices = cycle.local_miio_scan(args)
+        known_hosts = [str(item.get("ip") or "") for item in devices if item.get("ip")]
+        local_devices = cycle.local_miio_scan(args, known_hosts=known_hosts)
         devices = cycle.map_local_to_cloud_devices(devices, local_devices)
 
     xiaomi_inventory.save_homes_map(homes_map, args)

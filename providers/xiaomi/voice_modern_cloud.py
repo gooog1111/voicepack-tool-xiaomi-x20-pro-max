@@ -8,6 +8,7 @@ from urllib.parse import urlsplit
 import requests
 
 from providers.xiaomi.inventory import request_json
+from providers.xiaomi.inventory import iter_region_nodes
 
 
 class VoiceStatusUnavailable(RuntimeError):
@@ -53,29 +54,35 @@ def enrich_device_fds(api, country: str, device: dict, suffix: str = "fds_probe.
 
 def enrich_homes_map_fds(api, args, homes_map: dict, suffix: str = "fds_probe.zip") -> int:
     updated = 0
-    for home in homes_map.get("homes", []):
-        for device in home.get("devices", []):
-            try:
-                updated += int(enrich_device_fds(api, args.country, device, suffix=suffix))
-            except Exception as exc:
-                device["fds_error"] = f"{type(exc).__name__}: {exc}"
-                if getattr(args, "debug_devices", False):
-                    print(f"DEBUG FDS resolve failed did={device.get('did')}: {device['fds_error']}")
-        for room in home.get("rooms", []):
-            for device in room.get("devices", []):
+    for region in iter_region_nodes(homes_map):
+        region_country = region.get("country") or args.country
+        for home in region.get("homes", []):
+            home_country = home.get("region") or region_country
+            for device in home.get("devices", []):
                 try:
-                    updated += int(enrich_device_fds(api, args.country, device, suffix=suffix))
+                    country = device.get("region") or home_country
+                    updated += int(enrich_device_fds(api, country, device, suffix=suffix))
                 except Exception as exc:
                     device["fds_error"] = f"{type(exc).__name__}: {exc}"
                     if getattr(args, "debug_devices", False):
                         print(f"DEBUG FDS resolve failed did={device.get('did')}: {device['fds_error']}")
-    for device in homes_map.get("unassigned_devices", []):
-        try:
-            updated += int(enrich_device_fds(api, args.country, device, suffix=suffix))
-        except Exception as exc:
-            device["fds_error"] = f"{type(exc).__name__}: {exc}"
-            if getattr(args, "debug_devices", False):
-                print(f"DEBUG FDS resolve failed did={device.get('did')}: {device['fds_error']}")
+            for room in home.get("rooms", []):
+                for device in room.get("devices", []):
+                    try:
+                        country = device.get("region") or room.get("region") or home_country
+                        updated += int(enrich_device_fds(api, country, device, suffix=suffix))
+                    except Exception as exc:
+                        device["fds_error"] = f"{type(exc).__name__}: {exc}"
+                        if getattr(args, "debug_devices", False):
+                            print(f"DEBUG FDS resolve failed did={device.get('did')}: {device['fds_error']}")
+        for device in region.get("unassigned_devices", []):
+            try:
+                country = device.get("region") or region_country
+                updated += int(enrich_device_fds(api, country, device, suffix=suffix))
+            except Exception as exc:
+                device["fds_error"] = f"{type(exc).__name__}: {exc}"
+                if getattr(args, "debug_devices", False):
+                    print(f"DEBUG FDS resolve failed did={device.get('did')}: {device['fds_error']}")
     if getattr(args, "debug_devices", False):
         print(f"DEBUG FDS endpoints resolved: {updated}")
     return updated
