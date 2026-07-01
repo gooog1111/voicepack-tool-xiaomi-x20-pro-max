@@ -27,21 +27,43 @@ DEFAULT_ORIGINAL_URL = (
     "xiaomi-d109gl/audio/1104/ru.zip"
 )
 DEFAULT_DID = ""
-DEFAULT_COUNTRY = "ru"
+DEFAULT_COUNTRY = "auto"
 DEFAULT_COUNTRY_CANDIDATES = (
+    "de",
     "ru",
     "cn",
-    "de",
     "i2",
     "in",
     "sg",
     "us",
     "tw",
 )
+EU_COUNTRY_ALIASES = {
+    "at", "be", "bg", "hr", "cy", "cz", "czech", "czechia", "dk", "ee",
+    "eu", "europe", "fi", "fr", "gr", "hu", "ie", "it", "lv", "lt", "lu",
+    "mt", "nl", "pl", "pt", "ro", "sk", "si", "es", "se", "uk", "gb",
+}
+COUNTRY_ALIASES = {
+    **{name: "de" for name in EU_COUNTRY_ALIASES},
+    "china": "cn",
+    "mainland": "cn",
+    "mainland_china": "cn",
+    "india": "i2",
+    "russia": "ru",
+    "singapore": "sg",
+    "taiwan": "tw",
+    "usa": "us",
+    "america": "us",
+}
 
 
 def env(name: str, default: str = "") -> str:
     return os.environ.get(name, default)
+
+
+def normalize_country_code(value: str) -> str:
+    token = str(value or "").strip().lower().replace("-", "_")
+    return COUNTRY_ALIASES.get(token, token)
 
 
 def file_info(path: Path) -> tuple[str, int]:
@@ -86,18 +108,18 @@ def local_write_path(value: str | Path, label: str) -> Path:
 
 def parse_country_candidates(value: str | None) -> list[str]:
     if value is None:
-        return [DEFAULT_COUNTRY]
+        return list(DEFAULT_COUNTRY_CANDIDATES)
 
     text = str(value).strip()
     if not text:
-        return [DEFAULT_COUNTRY]
+        return list(DEFAULT_COUNTRY_CANDIDATES)
     if text.lower() in {"auto", "detect", "all"}:
-        return [DEFAULT_COUNTRY, *[country for country in DEFAULT_COUNTRY_CANDIDATES if country != DEFAULT_COUNTRY]]
+        return list(DEFAULT_COUNTRY_CANDIDATES)
 
     parts: list[str] = []
     for chunk in text.replace(";", ",").split(","):
         for token in chunk.split():
-            token = token.strip().lower()
+            token = normalize_country_code(token)
             if token:
                 parts.append(token)
 
@@ -746,8 +768,33 @@ def choose_device(candidates: list[dict], args, source: str, inventory_devices: 
     raise RuntimeError("More than one matching device was found. Use --device-index, --device-ip, --device-name or --did.")
 
 
+def is_auto_country(value: str | None) -> bool:
+    text = str(value or "").strip().lower()
+    return not text or text in {"auto", "detect", "all"}
+
+
+def resolve_country_for_existing_did(api, args) -> bool:
+    if not args.did or args.did == "YOUR_DEVICE_DID" or not is_auto_country(getattr(args, "country", "")):
+        return False
+
+    devices = list_cloud_devices(api, args)
+    target = str(args.did)
+    for item in devices:
+        if str(item.get("did") or "") == target and item.get("region"):
+            args.country = str(item["region"])
+            print(f"Auto country for DID {target}: {args.country}")
+            save_device_inventory(devices, args, target)
+            return True
+    return False
+
+
 def resolve_did(api, args) -> str:
     if args.did and args.did != "YOUR_DEVICE_DID":
+        if is_auto_country(getattr(args, "country", "")) and not resolve_country_for_existing_did(api, args):
+            raise RuntimeError(
+                "DID is set but Xiaomi region is auto and could not be resolved. "
+                "Use --country de/ru/cn/i2/sg/us/tw or run list-devices/search-homes-devices first."
+            )
         return args.did
 
     devices: list[dict] = []

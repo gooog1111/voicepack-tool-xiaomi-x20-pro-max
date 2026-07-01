@@ -7,7 +7,9 @@ from providers.xiaomi import voice_modern_cloud
 class CountryAndScanHelpersTest(unittest.TestCase):
     def test_parse_country_candidates_parses_csv_and_defaults(self) -> None:
         self.assertEqual(voicepack_cycle.parse_country_candidates("ru, us ,de"), ["ru", "us", "de"])
-        self.assertEqual(voicepack_cycle.parse_country_candidates(""), [voicepack_cycle.DEFAULT_COUNTRY])
+        self.assertEqual(voicepack_cycle.parse_country_candidates(""), list(voicepack_cycle.DEFAULT_COUNTRY_CANDIDATES))
+        self.assertEqual(voicepack_cycle.parse_country_candidates("cz"), ["de"])
+        self.assertEqual(voicepack_cycle.parse_country_candidates("eu,ru"), ["de", "ru"])
 
     def test_build_scan_subnets_prefers_local_range(self) -> None:
         subnets = voicepack_cycle.build_scan_subnets("", "192.168.31.55")

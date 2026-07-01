@@ -8,33 +8,55 @@ from pathlib import Path
 from providers.xiaomi import compatibility
 
 HERE = Path(__file__).resolve().parents[2]
-DEFAULT_COUNTRY = "ru"
+DEFAULT_COUNTRY = "auto"
 DEFAULT_COUNTRY_CANDIDATES = (
+    "de",
     "ru",
     "cn",
-    "de",
     "i2",
     "in",
     "sg",
     "us",
     "tw",
 )
+EU_COUNTRY_ALIASES = {
+    "at", "be", "bg", "hr", "cy", "cz", "czech", "czechia", "dk", "ee",
+    "eu", "europe", "fi", "fr", "gr", "hu", "ie", "it", "lv", "lt", "lu",
+    "mt", "nl", "pl", "pt", "ro", "sk", "si", "es", "se", "uk", "gb",
+}
+COUNTRY_ALIASES = {
+    **{name: "de" for name in EU_COUNTRY_ALIASES},
+    "china": "cn",
+    "mainland": "cn",
+    "mainland_china": "cn",
+    "india": "i2",
+    "russia": "ru",
+    "singapore": "sg",
+    "taiwan": "tw",
+    "usa": "us",
+    "america": "us",
+}
+
+
+def normalize_country_code(value: str) -> str:
+    token = str(value or "").strip().lower().replace("-", "_")
+    return COUNTRY_ALIASES.get(token, token)
 
 
 def parse_country_candidates(value: str | None) -> list[str]:
     if value is None:
-        return [DEFAULT_COUNTRY]
+        return list(DEFAULT_COUNTRY_CANDIDATES)
 
     text = str(value).strip()
     if not text:
-        return [DEFAULT_COUNTRY]
+        return list(DEFAULT_COUNTRY_CANDIDATES)
     if text.lower() in {"auto", "detect", "all"}:
-        return [DEFAULT_COUNTRY, *[country for country in DEFAULT_COUNTRY_CANDIDATES if country != DEFAULT_COUNTRY]]
+        return list(DEFAULT_COUNTRY_CANDIDATES)
 
     parts: list[str] = []
     for chunk in text.replace(";", ",").split(","):
         for token in chunk.split():
-            token = token.strip().lower()
+            token = normalize_country_code(token)
             if token:
                 parts.append(token)
 
