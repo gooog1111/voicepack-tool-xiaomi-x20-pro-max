@@ -84,6 +84,14 @@ def auth_marker_ok(path: Path) -> bool:
     return path.exists() and marker.exists() and marker.read_text(encoding="utf-8").strip() == file_sha256(path)
 
 
+def clear_auth_marker(path: str | Path) -> None:
+    marker = auth_marker_path(Path(path).expanduser())
+    try:
+        marker.unlink()
+    except FileNotFoundError:
+        pass
+
+
 def mark_auth_verified(path: str | Path) -> None:
     auth_path = Path(path).expanduser()
     if not auth_path.exists():

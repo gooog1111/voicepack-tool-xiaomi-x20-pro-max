@@ -12,6 +12,7 @@ import webbrowser
 from pathlib import Path
 
 import requests
+import voicepack_cycle as cycle
 
 
 HERE = Path(__file__).resolve().parent
@@ -136,6 +137,7 @@ def main() -> int:
     result = login.wait_for_scan()
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    cycle.clear_auth_marker(args.output)
     try:
         os.chmod(args.output, 0o600)
     except OSError:

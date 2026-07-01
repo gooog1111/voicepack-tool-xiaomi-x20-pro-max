@@ -77,9 +77,11 @@ def resolve_country_candidates(api, args, probe_paths: list[str] | None = None, 
     probe_payload = payload or {"getVirtualModel": False, "getHuamiDevices": 0}
     successful: list[str] = []
     for country in candidates:
+        print(f"Проверяю Xiaomi Cloud регион {country}...", flush=True)
         for path in probe_paths:
             try:
                 request_json(api, path, country, probe_payload)
+                print(f"  OK: {country} {path}", flush=True)
                 successful.append(country)
                 break
             except Exception:
@@ -504,11 +506,14 @@ def build_homes_map(api, args) -> dict:
         args.country = country
         region_devices = direct_devices_by_region.setdefault(country, [])
         for path, payload in attempts:
+            print(f"Запрашиваю устройства: регион {country}, endpoint {path}", flush=True)
             try:
                 response = request_json(api, path, country, payload)
                 devices = walk_devices(response.get("result") or response, path, country)
                 add_homes_from_response(homes_map, response, path, country)
                 region_devices.extend(devices)
+                if devices or iter_home_device_refs(homes_map):
+                    print(f"  Найдено: devices={len(devices)}", flush=True)
                 if getattr(args, "debug_devices", False):
                     refs_count = len(iter_home_device_refs(homes_map))
                     homes_count = len(get_or_add_region(homes_map, country).get("homes", []))

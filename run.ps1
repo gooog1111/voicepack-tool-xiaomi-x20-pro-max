@@ -25,7 +25,7 @@ $RequirementsFile = Join-Path $Here "requirements.txt"
 $RequirementsHashFile = Join-Path $Venv ".requirements.sha256"
 $PlaywrightMarkerFile = Join-Path $Venv ".playwright.chromium.installed"
 
-$CurrentVersion = "v1.0.4-3"
+$CurrentVersion = "v1.0.4-4"
 $RepoUrl = "https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max"
 $GitHubApiLatestRelease = "https://api.github.com/repos/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases/latest"
 
@@ -288,6 +288,21 @@ function Ensure-Environment {
     Ensure-ArchiveExtractor
 }
 
+function Reset-CloudStateForNewAuth {
+    $StateFiles = @(
+        (Join-Path $Here "state\cloud_auth.sha256"),
+        (Join-Path $Here "state\homes_map.json"),
+        (Join-Path $Here "state\devices.json"),
+        (Join-Path $Here "state\latest_upload.json")
+    )
+
+    foreach ($path in $StateFiles) {
+        if (Test-Path -LiteralPath $path) {
+            Remove-Item -LiteralPath $path -Force
+        }
+    }
+}
+
 function Show-Menu {
     Write-Host ""
     Write-Host "Xiaomi Voice Pack Tool" -ForegroundColor Cyan
@@ -344,6 +359,7 @@ Ensure-Environment
 
 if ($Command -eq "setup") {
     $CloudAuthFile = Join-Path $Here "state\cloud_auth.json"
+    Reset-CloudStateForNewAuth
     Write-Host ""
     Write-Host "Шаг 1/3: импортирую Xiaomi-сессию из браузера..." -ForegroundColor Cyan
     & $Python (Join-Path $Here "import-browser-session.py") --output $CloudAuthFile
@@ -395,6 +411,7 @@ if ($Command -eq "compatible-models") {
 }
 
 if ($Command -eq "existing-auth") {
+    Reset-CloudStateForNewAuth
     & $Python (Join-Path $Here "import-browser-session.py") @ExtraArgs
     $code = $LASTEXITCODE
     Return-ToMenu
