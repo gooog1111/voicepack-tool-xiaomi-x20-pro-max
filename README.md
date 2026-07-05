@@ -13,13 +13,13 @@
 
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-07-05 20:01 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-07-05 21:01 UTC -->
 
-[![Views local](https://img.shields.io/badge/Views_local-197-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views local](https://img.shields.io/badge/Views_local-198-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Views GitHub](https://img.shields.io/badge/Views_GitHub-273-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Unique visitors](https://img.shields.io/badge/Unique-32-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Clones](https://img.shields.io/badge/Clones-1995-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
-[![Stars](https://img.shields.io/badge/Stars-0-yellow?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/stargazers)
+[![Stars](https://img.shields.io/badge/Stars-1-yellow?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/stargazers)
 [![Forks](https://img.shields.io/badge/Forks-0-green?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/network/members)
 [![Downloads latest release](https://img.shields.io/badge/Downloads_latest_release-0-brightgreen?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases/latest)
 [![Downloads total assets](https://img.shields.io/badge/Downloads_total_assets-4-brightgreen?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases)
@@ -48,7 +48,7 @@
 
 
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-07-05 20:01 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-07-05 21:01 UTC -->
 
 ## Issues
 
