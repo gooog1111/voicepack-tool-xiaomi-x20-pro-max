@@ -25,7 +25,7 @@
 180.mp3,Continue cleanup.
 190.mp3,Cleanup resumes
 200.mp3,Map creation is being resumed
-201.mp3,and clean up.
+201.mp3,End clean up.
 202.mp3,Mapping ended.
 210.mp3,"Clean up completed, and return to the station to charge."
 220.mp3,Mapping completed and returned to the station to charge
@@ -96,7 +96,7 @@
 810.mp3,Please install the disposable bag.
 815.mp3,Detected that the dirty water tank is not installed or is full
 816.mp3,Detected that the washboard is not installed or the water level is too high.
-817.mp3,and mop pad drying.
+817.mp3,End mop pad drying.
 818.mp3,Detected that the clean water tank is not installed or has insufficient water.
 900.mp3,"The robot vacuum and the station are paired abnormally, simultaneously press and hold the mop pad cleaning button and the dry button for 7 seconds to pair again."
 910.mp3,Please move the robot vacuum away from the carpet area.
