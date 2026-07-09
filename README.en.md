@@ -13,9 +13,9 @@
 
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-07-09 12:01 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-07-09 13:01 UTC -->
 
-[![Views local](https://img.shields.io/badge/Views_local-285-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views local](https://img.shields.io/badge/Views_local-286-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Views GitHub](https://img.shields.io/badge/Views_GitHub-288-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Unique visitors](https://img.shields.io/badge/Unique-35-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Clones](https://img.shields.io/badge/Clones-2572-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
@@ -48,7 +48,7 @@
 
 
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-07-09 12:01 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-07-09 13:01 UTC -->
 
 ## Issues
 
@@ -334,7 +334,7 @@ python search-homes-devices.py --compatible-models --family legacy_miio
 
 Local search uses UDP 54321 with a timeout of 1.5 seconds and 3 retries.
 If the device responds slowly, increase `--scan-timeout` or
-`XIAOMI_SCAN_TIMEOUT`, for example to `3`.
+`XIAOMI_SCAN_TIMEOUT`, for example before `3`.
 
 ## Obtaining device information in MiHome
 
