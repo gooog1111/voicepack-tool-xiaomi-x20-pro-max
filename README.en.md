@@ -13,9 +13,9 @@
 
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-07-10 07:02 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-07-10 08:02 UTC -->
 
-[![Views local](https://img.shields.io/badge/Views_local-303-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views local](https://img.shields.io/badge/Views_local-304-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Views GitHub](https://img.shields.io/badge/Views_GitHub-276-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Unique visitors](https://img.shields.io/badge/Unique-32-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Clones](https://img.shields.io/badge/Clones-2660-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
@@ -48,7 +48,7 @@
 
 
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-07-10 07:02 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-07-10 08:02 UTC -->
 
 ## Issues
 
@@ -189,56 +189,56 @@ providers/                  Провайдеры роботов и методы 
 resources/                  Таблицы, кэш донора и служебные файлы
 state/                      Локальная авторизация, homes_map и состояние
 work/                       Временные файлы
-```Авторизация, готовые сборки, скачанные оригиналы и временные файлы исключены из
+```Authorization, finished assemblies, downloaded originals and temporary files are excluded from
 Git.
 
-Не храните большие голосовые архивы в Git. Для этого проекта в репозитории
-должны оставаться код, таблицы и манифесты; `ready_voicepacks/`,
-`official_voicepacks/`, `old_voicepacks/`, `cache/`, `work/` и `state/`
-игнорируются.
+Don't store large voice archives in Git. For this project in the repository
+code, tables and manifests must remain; `ready_voicepacks/`,
+`official_voicepacks/`, `old_voicepacks/`, `cache/`, `work/` and `state/`
+are ignored.
 
-## Конвертация старых пакетов
+## Converting old packages
 
-Поместите каждый исходник в `old_voicepacks` и выберите пункт 5. Поддерживаются:
+Place each source in `old_voicepacks` and select option 5. Supported:
 
-- отдельный зашифрованный `.pkg`;
-- ZIP/RAR с WAV;
-- ZIP/RAR с одним или несколькими `.pkg`;
-- ZIP/RAR, одновременно содержащий WAV и `.pkg`;
-- подпапки с WAV, ZIP, RAR и `.pkg`;
-- вложенные ZIP/RAR до четырёх уровней.
+- separate encrypted `.pkg`;
+- ZIP/RAR with WAV;
+- ZIP/RAR with one or more `.pkg`;
+- ZIP/RAR containing both WAV and `.pkg`;
+- subfolders with WAV, ZIP, RAR and `.pkg`;
+- nested ZIP/RAR up to four levels.
 
-Отдельный WAV имеет приоритет над одноимённым файлом из вложенного пакета.
-Небезопасные пути ZIP/RAR и архивы размером более 512 МиБ после распаковки
-отклоняются.
-Для RAR нужен установленный распаковщик в `PATH`, например `7z`, `unrar`,
-`unar` или `bsdtar`; Python-пакет `rarfile` устанавливается автоматически.
+A separate WAV takes precedence over the file of the same name from the included package.
+Unsafe ZIP/RAR paths and archives larger than 512 MiB after unpacking
+are rejected.
+RAR needs an installed unpacker in `PATH`, for example `7z`, `unrar`,
+`unar` or `bsdtar`; The Python package `rarfile` is installed automatically.
 
-Полный старый каталог содержит 97 голосовых событий. `sound.info` и
-`sound.ver` являются служебными файлами и не считаются голосами.
+The full old catalog contains 97 voice events. `sound.info` and
+`sound.ver` are service files and are not considered votes.
 
-## Скачать старые голосовые пакеты
+## Download old voice packs
 
 https://4pda.to/forum/index.php?showtopic=881982
 
-[https://www.google.com/search](https://www.google.com/webhp) -> xiaomi voice pack скачать
+[https://www.google.com/search](https://www.google.com/webhp) -> xiaomi voice pack download
 
-## Ручной кастомный пакет
+## Manual custom package
 
-Номера событий находятся в `custom_voicepack/table_ru.csv` и
-`table_en.csv`. Положите изменённые числовые MP3, например `130.mp3`, в
-`custom_voicepack/audio` и выберите пункт 6.
+Event numbers are in `custom_voicepack/table_ru.csv` and
+`table_en.csv`. Put modified numeric MP3s, such as `130.mp3`, into
+`custom_voicepack/audio` and select option 6.
 
-Отсутствующие события берутся из официального русского пакета, который
-автоматически скачивается при первом использовании. Заменяемые файлы
-нормализуются в mono, 16 kHz, 32 kbps без ID3 и Xing.
+Missing events are taken from the official Russian package, which
+automatically downloaded the first time you use it. Replaceable files
+normalized to mono, 16 kHz, 32 kbps without ID3 and Xing.
 
-## Legacy PKG для Roborock v1/S5
+## Legacy PKG for Roborock v1/S5
 
-Пункт 7 собирает зашифрованный `.pkg` для старых miIO-пылесосов:
-Xiaomi Mi Robot Vacuum / Mijia 1C gen 1 (`rockrobo.vacuum.v1`) и Roborock
-Sweep One S5/S50/S51/S55/S501 (`roborock.vacuum.s5`). Эти пакеты ставятся
-не через Xiaomi Cloud, а локально:
+Point 7 collects encrypted `.pkg` for old miIO vacuum cleaners:
+Xiaomi Mi Robot Vacuum / Mijia 1C gen 1 (`rockrobo.vacuum.v1`) and Roborock
+Sweep One S5/S50/S51/S55/S501 (`roborock.vacuum.s5`). These packages are installed
+not via Xiaomi Cloud, but locally:
 
 ```bash
 pip install python-miio
@@ -246,11 +246,11 @@ mirobo discover --handshake true
 mirobo --ip=192.168.8.1 --token=TOKEN install-sound ready_voicepacks/custom_roborock_v1_s5.pkg
 ```
 
-Робот должен быть заряжен и стоять на док-станции. Для прошивки нужен IP и
-локальный token; их можно получить через `mirobo discover --handshake true`
-после подключения к сети `rockrobo-XXXX` или другим способом из вашей сети.
+The robot must be charged and docked. For firmware you need IP and
+local token; they can be obtained through `mirobo discover --handshake true`
+after connecting to the `rockrobo-XXXX` network or otherwise from your network.
 
-Профили сборки отличаются набором WAV:
+Build profiles differ in the WAV set:
 
 ```bash
 python voicepack_manager.py build-legacy-pkg --legacy-profile gen1
@@ -258,16 +258,15 @@ python voicepack_manager.py build-legacy-pkg --legacy-profile gen2
 python install_legacy_pkg.py --discover --status-first
 ```
 
-`gen1` ориентирован на старый каталог 72 фраз, `gen2`/`s5` - на полный каталог
-S5. Если нужны отсутствующие фразы, положите готовые старые `*.wav` с именами
-Roborock в `custom_voicepack/audio`.
+`gen1` is focused on the old catalog of 72 phrases, `gen2`/`s5` - on the full catalog
+S5. If you need missing phrases, put ready-made old `*.wav` with names
+Roborock in `custom_voicepack/audio`.
 
-## Авторизация
+## Authorization
 
-Пункт 1 выполняет три шага: импортирует Xiaomi-сессию из установленного
-браузера, строит карту домов/устройств и выполняет предварительную проверку.
-Если импорт из браузера не получился, пункт 1 автоматически запускает
-Xiaomi QR authorization: open the QR image or login page, confirm
+Step 1 performs three steps: imports the Xiaomi session from the installed
+browser, builds a map of houses/devices and performs a preliminary check.
+If import from the browser fails, step 1 automatically startsXiaomi QR authorization: open the QR image or login page, confirm
 Login to Xiaomi Home, after which the session will be saved in `state/cloud_auth.json`.
 
 Point 2 can be run separately. It builds `state/homes_map.json` and
