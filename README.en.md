@@ -13,9 +13,9 @@
 
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-07-10 05:01 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-07-10 06:02 UTC -->
 
-[![Views local](https://img.shields.io/badge/Views_local-301-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views local](https://img.shields.io/badge/Views_local-302-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Views GitHub](https://img.shields.io/badge/Views_GitHub-288-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Unique visitors](https://img.shields.io/badge/Unique-35-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Clones](https://img.shields.io/badge/Clones-2572-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
@@ -48,7 +48,7 @@
 
 
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-07-10 05:01 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-07-10 06:02 UTC -->
 
 ## Issues
 
@@ -86,53 +86,53 @@
 
 ## Xiaomi Voice Pack Tool
 
-Windows tool for working with robot vacuum cleaner voice packages
-Xiaomi. Now the main focus is Xiaomi X20 Pro (`d102gl`) and X20 Max
-(`d109gl`), but the code is already separated into providers and device families so that
-gradually expand support for other Xiaomi models, and then others
-manufacturers.
+Инструмент для Windows для работы с голосовыми пакетами роботов-пылесосов
+Xiaomi. Сейчас основной фокус - Xiaomi X20 Pro (`d102gl`) и X20 Max
+(`d109gl`), но код уже разделён на провайдеры и семейства устройств, чтобы
+постепенно расширять поддержку других моделей Xiaomi, а затем и других
+производителей.
 
-It imports Xiaomi authorization, builds a map of houses/rooms/devices,
-converts old Roborock packages, collects new Xiaomi number packages,
-checks archives, downloads official languages and installs the selected one
-Voyspak.
+Он импортирует авторизацию Xiaomi, строит карту домов/комнат/устройств,
+конвертирует старые пакеты Roborock, собирает новые числовые пакеты Xiaomi,
+проверяет архивы, скачивает официальные языки и устанавливает выбранный
+войспак.
 
-Tested on:
+Проверено на:
 
 - `xiaomi.vacuum.d109gl`
 - `xiaomi.vacuum.d102gl`
 
-## And also
+## А так же
 
-- the list will be updated with all the vacuum cleaners I can get my hands on
-- the current architecture is being prepared for a future renaming to
-  `xiaomi-voicepack-tool` and then to `robot-voicepack-tool` when they appear
-  other manufacturers.
+- список будет пополняться всеми пылесосми, до которых смогу дотянуться
+- текущая архитектура готовится к будущему переименованию в
+  `xiaomi-voicepack-tool`, а затем в `robot-voicepack-tool`, когда появятся
+  другие производители.
 
 
 
-## Features
+## Возможности
 
-- Interactive menu for Windows.
-- Consecutive session import from Chrome, Firefox, Edge, Yandex, Chromium,
-  Brave, Vivaldi, Opera, Opera GX and Tor Browser.
-- Building `homes_map` from Xiaomi Cloud: regular houses, shared homes, rooms
-  and devices inside rooms.
-- Separate provider layer `providers/xiaomi`: inventory, compatibility,
-  modern cloud voice and legacy miIO.
-- List of compatible models and capabilities to help you choose the right method
-  installations.
-- Determining regional Xiaomi FDS endpoint from a session without sending a command
-  to robot.
-- Unpacking old encrypted Roborock `.pkg`.
-- Recursive processing of ZIP/RAR with WAV, `.pkg` and mixed content.
-- Batch conversion of the entire `old_voicepacks` folder.
-- Manual assembly using Russian and English event tables.
-- Checking the exact set of 101 numeric MP3s.
-- Select and install a package from `ready_voicepacks`.
-- Download 20 official languages ​​for d109gl and d102gl.
+- Интерактивное меню для Windows.
+- Последовательный импорт сессии из Chrome, Firefox, Edge, Яндекс, Chromium,
+  Brave, Vivaldi, Opera, Opera GX и Tor Browser.
+- Построение `homes_map` из Xiaomi Cloud: обычные дома, shared homes, комнаты
+  и устройства внутри комнат.
+- Отдельный слой провайдера `providers/xiaomi`: inventory, совместимость,
+  modern cloud voice и legacy miIO.
+- Список совместимых моделей и capabilities для выбора правильного метода
+  установки.
+- Определение регионального Xiaomi FDS endpoint из сессии без отправки команды
+  на робот.
+- Распаковка старых зашифрованных Roborock `.pkg`.
+- Рекурсивная обработка ZIP/RAR с WAV, `.pkg` и смешанным содержимым.
+- Пакетная конвертация всей папки `old_voicepacks`.
+- Ручная сборка по русской и английской таблицам событий.
+- Проверка точного набора из 101 числового MP3.
+- Выбор и установка пакета из `ready_voicepacks`.
+- Скачивание 20 официальных языков для d109gl и d102gl.
 
-## Quick start
+## Быстрый старт
 
 ```bash
 git clone https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max.git
@@ -152,25 +152,25 @@ chmod +x run.sh
 ./run.sh
 ```
 
-When you run it for the first time, select option 1. It will install the Python dependencies,
-Playwright Chromium, `ffmpeg` and, if necessary, `ccrypt`.
+При первом запуске выберите пункт 1. Он установит Python-зависимости,
+Playwright Chromium, `ffmpeg` и, при необходимости, `ccrypt`.
 
-## Menu
+## Меню
 
-1. Prepare authorization and DID automatically
-2. Build a map of houses and devices
-3. Show compatible Xiaomi models
-4. Preliminary check of the device
-5. Convert all old packages from the old_voicepacks folder
-6. Build a new custom ZIP for X20/Xiaomi Cloud
-7. Build legacy PKG for Xiaomi/Roborock v1/S5
-8. Install legacy PKG via python-miio
-9. Check new ZIP voicepacks from the ready_voicepacks folder
-10. Install the ZIP voicepack from the ready_voicepacks list
-11. Download original d109gl/d102gl packages in all languages
-12. Exit
+1. Подготовить авторизацию и DID автоматически
+2. Построить карту домов и устройств
+3. Показать совместимые модели Xiaomi
+4. Предварительная проверка устройства
+5. Конвертировать все старые пакеты из папки old_voicepacks
+6. Собрать новый кастомный ZIP для X20/Xiaomi Cloud
+7. Собрать legacy PKG для Xiaomi/Roborock v1/S5
+8. Установить legacy PKG через python-miio
+9. Проверить новые ZIP-войспаки из папки ready_voicepacks
+10. Установить ZIP-войспак из списка ready_voicepacks
+11. Скачать оригинальные пакеты d109gl/d102gl на всех языках
+12. Выход
 
-## Folder structure
+## Структура папок
 
 ```text
 old_voicepacks/             Старые .pkg, ZIP, RAR, WAV или подпапки
@@ -189,56 +189,58 @@ providers/                  Провайдеры роботов и методы 
 resources/                  Таблицы, кэш донора и служебные файлы
 state/                      Локальная авторизация, homes_map и состояние
 work/                       Временные файлы
-```Authorization, finished assemblies, downloaded originals and temporary files are excluded from
+```
+
+Авторизация, готовые сборки, скачанные оригиналы и временные файлы исключены из
 Git.
 
-Don't store large voice archives in Git. For this project in the repository
-code, tables and manifests must remain; `ready_voicepacks/`,
-`official_voicepacks/`, `old_voicepacks/`, `cache/`, `work/` and `state/`
-are ignored.
+Не храните большие голосовые архивы в Git. Для этого проекта в репозитории
+должны оставаться код, таблицы и манифесты; `ready_voicepacks/`,
+`official_voicepacks/`, `old_voicepacks/`, `cache/`, `work/` и `state/`
+игнорируются.
 
-## Converting old packages
+## Конвертация старых пакетов
 
-Place each source in `old_voicepacks` and select option 5. Supported:
+Поместите каждый исходник в `old_voicepacks` и выберите пункт 5. Поддерживаются:
 
-- separate encrypted `.pkg`;
-- ZIP/RAR with WAV;
-- ZIP/RAR with one or more `.pkg`;
-- ZIP/RAR containing both WAV and `.pkg`;
-- subfolders with WAV, ZIP, RAR and `.pkg`;
-- nested ZIP/RAR up to four levels.
+- отдельный зашифрованный `.pkg`;
+- ZIP/RAR с WAV;
+- ZIP/RAR с одним или несколькими `.pkg`;
+- ZIP/RAR, одновременно содержащий WAV и `.pkg`;
+- подпапки с WAV, ZIP, RAR и `.pkg`;
+- вложенные ZIP/RAR до четырёх уровней.
 
-A separate WAV takes precedence over the file of the same name from the included package.
-Unsafe ZIP/RAR paths and archives larger than 512 MiB after unpacking
-are rejected.
-RAR needs an installed unpacker in `PATH`, for example `7z`, `unrar`,
-`unar` or `bsdtar`; The Python package `rarfile` is installed automatically.
+Отдельный WAV имеет приоритет над одноимённым файлом из вложенного пакета.
+Небезопасные пути ZIP/RAR и архивы размером более 512 МиБ после распаковки
+отклоняются.
+Для RAR нужен установленный распаковщик в `PATH`, например `7z`, `unrar`,
+`unar` или `bsdtar`; Python-пакет `rarfile` устанавливается автоматически.
 
-The full old catalog contains 97 voice events. `sound.info` and
-`sound.ver` are service files and are not considered votes.
+Полный старый каталог содержит 97 голосовых событий. `sound.info` и
+`sound.ver` являются служебными файлами и не считаются голосами.
 
-## Download old voice packs
+## Скачать старые голосовые пакеты
 
 https://4pda.to/forum/index.php?showtopic=881982
 
-[https://www.google.com/search](https://www.google.com/webhp) -> xiaomi voice pack download
+[https://www.google.com/search](https://www.google.com/webhp) -> xiaomi voice pack скачать
 
-## Manual custom package
+## Ручной кастомный пакет
 
-Event numbers are in `custom_voicepack/table_ru.csv` and
-`table_en.csv`. Put modified numeric MP3s, such as `130.mp3`, into
-`custom_voicepack/audio` and select option 6.
+Номера событий находятся в `custom_voicepack/table_ru.csv` и
+`table_en.csv`. Положите изменённые числовые MP3, например `130.mp3`, в
+`custom_voicepack/audio` и выберите пункт 6.
 
-Missing events are taken from the official Russian package, which
-automatically downloaded the first time you use it. Replaceable files
-normalized to mono, 16 kHz, 32 kbps without ID3 and Xing.
+Отсутствующие события берутся из официального русского пакета, который
+автоматически скачивается при первом использовании. Заменяемые файлы
+нормализуются в mono, 16 kHz, 32 kbps без ID3 и Xing.
 
-## Legacy PKG for Roborock v1/S5
+## Legacy PKG для Roborock v1/S5
 
-Point 7 collects encrypted `.pkg` for old miIO vacuum cleaners:
-Xiaomi Mi Robot Vacuum / Mijia 1C gen 1 (`rockrobo.vacuum.v1`) and Roborock
-Sweep One S5/S50/S51/S55/S501 (`roborock.vacuum.s5`). These packages are installed
-not via Xiaomi Cloud, but locally:
+Пункт 7 собирает зашифрованный `.pkg` для старых miIO-пылесосов:
+Xiaomi Mi Robot Vacuum / Mijia 1C gen 1 (`rockrobo.vacuum.v1`) и Roborock
+Sweep One S5/S50/S51/S55/S501 (`roborock.vacuum.s5`). Эти пакеты ставятся
+не через Xiaomi Cloud, а локально:
 
 ```bash
 pip install python-miio
@@ -246,11 +248,11 @@ mirobo discover --handshake true
 mirobo --ip=192.168.8.1 --token=TOKEN install-sound ready_voicepacks/custom_roborock_v1_s5.pkg
 ```
 
-The robot must be charged and docked. For firmware you need IP and
-local token; they can be obtained through `mirobo discover --handshake true`
-after connecting to the `rockrobo-XXXX` network or otherwise from your network.
+Робот должен быть заряжен и стоять на док-станции. Для прошивки нужен IP и
+локальный token; их можно получить через `mirobo discover --handshake true`
+после подключения к сети `rockrobo-XXXX` или другим способом из вашей сети.
 
-Build profiles differ in the WAV set:
+Профили сборки отличаются набором WAV:
 
 ```bash
 python voicepack_manager.py build-legacy-pkg --legacy-profile gen1
@@ -258,15 +260,16 @@ python voicepack_manager.py build-legacy-pkg --legacy-profile gen2
 python install_legacy_pkg.py --discover --status-first
 ```
 
-`gen1` is focused on the old catalog of 72 phrases, `gen2`/`s5` - on the full catalog
-S5. If you need missing phrases, put ready-made old `*.wav` with names
-Roborock in `custom_voicepack/audio`.
+`gen1` ориентирован на старый каталог 72 фраз, `gen2`/`s5` - на полный каталог
+S5. Если нужны отсутствующие фразы, положите готовые старые `*.wav` с именами
+Roborock в `custom_voicepack/audio`.
 
-## Authorization
+## Авторизация
 
-Step 1 performs three steps: imports the Xiaomi session from the installed
-browser, builds a map of houses/devices and performs a preliminary check.
-If import from the browser fails, step 1 automatically startsXiaomi QR authorization: open the QR image or login page, confirm
+Пункт 1 выполняет три шага: импортирует Xiaomi-сессию из установленного
+браузера, строит карту домов/устройств и выполняет предварительную проверку.
+Если импорт из браузера не получился, пункт 1 автоматически запускает
+Xiaomi QR authorization: open the QR image or login page, confirm
 Login to Xiaomi Home, after which the session will be saved in `state/cloud_auth.json`.
 
 Point 2 can be run separately. It builds `state/homes_map.json` and
@@ -342,8 +345,8 @@ Go to MiHome -> vacuum cleaner -> ⋮ -> Cleaning history -> quickly press with 
 
 ## Disclaimer
 
-This is an independent project not associated with Xiaomi or Roborock.Installation of unofficial voicepacks is at your own risk and may void warranty service.
+This is an independent project not associated with Xiaomi or Roborock.Установка неофициальных войспаков выполняется на ваш страх и риск, и может повлечь за собой отказ от гарантийного обслуживания.
 
-## Acknowledgments
+## Благодарности
 
-Special thanks to [runassu](https://github.com/runassu) for the research and Chromium v20 cookie decryption techniques used in this project.
+Отдельная благодарность [runassu](https://github.com/runassu) за исследование и методы расшифровки Chromium v20 cookie, использованные в этом проекте.
