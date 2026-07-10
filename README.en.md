@@ -13,9 +13,9 @@
 
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-07-10 15:02 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-07-10 15:48 UTC -->
 
-[![Views local](https://img.shields.io/badge/Views_local-311-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views local](https://img.shields.io/badge/Views_local-312-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Views GitHub](https://img.shields.io/badge/Views_GitHub-276-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Unique visitors](https://img.shields.io/badge/Unique-32-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Clones](https://img.shields.io/badge/Clones-2660-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
@@ -48,7 +48,7 @@
 
 
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-07-10 15:02 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-07-10 15:48 UTC -->
 
 ## Issues
 
@@ -115,8 +115,7 @@ Tested on:
 
 - Interactive menu for Windows.
 - Consecutive session import from Chrome, Firefox, Edge, Yandex, Chromium,
-  Brave, Vivaldi, Opera, Opera GX and Tor Browser.
-- Building `homes_map` from Xiaomi Cloud: regular houses, shared homes, rooms
+  Brave, Vivaldi, Opera, Opera GX and Tor Browser.- Building `homes_map` from Xiaomi Cloud: regular houses, shared homes, rooms
   and devices inside rooms.
 - Separate provider layer `providers/xiaomi`: inventory, compatibility,
   modern cloud voice and legacy miIO.
@@ -159,8 +158,7 @@ Playwright Chromium, `ffmpeg` and, if necessary, `ccrypt`.
 
 1. Prepare authorization and DID automatically
 2. Build a map of houses and devices
-3. Show compatible Xiaomi models
-4. Preliminary check of the device
+3. Show compatible Xiaomi models4. Preliminary check of the device
 5. Convert all old packages from the old_voicepacks folder
 6. Build a new custom ZIP for X20/Xiaomi Cloud
 7. Build legacy PKG for Xiaomi/Roborock v1/S5
@@ -189,7 +187,9 @@ providers/                  Провайдеры роботов и методы 
 resources/                  Таблицы, кэш донора и служебные файлы
 state/                      Локальная авторизация, homes_map и состояние
 work/                       Временные файлы
-```Authorization, finished assemblies, downloaded originals and temporary files are excluded from
+```
+
+Authorization, finished assemblies, downloaded originals and temporary files are excluded from
 Git.
 
 Don't store large voice archives in Git. For this project in the repository
@@ -206,9 +206,7 @@ Place each source in `old_voicepacks` and select option 5. Supported:
 - ZIP/RAR with one or more `.pkg`;
 - ZIP/RAR containing both WAV and `.pkg`;
 - subfolders with WAV, ZIP, RAR and `.pkg`;
-- nested ZIP/RAR up to four levels.
-
-A separate WAV takes precedence over the file of the same name from the included package.
+- nested ZIP/RAR up to four levels.A separate WAV takes precedence over the file of the same name from the included package.
 Unsafe ZIP/RAR paths and archives larger than 512 MiB after unpacking
 are rejected.
 RAR needs an installed unpacker in `PATH`, for example `7z`, `unrar`,
@@ -236,8 +234,7 @@ normalized to mono, 16 kHz, 32 kbps without ID3 and Xing.
 ## Legacy PKG for Roborock v1/S5
 
 Point 7 collects encrypted `.pkg` for old miIO vacuum cleaners:
-Xiaomi Mi Robot Vacuum / Mijia 1C gen 1 (`rockrobo.vacuum.v1`) and Roborock
-Sweep One S5/S50/S51/S55/S501 (`roborock.vacuum.s5`). These packages are installed
+Xiaomi Mi Robot Vacuum / Mijia 1C gen 1 (`rockrobo.vacuum.v1`) and RoborockSweep One S5/S50/S51/S55/S501 (`roborock.vacuum.s5`). These packages are installed
 not via Xiaomi Cloud, but locally:
 
 ```bash
@@ -266,13 +263,13 @@ Roborock in `custom_voicepack/audio`.
 
 Step 1 performs three steps: imports the Xiaomi session from the installed
 browser, builds a map of houses/devices and performs a preliminary check.
-If import from the browser fails, step 1 automatically startsXiaomi QR authorization: open the QR image or login page, confirm
+If import from the browser fails, step 1 automatically starts
+Xiaomi QR authorization: open the QR image or login page, confirm
 Login to Xiaomi Home, after which the session will be saved in `state/cloud_auth.json`.
 
 Point 2 can be run separately. It builds `state/homes_map.json` and
 `state/devices.json` via Xiaomi Cloud. Regular houses are supported,
-shared homes and devices located only in the rooms of a shared house. For
-modern cloud devices are additionally determined by the regional FDS endpoint
+shared homes and devices located only in the rooms of a shared house. Formodern cloud devices are additionally determined by the regional FDS endpoint
 via `genpresignedurl_v3`; This is a cloud request and it does not send a command to
 robot Only the cleared host/base URL is saved in the state, without the signed URL
 and query signatures. You can disable it using the `--no-resolve-fds` flag.
@@ -300,8 +297,7 @@ python voicepack_cycle.py remote-install --country de --did 1140953532
 ```
 
 `upload` stores `state/latest_upload.json` and `remote-install` reads it and
-sends a command to the robot without re-downloading the archive locally. You can also
-pass the finished remote link manually:
+sends a command to the robot without re-downloading the archive locally. You can alsopass the finished remote link manually:
 
 ```bash
 python voicepack_cycle.py remote-install --remote-url URL --remote-md5 MD5 --remote-size SIZE
@@ -340,9 +336,8 @@ If the device responds slowly, increase `--scan-timeout` or
 
 Go to MiHome -> vacuum cleaner -> ⋮ -> Cleaning history -> quickly press with three fingers -> total duration, total cleanings, total number of times
 
-## Disclaimer
-
-This is an independent project not associated with Xiaomi or Roborock.Installation of unofficial voicepacks is at your own risk and may void warranty service.
+## DisclaimerThis is an independent project not associated with Xiaomi or Roborock.
+Installation of unofficial voicepacks is at your own risk and may void warranty service.
 
 ## Acknowledgments
 
