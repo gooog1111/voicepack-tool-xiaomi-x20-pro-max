@@ -13,9 +13,9 @@
 
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-07-10 13:02 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-07-10 14:01 UTC -->
 
-[![Views local](https://img.shields.io/badge/Views_local-309-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views local](https://img.shields.io/badge/Views_local-310-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Views GitHub](https://img.shields.io/badge/Views_GitHub-276-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Unique visitors](https://img.shields.io/badge/Unique-32-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Clones](https://img.shields.io/badge/Clones-2660-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
@@ -48,7 +48,7 @@
 
 
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-07-10 13:02 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-07-10 14:01 UTC -->
 
 ## Issues
 
@@ -86,53 +86,53 @@
 
 ## Xiaomi Voice Pack Tool
 
-Windows tool for working with robot vacuum cleaner voice packages
-Xiaomi. Now the main focus is Xiaomi X20 Pro (`d102gl`) and X20 Max
-(`d109gl`), but the code is already separated into providers and device families so that
-gradually expand support for other Xiaomi models, and then others
-manufacturers.
+Инструмент для Windows для работы с голосовыми пакетами роботов-пылесосов
+Xiaomi. Сейчас основной фокус - Xiaomi X20 Pro (`d102gl`) и X20 Max
+(`d109gl`), но код уже разделён на провайдеры и семейства устройств, чтобы
+постепенно расширять поддержку других моделей Xiaomi, а затем и других
+производителей.
 
-It imports Xiaomi authorization, builds a map of houses/rooms/devices,
-converts old Roborock packages, collects new Xiaomi number packages,
-checks archives, downloads official languages and installs the selected one
-Voyspak.
+Он импортирует авторизацию Xiaomi, строит карту домов/комнат/устройств,
+конвертирует старые пакеты Roborock, собирает новые числовые пакеты Xiaomi,
+проверяет архивы, скачивает официальные языки и устанавливает выбранный
+войспак.
 
-Tested on:
+Проверено на:
 
 - `xiaomi.vacuum.d109gl`
 - `xiaomi.vacuum.d102gl`
 
-## And also
+## А так же
 
-- the list will be updated with all the vacuum cleaners I can get my hands on
-- the current architecture is being prepared for a future renaming to
-  `xiaomi-voicepack-tool` and then to `robot-voicepack-tool` when they appear
-  other manufacturers.
+- список будет пополняться всеми пылесосми, до которых смогу дотянуться
+- текущая архитектура готовится к будущему переименованию в
+  `xiaomi-voicepack-tool`, а затем в `robot-voicepack-tool`, когда появятся
+  другие производители.
 
 
 
-## Features
+## Возможности
 
-- Interactive menu for Windows.
-- Consecutive session import from Chrome, Firefox, Edge, Yandex, Chromium,
-  Brave, Vivaldi, Opera, Opera GX and Tor Browser.
-- Building `homes_map` from Xiaomi Cloud: regular houses, shared homes, rooms
-  and devices inside rooms.
-- Separate provider layer `providers/xiaomi`: inventory, compatibility,
-  modern cloud voice and legacy miIO.
-- List of compatible models and capabilities to help you choose the right method
-  installations.
-- Determining regional Xiaomi FDS endpoint from a session without sending a command
-  to robot.
-- Unpacking old encrypted Roborock `.pkg`.
-- Recursive processing of ZIP/RAR with WAV, `.pkg` and mixed content.
-- Batch conversion of the entire `old_voicepacks` folder.
-- Manual assembly using Russian and English event tables.
-- Checking the exact set of 101 numeric MP3s.
-- Select and install a package from `ready_voicepacks`.
-- Download 20 official languages ​​for d109gl and d102gl.
+- Интерактивное меню для Windows.
+- Последовательный импорт сессии из Chrome, Firefox, Edge, Яндекс, Chromium,
+  Brave, Vivaldi, Opera, Opera GX и Tor Browser.
+- Построение `homes_map` из Xiaomi Cloud: обычные дома, shared homes, комнаты
+  и устройства внутри комнат.
+- Отдельный слой провайдера `providers/xiaomi`: inventory, совместимость,
+  modern cloud voice и legacy miIO.
+- Список совместимых моделей и capabilities для выбора правильного метода
+  установки.
+- Определение регионального Xiaomi FDS endpoint из сессии без отправки команды
+  на робот.
+- Распаковка старых зашифрованных Roborock `.pkg`.
+- Рекурсивная обработка ZIP/RAR с WAV, `.pkg` и смешанным содержимым.
+- Пакетная конвертация всей папки `old_voicepacks`.
+- Ручная сборка по русской и английской таблицам событий.
+- Проверка точного набора из 101 числового MP3.
+- Выбор и установка пакета из `ready_voicepacks`.
+- Скачивание 20 официальных языков для d109gl и d102gl.
 
-## Quick start
+## Быстрый старт
 
 ```bash
 git clone https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max.git
@@ -152,25 +152,25 @@ chmod +x run.sh
 ./run.sh
 ```
 
-When you run it for the first time, select option 1. It will install the Python dependencies,
-Playwright Chromium, `ffmpeg` and, if necessary, `ccrypt`.
+При первом запуске выберите пункт 1. Он установит Python-зависимости,
+Playwright Chromium, `ffmpeg` и, при необходимости, `ccrypt`.
 
-## Menu
+## Меню
 
-1. Prepare authorization and DID automatically
-2. Build a map of houses and devices
-3. Show compatible Xiaomi models
-4. Preliminary check of the device
-5. Convert all old packages from the old_voicepacks folder
-6. Build a new custom ZIP for X20/Xiaomi Cloud
-7. Build legacy PKG for Xiaomi/Roborock v1/S5
-8. Install legacy PKG via python-miio
-9. Check new ZIP voicepacks from the ready_voicepacks folder
-10. Install the ZIP voicepack from the ready_voicepacks list
-11. Download original d109gl/d102gl packages in all languages
-12. Exit
+1. Подготовить авторизацию и DID автоматически
+2. Построить карту домов и устройств
+3. Показать совместимые модели Xiaomi
+4. Предварительная проверка устройства
+5. Конвертировать все старые пакеты из папки old_voicepacks
+6. Собрать новый кастомный ZIP для X20/Xiaomi Cloud
+7. Собрать legacy PKG для Xiaomi/Roborock v1/S5
+8. Установить legacy PKG через python-miio
+9. Проверить новые ZIP-войспаки из папки ready_voicepacks
+10. Установить ZIP-войспак из списка ready_voicepacks
+11. Скачать оригинальные пакеты d109gl/d102gl на всех языках
+12. Выход
 
-## Folder structure
+## Структура папок
 
 ```text
 old_voicepacks/             Старые .pkg, ZIP, RAR, WAV или подпапки
@@ -189,7 +189,9 @@ providers/                  Провайдеры роботов и методы 
 resources/                  Таблицы, кэш донора и служебные файлы
 state/                      Локальная авторизация, homes_map и состояние
 work/                       Временные файлы
-```Authorization, finished assemblies, downloaded originals and temporary files are excluded from
+```
+
+Authorization, finished assemblies, downloaded originals and temporary files are excluded from
 Git.
 
 Don't store large voice archives in Git. For this project in the repository
@@ -266,65 +268,65 @@ Roborock in `custom_voicepack/audio`.
 
 Step 1 performs three steps: imports the Xiaomi session from the installed
 browser, builds a map of houses/devices and performs a preliminary check.
-If import from the browser fails, step 1 automatically startsQR-авторизацию Xiaomi: откройте QR-картинку или страницу входа, подтвердите
-вход в Xiaomi Home, после чего сессия сохранится в `state/cloud_auth.json`.
+If import from the browser fails, step 1 automatically startsXiaomi QR authorization: open the QR image or login page, confirm
+Login to Xiaomi Home, after which the session will be saved in `state/cloud_auth.json`.
 
-Пункт 2 можно запускать отдельно. Он строит `state/homes_map.json` и
-`state/devices.json` через Xiaomi Cloud. Поддерживаются обычные дома,
-shared homes и устройства, лежащие только в комнатах shared-дома. Для
-modern cloud устройств дополнительно определяется региональный FDS endpoint
-через `genpresignedurl_v3`; это cloud-запрос и он не отправляет команду на
-робот. В состояние сохраняется только очищенный host/base URL, без signed URL
-и query-подписи. Отключить можно флагом `--no-resolve-fds`.
+Point 2 can be run separately. It builds `state/homes_map.json` and
+`state/devices.json` via Xiaomi Cloud. Regular houses are supported,
+shared homes and devices located only in the rooms of a shared house. For
+modern cloud devices are additionally determined by the regional FDS endpoint
+via `genpresignedurl_v3`; This is a cloud request and it does not send a command to
+robot Only the cleared host/base URL is saved in the state, without the signed URL
+and query signatures. You can disable it using the `--no-resolve-fds` flag.
 
-Если регион не указан, инструмент пробует Xiaomi Cloud endpoints автоматически.
-Европейские страны, например `cz`, `sk`, `pl`, `fr`, `it` или `eu`, для
-старого `api.io.mi.com` преобразуются в endpoint `de`. Если в старой `.env`
-уже записан неверный `XIAOMI_COUNTRY=ru`, временно переопределите его:
+If the region is not specified, the tool tries Xiaomi Cloud endpoints automatically.
+European countries, such as `cz`, `sk`, `pl`, `fr`, `it` or `eu`, for
+old `api.io.mi.com` are converted to endpoint `de`. If in the old `.env`
+the invalid `XIAOMI_COUNTRY=ru` is already written, temporarily override it:
 
 ```bash
 ./run.sh search-homes-devices --country auto
 ./run.sh search-homes-devices --country cz
 ```
 
-Для неинтерактивного выбора используйте `--device-index`, `--device-ip`,
-`--device-name` или `--did`.
+For non-interactive selection use `--device-index`, `--device-ip`,
+`--device-name` or `--did`.
 
-Современная установка голосового ZIP выполняется удалённо через Xiaomi Cloud:
-архив загружается в Xiaomi FDS, затем роботу отправляется MiOT action со
-signed URL, md5 и размером. Эти шаги можно разделить:
+Modern voice ZIP installation is done remotely via Xiaomi Cloud:
+the archive is uploaded to Xiaomi FDS, then the MiOT action is sent to the robot
+signed URL, md5 and size. These steps can be divided:
 
 ```bash
 python voicepack_cycle.py upload --country de --did 1140953532
 python voicepack_cycle.py remote-install --country de --did 1140953532
 ```
 
-`upload` сохраняет `state/latest_upload.json`, а `remote-install` читает его и
-отправляет команду роботу без повторной локальной загрузки архива. Также можно
-передать готовую удалённую ссылку вручную:
+`upload` stores `state/latest_upload.json` and `remote-install` reads it and
+sends a command to the robot without re-downloading the archive locally. You can also
+pass the finished remote link manually:
 
 ```bash
 python voicepack_cycle.py remote-install --remote-url URL --remote-md5 MD5 --remote-size SIZE
 ```
 
-Через Linux/macOS-обёртку то же самое:
+Through the Linux/macOS wrapper the same thing:
 
 ```bash
 ./run.sh upload --country de --did 1140953532
 ./run.sh remote-install --country de --did 1140953532
 ```
 
-Современный Chrome
-может использовать привязанное к приложению шифрование cookie `v20`
-(не тестировалось). Перед чтением cookie пункт 1 делает временную копию
-cookie-базы браузера и не закрывает браузеры. Если на конкретной системе
-копия заблокированной базы не читается, можно запустить импорт с явным
-флагом `--close-browsers`.
-После успешного обращения к Xiaomi Cloud создаётся маркер
-`state/cloud_auth.sha256`. Если `cloud_auth.json` меняли вручную, маркер
-перестанет совпадать и будет обновлён после следующей успешной проверки.
+Modern Chrome
+can use application-specific encryption cookie `v20`
+(not tested). Before reading the cookie, point 1 makes a temporary copy
+browser cookie and does not close browsers. If on a specific system
+a copy of the blocked database is not readable, you can run the import with an explicit
+flag `--close-browsers`.
+After successfully accessing Xiaomi Cloud, a token is created
+`state/cloud_auth.sha256`. If `cloud_auth.json` was changed manually, the token
+will no longer match and will be updated after the next successful check.
 
-Список известных совместимых моделей можно вывести так:
+The list of known compatible models can be displayed as follows:
 
 ```bash
 python search-homes-devices.py --compatible-models
@@ -332,18 +334,17 @@ python search-homes-devices.py --compatible-models --family modern_cloud
 python search-homes-devices.py --compatible-models --family legacy_miio
 ```
 
-Локальный поиск использует UDP 54321 с таймаутом 1.5 секунды и 3 попытками.
-Если устройство отвечает медленно, увеличьте `--scan-timeout` или
-`XIAOMI_SCAN_TIMEOUT`, например до `3`.
+Local search uses UDP 54321 with a timeout of 1.5 seconds and 3 retries.
+If the device responds slowly, increase `--scan-timeout` or
+`XIAOMI_SCAN_TIMEOUT`, for example to `3`.
 
-## Получение информации об устройстве в MiHome
+## Obtaining device information in MiHome
 
-Зайдите в MiHome -> пылесос -> ⋮ -> История уборок -> тремя пальцами быстро нажимать на -> общая продолжительность, всего уборок, общее количество раз
+Go to MiHome -> vacuum cleaner -> ⋮ -> Cleaning history -> quickly press with three fingers -> total duration, total cleanings, total number of times
 
-## Отказ от ответственности
+## Disclaimer
 
-Это независимый проект, не связанный с Xiaomi или Roborock.
-Installation of unofficial voicepacks is at your own risk and may void warranty service.
+This is an independent project not associated with Xiaomi or Roborock.Installation of unofficial voicepacks is at your own risk and may void warranty service.
 
 ## Acknowledgments
 
