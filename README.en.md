@@ -13,12 +13,12 @@
 
 
 <!-- STATS_START -->
-<!-- auto-updated by GitHub Actions · 2026-07-10 06:02 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-07-10 07:02 UTC -->
 
-[![Views local](https://img.shields.io/badge/Views_local-302-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
-[![Views GitHub](https://img.shields.io/badge/Views_GitHub-288-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
-[![Unique visitors](https://img.shields.io/badge/Unique-35-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
-[![Clones](https://img.shields.io/badge/Clones-2572-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views local](https://img.shields.io/badge/Views_local-303-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Views GitHub](https://img.shields.io/badge/Views_GitHub-276-ff6900?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Unique visitors](https://img.shields.io/badge/Unique-32-blue?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
+[![Clones](https://img.shields.io/badge/Clones-2660-purple?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max)
 [![Stars](https://img.shields.io/badge/Stars-1-yellow?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/stargazers)
 [![Forks](https://img.shields.io/badge/Forks-0-green?style=for-the-badge&logo=github)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/network/members)
 [![Downloads latest release](https://img.shields.io/badge/Downloads_latest_release-0-brightgreen?style=for-the-badge)](https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max/releases/latest)
@@ -48,7 +48,7 @@
 
 
 <!-- ISSUES_START -->
-<!-- auto-updated by GitHub Actions · 2026-07-10 06:02 UTC -->
+<!-- auto-updated by GitHub Actions · 2026-07-10 07:02 UTC -->
 
 ## Issues
 
@@ -86,53 +86,53 @@
 
 ## Xiaomi Voice Pack Tool
 
-Инструмент для Windows для работы с голосовыми пакетами роботов-пылесосов
-Xiaomi. Сейчас основной фокус - Xiaomi X20 Pro (`d102gl`) и X20 Max
-(`d109gl`), но код уже разделён на провайдеры и семейства устройств, чтобы
-постепенно расширять поддержку других моделей Xiaomi, а затем и других
-производителей.
+Windows tool for working with robot vacuum cleaner voice packages
+Xiaomi. Now the main focus is Xiaomi X20 Pro (`d102gl`) and X20 Max
+(`d109gl`), but the code is already separated into providers and device families so that
+gradually expand support for other Xiaomi models, and then others
+manufacturers.
 
-Он импортирует авторизацию Xiaomi, строит карту домов/комнат/устройств,
-конвертирует старые пакеты Roborock, собирает новые числовые пакеты Xiaomi,
-проверяет архивы, скачивает официальные языки и устанавливает выбранный
-войспак.
+It imports Xiaomi authorization, builds a map of houses/rooms/devices,
+converts old Roborock packages, collects new Xiaomi number packages,
+checks archives, downloads official languages and installs the selected one
+Voyspak.
 
-Проверено на:
+Tested on:
 
 - `xiaomi.vacuum.d109gl`
 - `xiaomi.vacuum.d102gl`
 
-## А так же
+## And also
 
-- список будет пополняться всеми пылесосми, до которых смогу дотянуться
-- текущая архитектура готовится к будущему переименованию в
-  `xiaomi-voicepack-tool`, а затем в `robot-voicepack-tool`, когда появятся
-  другие производители.
+- the list will be updated with all the vacuum cleaners I can get my hands on
+- the current architecture is being prepared for a future renaming to
+  `xiaomi-voicepack-tool` and then to `robot-voicepack-tool` when they appear
+  other manufacturers.
 
 
 
-## Возможности
+## Features
 
-- Интерактивное меню для Windows.
-- Последовательный импорт сессии из Chrome, Firefox, Edge, Яндекс, Chromium,
-  Brave, Vivaldi, Opera, Opera GX и Tor Browser.
-- Построение `homes_map` из Xiaomi Cloud: обычные дома, shared homes, комнаты
-  и устройства внутри комнат.
-- Отдельный слой провайдера `providers/xiaomi`: inventory, совместимость,
-  modern cloud voice и legacy miIO.
-- Список совместимых моделей и capabilities для выбора правильного метода
-  установки.
-- Определение регионального Xiaomi FDS endpoint из сессии без отправки команды
-  на робот.
-- Распаковка старых зашифрованных Roborock `.pkg`.
-- Рекурсивная обработка ZIP/RAR с WAV, `.pkg` и смешанным содержимым.
-- Пакетная конвертация всей папки `old_voicepacks`.
-- Ручная сборка по русской и английской таблицам событий.
-- Проверка точного набора из 101 числового MP3.
-- Выбор и установка пакета из `ready_voicepacks`.
-- Скачивание 20 официальных языков для d109gl и d102gl.
+- Interactive menu for Windows.
+- Consecutive session import from Chrome, Firefox, Edge, Yandex, Chromium,
+  Brave, Vivaldi, Opera, Opera GX and Tor Browser.
+- Building `homes_map` from Xiaomi Cloud: regular houses, shared homes, rooms
+  and devices inside rooms.
+- Separate provider layer `providers/xiaomi`: inventory, compatibility,
+  modern cloud voice and legacy miIO.
+- List of compatible models and capabilities to help you choose the right method
+  installations.
+- Determining regional Xiaomi FDS endpoint from a session without sending a command
+  to robot.
+- Unpacking old encrypted Roborock `.pkg`.
+- Recursive processing of ZIP/RAR with WAV, `.pkg` and mixed content.
+- Batch conversion of the entire `old_voicepacks` folder.
+- Manual assembly using Russian and English event tables.
+- Checking the exact set of 101 numeric MP3s.
+- Select and install a package from `ready_voicepacks`.
+- Download 20 official languages ​​for d109gl and d102gl.
 
-## Быстрый старт
+## Quick start
 
 ```bash
 git clone https://github.com/gooog1111/voicepack-tool-xiaomi-x20-pro-max.git
@@ -152,25 +152,25 @@ chmod +x run.sh
 ./run.sh
 ```
 
-При первом запуске выберите пункт 1. Он установит Python-зависимости,
-Playwright Chromium, `ffmpeg` и, при необходимости, `ccrypt`.
+When you run it for the first time, select option 1. It will install the Python dependencies,
+Playwright Chromium, `ffmpeg` and, if necessary, `ccrypt`.
 
-## Меню
+## Menu
 
-1. Подготовить авторизацию и DID автоматически
-2. Построить карту домов и устройств
-3. Показать совместимые модели Xiaomi
-4. Предварительная проверка устройства
-5. Конвертировать все старые пакеты из папки old_voicepacks
-6. Собрать новый кастомный ZIP для X20/Xiaomi Cloud
-7. Собрать legacy PKG для Xiaomi/Roborock v1/S5
-8. Установить legacy PKG через python-miio
-9. Проверить новые ZIP-войспаки из папки ready_voicepacks
-10. Установить ZIP-войспак из списка ready_voicepacks
-11. Скачать оригинальные пакеты d109gl/d102gl на всех языках
-12. Выход
+1. Prepare authorization and DID automatically
+2. Build a map of houses and devices
+3. Show compatible Xiaomi models
+4. Preliminary check of the device
+5. Convert all old packages from the old_voicepacks folder
+6. Build a new custom ZIP for X20/Xiaomi Cloud
+7. Build legacy PKG for Xiaomi/Roborock v1/S5
+8. Install legacy PKG via python-miio
+9. Check new ZIP voicepacks from the ready_voicepacks folder
+10. Install the ZIP voicepack from the ready_voicepacks list
+11. Download original d109gl/d102gl packages in all languages
+12. Exit
 
-## Структура папок
+## Folder structure
 
 ```text
 old_voicepacks/             Старые .pkg, ZIP, RAR, WAV или подпапки
@@ -189,9 +189,7 @@ providers/                  Провайдеры роботов и методы 
 resources/                  Таблицы, кэш донора и служебные файлы
 state/                      Локальная авторизация, homes_map и состояние
 work/                       Временные файлы
-```
-
-Авторизация, готовые сборки, скачанные оригиналы и временные файлы исключены из
+```Авторизация, готовые сборки, скачанные оригиналы и временные файлы исключены из
 Git.
 
 Не храните большие голосовые архивы в Git. Для этого проекта в репозитории
@@ -345,8 +343,8 @@ Go to MiHome -> vacuum cleaner -> ⋮ -> Cleaning history -> quickly press with 
 
 ## Disclaimer
 
-This is an independent project not associated with Xiaomi or Roborock.Установка неофициальных войспаков выполняется на ваш страх и риск, и может повлечь за собой отказ от гарантийного обслуживания.
+This is an independent project not associated with Xiaomi or Roborock.Installation of unofficial voicepacks is at your own risk and may void warranty service.
 
-## Благодарности
+## Acknowledgments
 
-Отдельная благодарность [runassu](https://github.com/runassu) за исследование и методы расшифровки Chromium v20 cookie, использованные в этом проекте.
+Special thanks to [runassu](https://github.com/runassu) for the research and Chromium v20 cookie decryption techniques used in this project.
